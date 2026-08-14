@@ -1,0 +1,37 @@
+[
+  {
+    "id": "hero",
+    "popis": "Podklad úvodní obrazovky. Slouží zároveň jako plakát pod hero video.",
+    "prompt": "Široký záběr do mlžného horského údolí za noci, v dálce jediný osamělý plamen prosvítající mlhou.",
+    "velikost": "1820x1024",
+    "cil": "public/video/hero.jpg"
+  },
+  {
+    "id": "nauka",
+    "popis": "Doprovodný obrázek k sekci Co je to Buliban.",
+    "prompt": "Detail klidně hořícího plamene ve tmě, kolem něj pomalu stoupající kouř s tyrkysovými odlesky.",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/nauka.png"
+  },
+  {
+    "id": "historie",
+    "popis": "Doprovodný obrázek k časové ose.",
+    "prompt": "Řada dávných kamenných mohyl mizících v mlze, na každé doutná drobný uhlík.",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/historie.png"
+  },
+  {
+    "id": "zahrivani",
+    "popis": "Doprovodný obrázek k technikám zahřívání.",
+    "prompt": "Zátiší připravených rituálních předmětů na hrubém dřevěném stole, nasvícené odspodu plamenem.",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/zahrivani.png"
+  },
+  {
+    "id": "og",
+    "popis": "Obrázek pro sdílení na sociálních sítích. Poměr 1200x630 se ořízne z 1200x640.",
+    "prompt": "Majestátní plamen uprostřed tmy, kompozice na střed, po stranách volné tmavé místo.",
+    "velikost": "1280x720",
+    "cil": "public/og.jpg"
+  }
+]

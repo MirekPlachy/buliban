@@ -25,14 +25,59 @@ Node.js 22 nebo novější.
 
 ```
 .github/workflows/deploy.yml   automatické nasazení na GitHub Pages
-public/                        soubory kopírované 1:1 (CNAME, favicon, robots.txt)
-src/layouts/Base.astro         HTML kostra, meta tagy, načtení fontů, scroll efekt
-src/pages/index.astro          obsah jednostránky
+public/                        soubory kopírované 1:1 (favicon, robots.txt, video)
+src/layouts/Base.astro         HTML kostra, meta tagy, fonty, navigace, patička
+src/components/                Navigace, Paticka, Video, Plamen
+src/content/vystrely/          kronika výstřelů — jeden soubor = jeden výstřel
+src/content.config.ts          schéma kroniky
+src/pages/index.astro          jednostránka
+src/pages/vystrely.astro       kronika výstřelů
+src/pages/minihra.astro        zástupná stránka minihry
 src/styles/global.css          barvy, písma, animace — designový systém webu
-astro.config.mjs               doména, sitemap, fonty
+grafika/                       stylová bible a zadání pro generování obrázků
+scripts/                       generování grafiky a videa
+astro.config.mjs               doména, náhledový režim, sitemap, fonty
 ```
 
 **Barvy a písma se mění na jednom místě:** v bloku `@theme` v `src/styles/global.css`.
+
+### Přidání výstřelu do kroniky
+
+Nový soubor v `src/content/vystrely/`:
+
+```markdown
+---
+nazev: Název výstřele
+datum: 2026-08-14
+popis: Krátký popis do karty.
+# obrazek: ./nazev.png      volitelně
+# video: /video/vystrel-05  volitelně, bez přípony
+---
+
+Delší vyprávění do detailu.
+```
+
+Nic dalšího se nemění — stránka se přestaví sama.
+
+---
+
+## Grafika
+
+Obrázky dělá **Recraft V3**, smyčky **fal.ai** (image-to-video z hotových
+obrázků, aby video nemohlo ujet jinam než zbytek webu). Klíče patří do `.env`
+(vzor v `.env.example`); web ani jeho nasazení je nepotřebují.
+
+```bash
+# 1. do grafika/reference/ vložte 1–5 obrázků s cílovou náladou
+npm run styl        # založí vlastní styl a zapíše jeho ID do grafika/styl.json
+npm run obrazky     # vygeneruje vše z grafika/zadani.json
+npm run video       # rozpohybuje vybrané obrázky podle grafika/video.json
+
+npm run obrazky -- --jen=hero    # jen jeden kus
+npm run obrazky -- --znovu       # přepsat i hotové
+```
+
+Podrobnosti a limity velikosti videa jsou v [PLAN.md](PLAN.md), kapitola 5a.
 
 ---
 

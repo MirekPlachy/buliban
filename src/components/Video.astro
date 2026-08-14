@@ -1,0 +1,104 @@
+---
+import Plamen from './Plamen.astro';
+
+/**
+ * Smyčkové video na pozadí nebo do karty.
+ *
+ * Tři věci, na kterých tahle komponenta stojí:
+ *
+ * 1. **Autoplay nezapíná HTML, ale JS.** Atribut `autoplay` se nedá vypnout
+ *    přes CSS, takže by video jelo i lidem, kteří mají v systému zapnuté
+ *    omezení pohybu. Skript ho pustí, jen když je to v pořádku.
+ * 2. **Dokud není video hotové, komponenta vykreslí plamen.** Web tak funguje
+ *    ještě předtím, než se vygeneruje grafika — nesvítí prázdné díry.
+ * 3. **Načítá se až v dohledu.** `preload="none"` plus IntersectionObserver,
+ *    aby video na konci stránky nežralo data někomu, kdo tam nedoscrolluje.
+ *
+ * Soubory se očekávají jako dvojice `<src>.webm` a `<src>.mp4` — WebM (AV1)
+ * je výrazně menší, MP4 je záchranná síť pro starší Safari.
+ */
+interface Props {
+  /** Cesta bez přípony, např. `/video/hero`. Když chybí, vykreslí se plamen. */
+  src?: string;
+  /** Obrázek, který drží místo, než video naskočí. */
+  poster?: string;
+  /** Popis obsahu pro čtečky. */
+  popis: string;
+  trida?: string;
+}
+
+const { src, poster, popis, trida = '' } = Astro.props;
+
+// V náhledovém režimu běží web v podadresáři, takže soubory z public/
+// musí mít před cestou základ. Absolutní adresu necháváme být — až se
+// kronika rozroste, budou klipy nejspíš na externím úložišti.
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+const adresa = (cil: string) =>
+  /^https?:\/\//.test(cil) ? cil : `${zaklad}${cil}`;
+---
+
+{
+  src ? (
+    <video
+      class:list={['h-full w-full object-cover', trida]}
+      poster={poster ? adresa(poster) : undefined}
+      preload="none"
+      muted
+      loop
+      playsinline
+      aria-label={popis}
+      data-smycka
+    >
+      <source src={`${adresa(src)}.webm`} type="video/webm" />
+      <source src={`${adresa(src)}.mp4`} type="video/mp4" />
+    </video>
+  ) : (
+    <div
+      class:list={[
+        'flex h-full w-full items-center justify-center bg-noc-800',
+        trida,
+      ]}
+      role="img"
+      aria-label={popis}
+    >
+      <Plamen velikost="velka" trida="opacity-70" />
+    </div>
+  )
+}
+
+<script>
+  // Video pustit až v dohledu a jen tomu, kdo nemá vypnuté animace.
+  const klidnyRezim = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const smycky = document.querySelectorAll<HTMLVideoElement>('[data-smycka]');
+
+  function pustit(video: HTMLVideoElement) {
+    if (klidnyRezim.matches) return;
+    video.preload = 'auto';
+    // Když soubor ještě neexistuje nebo prohlížeč přehrání odmítne,
+    // zůstane viset plakátový obrázek. Chyba do konzole nepatří.
+    video.play().catch(() => {});
+  }
+
+  if (smycky.length) {
+    const pozorovatel = new IntersectionObserver(
+      (zaznamy) => {
+        zaznamy.forEach((zaznam) => {
+          const video = zaznam.target as HTMLVideoElement;
+          if (zaznam.isIntersecting) {
+            pustit(video);
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { rootMargin: '200px' },
+    );
+
+    smycky.forEach((video) => pozorovatel.observe(video));
+
+    // Kdo si omezení pohybu zapne za běhu, tomu se video zastaví.
+    klidnyRezim.addEventListener('change', () => {
+      smycky.forEach((video) => (klidnyRezim.matches ? video.pause() : pustit(video)));
+    });
+  }
+</script>

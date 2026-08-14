@@ -81,7 +81,16 @@ Starý web má 9 položek menu. Z téhle tabulky vychází jednak stavba stránk
 
 **Texty:** psát nově — staré slouží jen jako inspirace a jako zdroj klíčových slov. Aby se tím neshodily pozice ve vyhledávačích, drží se dvě pojistky: přesměrování všech starých URL a zachování stejných témat i názvosloví v nadpisech.
 
-**Obrázky:** stáhnout ze starého webu jako zálohu, ale počítat s tím, že většinu bude chtít nahradit lepšími. Ty stávající jsou z Pixlru.
+**Obrázky:** stáhnout ze starého webu jako zálohu, ale nová grafika se generuje (viz kapitolu 5a). Ty stávající jsou z Pixlru.
+
+### Samostatné stránky mimo jednostránku
+
+| Stránka | URL | Stav |
+|---|---|---|
+| Výstřely — kronika jednotlivých výstřelů | `/vystrely/` | hotová kostra, plní se z Markdownu |
+| Minihra | `/minihra/` | zástupná stránka, obsah vymyslíme později |
+
+**Výstřely** jsou Astro content collection: jeden výstřel = jeden soubor v `src/content/vystrely/`. Přidat záznam znamená přidat soubor, nic jiného se nemění. Schéma je v [`src/content.config.ts`](src/content.config.ts) — název, datum, popis, nepovinný obrázek a nepovinná videosmyčka.
 
 ---
 
@@ -118,10 +127,17 @@ Cílem je ověřit potrubí dřív, než se do něj nalije obsah.
 
 ### Fáze 2 — obsah a design (hlavní práce)
 
+Kostra stojí: navigace, patička, stránka Výstřely, zástupná Minihra, komponenty `Video` a `Plamen`. Zbývá naplnit obsahem.
+
+
 5. Naskládat sekce podle tabulky v kapitole 4. **Každá sekce dostane `id` přesně podle sloupce „Kotva"** — na tom pak stojí přesměrování.
 6. Napsat texty, doplnit obrázky přes `astro:assets` (Astro je sám převede do WebP/AVIF).
 7. Sticky hlavička s odkazy na kotvy, responzivita, kontrast, viditelný focus stav pro klávesnici.
 8. Průběžná kontrola: `npm run dev` lokálně, po každém pushi náhled na github.io adrese.
+
+### Fáze 2a — grafika a video
+
+Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky → smyčky.
 
 ### Fáze 3 — doplňky, které musí být hotové před přepnutím (~1 večer)
 
@@ -158,6 +174,42 @@ Cílem je ověřit potrubí dřív, než se do něj nalije obsah.
 19. **Ověřit, že pošta na doméně chodí** — poslat si testovací zprávu. Teprve pak dál.
 20. Zrušit starou inPage prezentaci u CZECHIA.COM. Pokud na stejném tarifu visí i schránka, nejdřív vyřešit její přesun (kapitola 6).
 21. Google Search Console: ověřit doménu a odeslat `https://buliban.cz/sitemap-index.xml`.
+
+---
+
+## 5a. Grafika a video
+
+Web má působit svižně a dynamicky. Většinu té dynamiky ale nedělá video — dělá ji kód, který nestojí ani bajt přenosu navíc: scroll efekty, animovaný SVG plamen ([`Plamen.astro`](src/components/Plamen.astro)), světelné mlhy v pozadí a mikroanimace při najetí. Video je koření, ne základ.
+
+### Rozdělení rolí
+
+| Nástroj | K čemu | Proč právě on |
+|---|---|---|
+| **Recraft V3** | statické obrázky | Umí z referencí vyrobit **vlastní styl** (`style_id`) a ten pak drží napříč vším. Konzistence není otázka toho, jak dobře je napsaný prompt. |
+| **fal.ai** | rozpohybování obrázků na smyčky | Image-to-video: smyčka vzniká **z hotového obrázku**, ne z vlastního promptu. Nemůže tedy ujet jinam než zbytek webu. Platba za kus, bez předplatného. |
+
+Klíče patří do `.env` (vzor v [`.env.example`](.env.example)), který je v `.gitignore`. Web ani jeho nasazení klíče nepotřebují — jsou jen pro skripty.
+
+### Postup
+
+1. Do `grafika/reference/` vložit 1–5 obrázků s náladou, jakou má web mít.
+2. `npm run styl` — založí v Recraftu vlastní styl a jeho ID zapíše do `grafika/styl.json`.
+3. `npm run obrazky` — vygeneruje vše z `grafika/zadani.json`. Hotové soubory přeskakuje, takže opakované spuštění nic nestojí.
+4. `npm run video` — rozpohybuje vybrané obrázky podle `grafika/video.json`. Když je po ruce ffmpeg, dodělá rovnou WebM (AV1) a plakátový obrázek.
+
+Přidat další obrázek znamená přidat položku do `grafika/zadani.json`. Prompty jsou tím pádem verzované v gitu — za rok bude jasné, jak která grafika vznikla, a dá se přegenerovat.
+
+### Kolik videa web unese
+
+GitHub Pages dává 1 GB na web a měkký limit ~100 GB přenosu měsíčně. Video je zdaleka největší soubor na stránce, takže:
+
+- **hero smyčka do 4 MB**, klipy u sekcí do ~2 MB
+- vždy dvojice `.webm` (AV1, dostane ji většina návštěvníků) + `.mp4` (záchranná síť pro starší Safari)
+- [`Video.astro`](src/components/Video.astro) načítá až v dohledu (`preload="none"` + IntersectionObserver), takže klip na konci stránky nestáhne nikdo, kdo tam nedojede
+- autoplay zapíná JavaScript, ne HTML — jinak by video jelo i lidem se zapnutým omezením pohybu
+- **YouTube embed ne** — vrátil by cookies, a s nimi cookie lištu, kterou jsme si zrušili
+
+**Pozor na video u každého výstřelu.** Při čtyřech záznamech je to v pohodě, při čtyřiceti ne. Až se kronika rozroste, přesunout klipy na externí úložiště (Cloudflare R2 má štědrý free tier) — pole `video` ve schématu bere i absolutní URL, takže to je změna v datech, ne v kódu.
 
 ---
 

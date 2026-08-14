@@ -1,0 +1,25 @@
+{
+  "_comment": "Zadání pro rozpohybování obrázků. Každá smyčka vychází z hotového obrázku, takže video nemůže ujet jinam než zbytek webu.",
+
+  "model": "fal-ai/wan-25-preview/image-to-video",
+  "_model": "Endpointy se na fal občas přejmenují. Aktuální název najdete na https://fal.ai/models — hledejte image-to-video. Levné: wan. Kvalitní a dražší: kling, veo3.",
+
+  "smycky": [
+    {
+      "id": "hero",
+      "popis": "Podklad úvodní obrazovky.",
+      "zdroj": "public/video/hero.jpg",
+      "prompt": "Plamen zvolna mihotá, mlha pomalu plyne zprava doleva. Kamera stojí. Velmi pomalý, klidný pohyb.",
+      "delka": 5,
+      "cil": "public/video/hero"
+    },
+    {
+      "id": "nauka",
+      "popis": "Smyčka k sekci Co je to Buliban.",
+      "zdroj": "src/assets/generovane/nauka.png",
+      "prompt": "Kouř zvolna stoupá vzhůru, plamen jemně dýchá. Kamera stojí.",
+      "delka": 5,
+      "cil": "public/video/nauka"
+    }
+  ]
+}

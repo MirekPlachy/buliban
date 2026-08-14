@@ -1,0 +1,113 @@
+---
+/**
+ * Animovaný plamen v SVG.
+ *
+ * Slouží dvojmo: jako dekorace a jako zástupná grafika tam, kde ještě
+ * není vygenerovaný obrázek. Je to čisté SVG — pár stovek bajtů, žádný
+ * síťový požadavek navíc, škáluje se do libovolné velikosti.
+ *
+ * Blikání je čistě v CSS, takže při `prefers-reduced-motion` prostě zamrzne.
+ */
+interface Props {
+  /** Jak velký plamen: `mala` do karty, `velka` přes celou sekci. */
+  velikost?: 'mala' | 'velka';
+  trida?: string;
+}
+
+const { velikost = 'mala', trida = '' } = Astro.props;
+const rozmer = velikost === 'velka' ? 'h-64 w-64' : 'h-24 w-24';
+---
+
+<svg
+  class:list={['plamen', rozmer, trida]}
+  viewBox="0 0 100 140"
+  fill="none"
+  aria-hidden="true"
+>
+  <defs>
+    <radialGradient id={`zar-${velikost}`} cx="50%" cy="72%" r="55%">
+      <stop offset="0%" stop-color="#fff6e6" stop-opacity="0.9"></stop>
+      <stop offset="45%" stop-color="#ffb347" stop-opacity="0.55"></stop>
+      <stop offset="100%" stop-color="#ff5fa2" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id={`telo-${velikost}`} x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ff5fa2"></stop>
+      <stop offset="40%" stop-color="#ffb347"></stop>
+      <stop offset="100%" stop-color="#fff6e6"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- záře kolem -->
+  <circle cx="50" cy="95" r="48" fill={`url(#zar-${velikost})`} class="zar"></circle>
+
+  <!-- vnější plamen -->
+  <path
+    class="jazyk jazyk-vnejsi"
+    d="M50 8c14 26 32 38 32 62a32 32 0 1 1-64 0c0-24 18-36 32-62z"
+    fill={`url(#telo-${velikost})`}
+    opacity="0.85"></path>
+
+  <!-- vnitřní jádro -->
+  <path
+    class="jazyk jazyk-jadro"
+    d="M50 52c7 14 15 20 15 32a15 15 0 1 1-30 0c0-12 8-18 15-32z"
+    fill="#fff6e6"
+    opacity="0.9"></path>
+</svg>
+
+<style>
+  .plamen {
+    overflow: visible;
+  }
+
+  .jazyk {
+    transform-origin: 50% 90%;
+  }
+
+  .jazyk-vnejsi {
+    animation: mihotani 2.6s ease-in-out infinite;
+  }
+
+  .jazyk-jadro {
+    animation: mihotani 1.7s ease-in-out infinite reverse;
+  }
+
+  .zar {
+    animation: pulz 3.4s ease-in-out infinite;
+  }
+
+  @keyframes mihotani {
+    0%,
+    100% {
+      transform: scale(1, 1) skewX(0deg);
+    }
+    25% {
+      transform: scale(0.96, 1.05) skewX(2.5deg);
+    }
+    50% {
+      transform: scale(1.04, 0.97) skewX(-1.5deg);
+    }
+    75% {
+      transform: scale(0.98, 1.03) skewX(1deg);
+    }
+  }
+
+  @keyframes pulz {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jazyk,
+    .zar {
+      animation: none;
+    }
+  }
+</style>

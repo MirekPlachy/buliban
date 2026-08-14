@@ -1,0 +1,134 @@
+---
+/**
+ * Hlavička webu.
+ *
+ * Odkazy na sekce míří vždy na kořen (`/#nauka`), ne na holou kotvu —
+ * aby fungovaly i ze samostatných stránek Výstřely a Minihra.
+ */
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const odkazy = [
+  { text: 'Nauka', cil: '/#nauka' },
+  { text: 'Historie', cil: '/#historie' },
+  { text: 'Zahřívání', cil: '/#zahrivani' },
+  { text: 'Výstřely', cil: '/vystrely/' },
+  { text: 'Minihra', cil: '/minihra/' },
+  { text: 'Kontakt', cil: '/#kontakt' },
+];
+
+// Zvýraznit položku, na které zrovna jsme.
+const cesta = Astro.url.pathname.replace(zaklad, '') || '/';
+---
+
+<header
+  class="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
+  data-hlavicka
+>
+  <nav
+    class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
+    aria-label="Hlavní"
+  >
+    <a
+      href={`${zaklad}/`}
+      class="font-display text-xl font-bold tracking-wide text-plamen-400 transition hover:text-jiskra-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+    >
+      Buliban
+    </a>
+
+    <!-- Přepínač pro mobil -->
+    <button
+      type="button"
+      class="rounded-lg p-2 text-uhel-300 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none md:hidden"
+      aria-expanded="false"
+      aria-controls="nabidka"
+      aria-label="Otevřít nabídku"
+      data-prepinac
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M4 7h16M4 12h16M4 17h16"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"></path>
+      </svg>
+    </button>
+
+    <ul
+      id="nabidka"
+      class="hidden gap-7 text-sm md:flex"
+      data-nabidka
+    >
+      {
+        odkazy.map(({ text, cil }) => {
+          const aktivni = cil.startsWith('/#')
+            ? false
+            : cesta === cil || cesta === cil.replace(/\/$/, '');
+          return (
+            <li>
+              <a
+                href={`${zaklad}${cil}`}
+                aria-current={aktivni ? 'page' : undefined}
+                class:list={[
+                  'transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none',
+                  aktivni ? 'text-plamen-400' : 'text-uhel-300/70',
+                ]}
+              >
+                {text}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </nav>
+
+  <!-- Rozbalená nabídka na mobilu -->
+  <ul
+    class="hidden border-t border-white/5 bg-noc-900/95 px-6 py-4 backdrop-blur md:hidden"
+    data-nabidka-mobil
+  >
+    {
+      odkazy.map(({ text, cil }) => (
+        <li>
+          <a
+            href={`${zaklad}${cil}`}
+            class="block py-2.5 text-uhel-300/80 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          >
+            {text}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</header>
+
+<script>
+  const hlavicka = document.querySelector<HTMLElement>('[data-hlavicka]');
+  const prepinac = document.querySelector<HTMLButtonElement>('[data-prepinac]');
+  const nabidkaMobil = document.querySelector<HTMLElement>('[data-nabidka-mobil]');
+
+  // Po odscrollování z hera hlavičku podložit, ať jsou odkazy čitelné.
+  if (hlavicka) {
+    const prepnoutPodklad = () => {
+      const odscrollovano = window.scrollY > 40;
+      hlavicka.classList.toggle('bg-noc-950/80', odscrollovano);
+      hlavicka.classList.toggle('backdrop-blur', odscrollovano);
+      hlavicka.classList.toggle('border-b', odscrollovano);
+      hlavicka.classList.toggle('border-white/5', odscrollovano);
+    };
+    prepnoutPodklad();
+    window.addEventListener('scroll', prepnoutPodklad, { passive: true });
+  }
+
+  if (prepinac && nabidkaMobil) {
+    prepinac.addEventListener('click', () => {
+      const otevreno = prepinac.getAttribute('aria-expanded') === 'true';
+      prepinac.setAttribute('aria-expanded', String(!otevreno));
+      prepinac.setAttribute(
+        'aria-label',
+        otevreno ? 'Otevřít nabídku' : 'Zavřít nabídku',
+      );
+      nabidkaMobil.classList.toggle('hidden', otevreno);
+    });
+  }
+</script>

@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import Plamen from '../components/Plamen.astro';
+
+const title = 'Minihra — Buliban';
+const description =
+  'Chystá se minihra. Zatím se jen zahřívá.';
+---
+
+<Base title={title} description={description}>
+  <section
+    class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 py-32 text-center"
+  >
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div
+        class="dychani absolute top-1/3 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-jiskra-400/15 blur-[130px]"
+      >
+      </div>
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-2xl">
+      <Plamen velikost="velka" trida="mx-auto" />
+
+      <p class="mt-10 text-xs tracking-[0.4em] text-kour-400 uppercase">
+        Zahřívací fáze
+      </p>
+
+      <h1
+        class="mt-5 font-display text-5xl leading-tight font-bold text-white sm:text-7xl"
+      >
+        Minihra se chystá
+      </h1>
+
+      <p class="mt-8 text-lg leading-relaxed text-uhel-300/75">
+        Tady jednou bude něco, u čeho se dá strávit pět minut a nepřiznat to.
+        Zatím je to prázdné místo se slibem.
+      </p>
+
+      <!-- Až budou pravidla hotová, nahradí tenhle blok samotná hra. -->
+      <div
+        class="mt-14 rounded-3xl border border-dashed border-plamen-400/25 bg-white/[0.02] p-10"
+      >
+        <p class="font-display text-2xl text-plamen-400/80">Co se tu chystá</p>
+        <p class="mt-4 leading-relaxed text-uhel-300/60">
+          Pravidla zatím nejsou. Až budou, přijde sem hrací plocha —
+          tenhle rámeček je pro ni připravené místo.
+        </p>
+      </div>
+
+      <a
+        href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/vystrely/`}
+        class="mt-12 inline-block rounded-full border border-plamen-400/40 bg-plamen-400/10 px-8 py-3.5 text-sm font-medium tracking-wide text-plamen-400 transition hover:border-plamen-400 hover:bg-plamen-400/20 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+      >
+        Zatím si prohlédněte kroniku
+      </a>
+    </div>
+  </section>
+</Base>

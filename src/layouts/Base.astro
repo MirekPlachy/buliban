@@ -1,5 +1,7 @@
 ---
 import { Font } from 'astro:assets';
+import Navigace from '../components/Navigace.astro';
+import Paticka from '../components/Paticka.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -45,7 +47,19 @@ const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
   </head>
 
   <body class="min-h-dvh antialiased">
-    <slot />
+    <a
+      href="#obsah"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-lg focus:bg-plamen-400 focus:px-4 focus:py-2 focus:text-noc-950"
+      >Přeskočit na obsah</a
+    >
+
+    <Navigace />
+
+    <main id="obsah">
+      <slot />
+    </main>
+
+    <Paticka />
 
     <script>
       // Odhalování prvků při scrollování.

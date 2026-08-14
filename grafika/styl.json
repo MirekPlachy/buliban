@@ -1,0 +1,21 @@
+{
+  "_comment": "Stylová bible webu. Tenhle soubor je jediné místo, kde se rozhoduje, jak web vypadá. Každý generovaný obrázek jím projde, takže konzistence není otázka disciplíny, ale zapojení.",
+
+  "styleId": null,
+  "_styleId": "Vyplní `npm run styl` z referenčních obrázků v grafika/reference/. Dokud je null, jede se na základní styl níže — výsledky budou hezké, ale méně jednotné.",
+
+  "zakladniStyl": "digital_illustration",
+  "podstyl": "hand_drawn",
+
+  "spolecnyPrompt": "Temná mystická scéna v mlžném horském údolí za noci. Hluboká noční modročerná základna, jediným zdrojem světla je teplý zlatooranžový plamen. Jemné magentové a tyrkysové odlesky v kouři. Filmové boční nasvícení, měkké mlhavé přechody, zrnitá texturovaná atmosféra. Bez textu, bez písmen, bez log, bez lidských tváří. Vážný pseudo-sakrální nádech s náznakem nadsázky.",
+
+  "negativni": "text, písmena, nápisy, loga, vodoznak, lidské tváře, jasné denní světlo, bílé pozadí, pestrá duha, kýčovité barvy",
+
+  "barvy": [
+    { "rgb": [7, 4, 15], "_nazev": "noc-950" },
+    { "rgb": [23, 16, 41], "_nazev": "noc-800" },
+    { "rgb": [255, 179, 71], "_nazev": "plamen-400" },
+    { "rgb": [255, 95, 162], "_nazev": "jiskra-400" },
+    { "rgb": [79, 214, 209], "_nazev": "kour-400" }
+  ]
+}

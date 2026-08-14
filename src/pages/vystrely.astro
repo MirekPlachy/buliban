@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Video from '../components/Video.astro';
+import Plamen from '../components/Plamen.astro';
+
+const title = 'Výstřely — kronika Bulibanu';
+const description =
+  'Kronika pozoruhodných výstřelů. Každý zápis má své datum, své svědky a svůj plamen.';
+
+// Řadí se podle vlastního pořadí, a když chybí, tak podle data.
+const vystrely = (await getCollection('vystrely')).sort(
+  (a, b) =>
+    (a.data.poradi ?? Number.MAX_SAFE_INTEGER) -
+      (b.data.poradi ?? Number.MAX_SAFE_INTEGER) ||
+    a.data.datum.getTime() - b.data.datum.getTime(),
+);
+
+const formatDatum = new Intl.DateTimeFormat('cs-CZ', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<Base title={title} description={description}>
+  <!-- ========================= ZÁHLAVÍ ========================= -->
+  <section class="relative overflow-hidden px-6 pt-36 pb-20">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div
+        class="dychani absolute -top-24 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-plamen-500/20 blur-[130px]"
+      >
+      </div>
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-3xl text-center">
+      <p class="mb-5 text-xs tracking-[0.4em] text-kour-400 uppercase">
+        Kronika
+      </p>
+      <h1
+        class="font-display text-5xl leading-tight font-bold text-white sm:text-7xl"
+      >
+        Jednotlivé výstřely
+      </h1>
+      <p class="mx-auto mt-8 max-w-xl text-lg text-uhel-300/75">
+        Ne každý výstřel se zapíše. Tyhle ano — každý má své datum, své
+        svědky a svůj plamen.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========================= KRONIKA ========================= -->
+  <section class="px-6 pb-32">
+    <div class="mx-auto max-w-6xl">
+      {
+        vystrely.length === 0 ? (
+          <p class="py-20 text-center text-uhel-300/60">
+            Kronika je zatím prázdná. První zápis na sebe nenechá dlouho čekat.
+          </p>
+        ) : (
+          <ul class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {vystrely.map((vystrel, i) => (
+              <li
+                class="reveal group flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] transition hover:border-plamen-400/35 hover:bg-white/[0.06]"
+                style={`transition-delay: ${(i % 3) * 90}ms`}
+              >
+                {/* Náhled: video, obrázek, nebo plamen — podle toho, co je hotové */}
+                <div class="relative aspect-[4/3] overflow-hidden bg-noc-800">
+                  {vystrel.data.video ? (
+                    <Video
+                      src={vystrel.data.video}
+                      popis={`Záznam výstřelu ${vystrel.data.nazev}`}
+                      trida="transition duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : vystrel.data.obrazek ? (
+                    <Image
+                      src={vystrel.data.obrazek}
+                      alt={`Výstřel ${vystrel.data.nazev}`}
+                      widths={[400, 800]}
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div class="flex h-full w-full items-center justify-center">
+                      <Plamen velikost="velka" trida="opacity-60" />
+                    </div>
+                  )}
+
+                  <span class="absolute top-4 left-4 rounded-full bg-noc-950/70 px-3 py-1 font-display text-sm text-plamen-400 backdrop-blur">
+                    {String(vystrel.data.poradi ?? i + 1).padStart(2, '0')}
+                  </span>
+                </div>
+
+                <div class="flex flex-1 flex-col p-7">
+                  <time
+                    datetime={vystrel.data.datum.toISOString().slice(0, 10)}
+                    class="text-xs tracking-[0.2em] text-kour-400 uppercase"
+                  >
+                    {formatDatum.format(vystrel.data.datum)}
+                  </time>
+
+                  <h2 class="mt-3 font-display text-2xl text-white">
+                    {vystrel.data.nazev}
+                  </h2>
+
+                  <p class="mt-4 flex-1 leading-relaxed text-uhel-300/70">
+                    {vystrel.data.popis}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+</Base>

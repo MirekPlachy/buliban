@@ -7,16 +7,21 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "styl": "node --env-file-if-exists=.env scripts/styl.mjs",
+    "obrazky": "node --env-file-if-exists=.env scripts/obrazky.mjs",
+    "video": "node --env-file-if-exists=.env scripts/video.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.2.2",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@fal-ai/client": "^1.10.1",
     "typescript": "^5.9.2"
   }
 }
