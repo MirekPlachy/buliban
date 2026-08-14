@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Plamen from '../components/Plamen.astro';
 import Zastupny from '../components/Zastupny.astro';
 
 const title = 'Buliban — zkroť svůj plamen';
@@ -158,6 +159,17 @@ const tipy = [
   <section
     class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 text-center"
   >
+    <!-- Velký plamen za nadpisem. Dokud nevznikne hero smyčka, nese celou
+         atmosféru sám — je to SVG, takže nestojí žádný síťový požadavek. -->
+    <div
+      class="pointer-events-none absolute inset-0 flex items-center justify-center"
+      aria-hidden="true"
+    >
+      <div class="translate-y-6 scale-[2.6] sm:scale-[3.2]">
+        <Plamen velikost="velka" trida="opacity-25 blur-[1px]" />
+      </div>
+    </div>
+
     <!-- Světelné mlhy v pozadí. Čistě CSS, nestojí ani bajt přenosu. -->
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
       <div
