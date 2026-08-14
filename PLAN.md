@@ -79,6 +79,8 @@ Starý web má 9 položek menu. Z téhle tabulky vychází jednak stavba stránk
 | `/inpage/buliban-dnes/` | Komunita, výzva ke sdílení | `#dnes` |
 | `/inpage/kontaktni-formular/` | Formulář v patičce | `#kontakt` |
 
+**Podklady:** kompletní extrakt starého webu je ve složce [`obsah/`](obsah/) — jeden soubor na sekci, v každém hlavní myšlenky, návrh zkráceného textu a zadání obrázku. Rozcestník a tón webu v [`obsah/README.md`](obsah/README.md).
+
 **Texty:** psát nově — staré slouží jen jako inspirace a jako zdroj klíčových slov. Aby se tím neshodily pozice ve vyhledávačích, drží se dvě pojistky: přesměrování všech starých URL a zachování stejných témat i názvosloví v nadpisech.
 
 **Obrázky:** stáhnout ze starého webu jako zálohu, ale nová grafika se generuje (viz kapitolu 5a). Ty stávající jsou z Pixlru.

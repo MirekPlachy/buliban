@@ -7,12 +7,14 @@
  */
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 
+// Sekcí je na jednostránce osm, do hlavičky se ale všechny nevejdou.
+// Vybrané jsou ty, které nesou návod — zbytek se najde scrollováním.
 const odkazy = [
   { text: 'Nauka', cil: '/#nauka' },
   { text: 'Historie', cil: '/#historie' },
   { text: 'Zahřívání', cil: '/#zahrivani' },
+  { text: 'Jak vypustit', cil: '/#jak-vypustit' },
   { text: 'Výstřely', cil: '/vystrely/' },
-  { text: 'Minihra', cil: '/minihra/' },
   { text: 'Kontakt', cil: '/#kontakt' },
 ];
 

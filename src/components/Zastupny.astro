@@ -1,0 +1,69 @@
+---
+/**
+ * Zástupné místo pro obrázek nebo videosmyčku.
+ *
+ * Drží rozměr, aby se stránka po doplnění grafiky nezačala kroutit, a rovnou
+ * ukazuje zadání — co na tom obrázku má být. Zadání jsou převzatá ze složky
+ * `obsah/`, takže při generování grafiky není potřeba hledat jinde.
+ *
+ * Až obrázek vznikne, komponenta se nahradí `<Image>` z `astro:assets`
+ * (u videa komponentou `Video`). Do té doby nic nechybí a nic nesvítí prázdné.
+ */
+interface Props {
+  /** Co na obrázku má být. Věta ze zadání v `obsah/`. */
+  popis: string;
+  /** Poměr stran, např. `aspect-[4/3]`. */
+  pomer?: string;
+  /** `obrázek` nebo `smyčka` — rozliší statickou grafiku od videa. */
+  druh?: 'obrázek' | 'smyčka';
+  trida?: string;
+}
+
+const {
+  popis,
+  pomer = 'aspect-[4/3]',
+  druh = 'obrázek',
+  trida = '',
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-white/15 bg-noc-800/40 p-8 text-center',
+    pomer,
+    trida,
+  ]}
+  role="img"
+  aria-label={`Zástupné místo: ${popis}`}
+>
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    class="text-plamen-400/40"
+    aria-hidden="true"
+  >
+    <rect
+      x="2.5"
+      y="4.5"
+      width="19"
+      height="15"
+      rx="2.5"
+      stroke="currentColor"
+      stroke-width="1.4"></rect>
+    <path
+      d="M3 16.5 8.5 11l4 4 3-2.5 5.5 4.5"
+      stroke="currentColor"
+      stroke-width="1.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+    <circle cx="15.5" cy="9" r="1.5" fill="currentColor"></circle>
+  </svg>
+
+  <p class="text-[0.65rem] tracking-[0.3em] text-plamen-400/50 uppercase">
+    Zde bude {druh}
+  </p>
+
+  <p class="max-w-xs text-sm leading-relaxed text-uhel-300/45">{popis}</p>
+</div>

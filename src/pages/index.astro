@@ -1,24 +1,155 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Video from '../components/Video.astro';
-import obrazekNauka from '../assets/generovane/nauka.webp';
+import Zastupny from '../components/Zastupny.astro';
 
 const title = 'Buliban — zkroť svůj plamen';
 const description =
-  'Buliban je tradice, která se rodila v mlžných údolích dávných hor. Objev buliban v sobě.';
+  'Pár mililitrů rumu na dně, zahřáté sklo a vteřina modrého ohně. Rituál z mlžných údolí dávných hor — dnes s hashtagem.';
 
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-// Sekce, které teprve čekají na obsah. Kotvy odpovídají mapě v PLAN.md,
-// protože z ní vychází i přesměrování starých URL.
-const pripravene = [
-  { id: 'historie', nazev: 'Historie Bulibanu' },
-  { id: 'zahrivani', nazev: 'Způsoby zahřívání' },
-  { id: 'vertikalni-horizontalni', nazev: 'Vertikální versus horizontální' },
-  { id: 'jak-vypustit', nazev: 'Jak vypustit Bulibana?' },
-  { id: 'opakovane-zapaleni', nazev: 'Opakované zapálení' },
-  { id: 'dnes', nazev: 'Buliban dnes' },
+// Přístupový klíč Web3Forms (fáze 3, krok 9 v PLAN.md). Je to veřejný
+// identifikátor, ne tajemství — až přijde e-mailem, patří sem. Dokud je
+// prázdný, formulář se vykreslí, ale odeslání zůstane vypnuté, aby zprávy
+// nemizely do prázdna.
+const PRISTUPOVY_KLIC = '';
+
+// ---------------------------------------------------------------------------
+// Obsah sekcí. Podklady i delší verze textů jsou ve složce `obsah/`, jeden
+// soubor na sekci. Tady je jen to, co se opravdu vykresluje.
+// ---------------------------------------------------------------------------
+
+const cisla = [
+  { hodnota: '~1 s', popis: 'tak dlouho trvá plamen' },
+  { hodnota: '40–50 °C', popis: 'na tolik stačí láhev zahřát' },
+  { hodnota: 'pár ml', popis: 'tolik alkoholu stačí — a proto je to bezpečné' },
+];
+
+const casovaOsa = [
+  {
+    stitek: 'Hory',
+    text: 'Kmen Bulibanů uctíval sílu zkrocených par. Věřil, že v každé tekutině je uvězněn duch, který čeká na osvobození — a že jediná cesta ven vede teplem.',
+  },
+  {
+    stitek: 'Obřad',
+    text: 'Zbytky posvátných nápojů se zahřívaly třením mezi koleny nebo ponořením do horkých pramenů. Když se nádoba naplnila párou, stařešina zažehl plamen. V ohni pak lidé viděli tváře předků a náznaky toho, co teprve přijde.',
+  },
+  {
+    stitek: 'Moře',
+    text: 'Obchodníci a dobrodruzi vynesli rituál z hor k pobřeží. Námořníci si předávali příběhy o duchu, který se uvolňuje z láhve, a přes přístavy se legenda dostala do Evropy.',
+  },
+  {
+    stitek: 'Dnes',
+    text: 'Z obřadu zbyla vteřina modrého ohně mezi přáteli. Zůstalo ale to podstatné: někdo drží láhev, ostatní se dívají a čekají, co se v plameni ukáže.',
+  },
+];
+
+const zpusoby = [
+  {
+    nazev: 'Tření mezi dlaněmi nebo koleny',
+    stitky: ['tradiční', 'nejrychlejší'],
+    text: 'Klasika. Láhev pevně mezi dlaně nebo mezi kolena a plynule třít, dokud se sklo nezahřeje. Teplotu máte pod kontrolou, takže nehrozí přehřátí ani prasklé sklo.',
+    pozn: 'V přítomnosti dámské společnosti vyvolává tato metoda situace, které bývají mylně vykládány jako příslib intimního pokračování večera.',
+  },
+  {
+    nazev: 'Krátké ponoření do teplé vody',
+    stitky: ['domácí', 'pro pokročilé'],
+    text: 'Pár desítek sekund v dřezu s horkou vodou — ne vroucí. Prohřeje rovnoměrně sklo i obsah.',
+    pozn: 'Doporučujeme až pro třetí a další opakování. Ohřev je tak dokonalý, že efekt přijde dřív, než se stihnete podívat.',
+  },
+  {
+    nazev: 'Teplý ručník',
+    stitky: ['pomalé', 'bezpečné'],
+    text: 'Zabalit do nahřátého ručníku nebo deky a počkat. Nejmírnější způsob ze všech.',
+    pozn: 'Nikdy se pořádně neuchytil. Nikdo se u něj nezasměje.',
+  },
+  {
+    nazev: 'Fén',
+    stitky: ['moderní', 'rychlé'],
+    text: 'Rovnoměrný ohřev za pár chvil. Držte 20–30 cm od proudu vzduchu a hlídejte, ať to nepřeženete.',
+    pozn: 'Hluk fénu ale kazí atmosféru a narušuje odkazy starých předků.',
+  },
+  {
+    nazev: 'Pod svetrem',
+    stitky: ['trpělivé'],
+    text: 'Láhev pod mikinu, přímo na tělo, a chvíli počkat. Pozvolné, ale svým způsobem důvěrné.',
+    pozn: 'Tělo dá maximálně 37 stupňů, takže to stejně budete muset dohřát jinak.',
+  },
+  {
+    nazev: 'Nad plamenem',
+    stitky: ['historické', '⚠ jen pro zkušené'],
+    text: 'Nejdobrodružnější metoda, přímo z dávných ohnišť. Láhev se krátce a opatrně podrží nad ohněm, svíčkou nebo petrolejkou. Plamen se nikdy nesmí dostat k alkoholu uvnitř — sklo praskne nebo se obsah vznítí.',
+    pozn: 'Neneseme žádnou odpovědnost za případné ztráty na prstech či životech.',
+  },
+];
+
+const kroky = [
+  {
+    nazev: 'Připravte prostor',
+    text: 'Ven nebo do dobře větrané místnosti. Ne nad stůl s ubrusem, ne mezi lidi, kteří se na to nedívají.',
+  },
+  {
+    nazev: 'Sundejte uzávěr',
+    text: 'Až teď, ne dřív. Do té chvíle páry drží uvnitř — a přesně o ně jde.',
+  },
+  {
+    nazev: 'Držte hlavu stranou',
+    text: 'Nikdy se nesklánějte nad hrdlo. Jediné pravidlo, které se nedá obejít.',
+  },
+  {
+    nazev: 'Zapalte',
+    text: 'Zdroj ohně k hrdlu, chvilku podržet. Pak už jen koukat.',
+  },
+];
+
+const zapalovace = [
+  {
+    nazev: 'Kuchyňský plynový',
+    text: 'Nejlepší volba. Dlouhá trubice = ruka daleko od hrdla, plamen drží i ve větru.',
+  },
+  {
+    nazev: 'Zápalka',
+    text: 'Nejtradičnější. Čím pokročilejší večer, tím horší nápad.',
+  },
+  {
+    nazev: 'Kapesní zapalovač',
+    text: 'Máte ho po ruce a funguje i venku ve větru.',
+  },
+  {
+    nazev: 'Plazmový',
+    text: 'Elektrický oblouk, žádný plyn, žádný plamen. Nejmodernější varianta.',
+  },
+  {
+    nazev: 'Svíčka',
+    text: 'Slavnostní, ale pomalá. Efekt vyjde rozptýlenější.',
+  },
+  {
+    nazev: 'Dlouhá špejle',
+    text: 'Pro odstup a pro horizontální variantu.',
+  },
+  {
+    nazev: 'Bez kontaktu, jen jiskrou',
+    text: 'Nejefektnější a nejtěžší. Ve tmě vypadá, že se to zapálilo samo.',
+  },
+];
+
+const tipy = [
+  {
+    nazev: 'Zahřívejte šetrně.',
+    text: 'Dlaně a ručník ano, otevřený žár ne.',
+  },
+  {
+    nazev: 'Měňte polohu.',
+    text: 'Jednou nastojato, podruhé naležato. Pokaždé to vypadá jinak.',
+  },
+  {
+    nazev: 'Alkoholu pořád jen na dně.',
+    text: 'Tohle pravidlo neplatí míň proto, že je to už potřetí.',
+  },
+  {
+    nazev: 'Natočte to.',
+    text: 'Každý pokus vyjde jinak, takže druhý záběr nikdy není ten samý.',
+  },
 ];
 ---
 
@@ -27,20 +158,7 @@ const pripravene = [
   <section
     class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 text-center"
   >
-    <!-- Podkladová smyčka. Dokud video není hotové, drží místo plamen. -->
-    <div class="absolute inset-0" aria-hidden="true">
-      <Video
-        poster="/video/hero.jpg"
-        popis="Plamen hořící ve tmě"
-        trida="opacity-40"
-      />
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-noc-950/70 via-noc-950/40 to-noc-950"
-      >
-      </div>
-    </div>
-
-    <!-- světelné mlhy v pozadí -->
+    <!-- Světelné mlhy v pozadí. Čistě CSS, nestojí ani bajt přenosu. -->
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
       <div
         class="dychani absolute top-1/4 left-1/2 h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-plamen-500/25 blur-[120px]"
@@ -62,7 +180,7 @@ const pripravene = [
       <p
         class="mb-8 text-xs tracking-[0.45em] text-plamen-400/80 uppercase sm:text-sm"
       >
-        Za hranicemi běžného rituálu
+        Zkroť svůj plamen
       </p>
 
       <h1
@@ -73,8 +191,12 @@ const pripravene = [
       </h1>
 
       <p class="mx-auto mt-10 max-w-xl text-lg text-uhel-300/85 sm:text-xl">
-        Tradice, která se rodila v mlžných údolích dávných hor — a dnes hoří
-        dál. <span class="text-plamen-400">Zkroť svůj plamen.</span>
+        Pár mililitrů rumu na dně. Zahřáté sklo.
+        <span class="text-plamen-400">Vteřina modrého ohně.</span>
+      </p>
+
+      <p class="mx-auto mt-4 max-w-xl text-base text-uhel-300/55">
+        Rituál starý jako lidstvo — a přesně tak dlouhý, jak potřebuje být.
       </p>
 
       <div class="mt-12 flex flex-wrap justify-center gap-4">
@@ -82,16 +204,29 @@ const pripravene = [
           href="#nauka"
           class="rounded-full border border-plamen-400/40 bg-plamen-400/10 px-8 py-3.5 text-sm font-medium tracking-wide text-plamen-400 transition hover:border-plamen-400 hover:bg-plamen-400/20 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
         >
-          Objev buliban v sobě
+          Objev Bulibana v sobě
         </a>
         <a
-          href={`${zaklad}/vystrely/`}
+          href="#jak-vypustit"
           class="rounded-full border border-white/12 px-8 py-3.5 text-sm font-medium tracking-wide text-uhel-300/80 transition hover:border-jiskra-400/50 hover:text-jiskra-400 focus-visible:ring-2 focus-visible:ring-jiskra-400 focus-visible:outline-none"
         >
-          Prohlédnout výstřely
+          Jak na to
         </a>
       </div>
+
+      <p class="mt-14 text-sm text-uhel-300/40">
+        Tradice z mlžných údolí dávných hor. Dnes s hashtagem.
+      </p>
     </div>
+
+    <!-- Až vznikne hero smyčka, nahradí tenhle štítek komponenta Video
+         a text se přesune k ní jako `popis`. -->
+    <p
+      class="absolute bottom-8 left-6 max-w-[15rem] rounded-xl border border-dashed border-white/15 bg-noc-900/60 px-3 py-2 text-left text-[0.7rem] leading-relaxed text-uhel-300/45"
+    >
+      Zde bude smyčka: ruka drží malou skleněnou láhev, z hrdla šlehá vysoký
+      modrý plamen, černé pozadí.
+    </p>
 
     <div
       class="absolute bottom-10 left-1/2 -translate-x-1/2 text-uhel-300/40"
@@ -118,69 +253,704 @@ const pripravene = [
   </section>
 
   <!-- ========================= NAUKA ========================= -->
-  <section id="nauka" class="border-t border-white/5 bg-noc-900 px-6 py-32">
-    <div class="mx-auto grid max-w-5xl items-center gap-14 md:grid-cols-[1fr_auto]">
-      <div class="reveal">
-        <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
-          Kapitola první
-        </p>
-        <h2
-          class="font-display text-4xl leading-tight font-semibold text-white sm:text-5xl"
-        >
-          Co je to Buliban?
-        </h2>
-        <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
-          Rituál, který propojuje generace. Spojuje tradiční prvky s technologií
-          a kreativitou, klade důraz na bezpečnost, kvalitu zážitku a estetiku.
-        </p>
-        <p class="mt-5 text-lg leading-relaxed text-uhel-300/60">
-          <em
-            >Zástupný text — sem přijde skutečný obsah ve fázi 2 podle
-            PLAN.md.</em
-          >
-        </p>
-      </div>
-
-      <div class="reveal">
-        <Image
-          src={obrazekNauka}
-          alt="Plamen hořící v temné kovárně"
-          widths={[400, 800, 1200]}
-          sizes="(max-width: 768px) 100vw, 40vw"
-          class="rounded-3xl border border-white/8 shadow-2xl shadow-black/50"
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================= PŘIPRAVENÉ SEKCE ========================= -->
-  <section class="bg-noc-950 px-6 py-32">
+  <section
+    id="nauka"
+    class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
+  >
     <div class="mx-auto max-w-5xl">
-      <div class="reveal">
-        <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
-          Co bude následovat
-        </p>
-        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Sekce připravené k naplnění
-        </h2>
+      <div class="grid items-center gap-14 md:grid-cols-2">
+        <div class="reveal">
+          <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
+            Kapitola první
+          </p>
+          <h2
+            class="font-display text-4xl leading-tight font-semibold text-white sm:text-5xl"
+          >
+            Co je to Buliban?
+          </h2>
+          <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+            Na dně láhve zbylo pár mililitrů. Zahřejete sklo — nejčastěji třením
+            mezi dlaněmi — dokud se v hrdle nenahromadí alkoholové páry. Pak je
+            zapálíte.
+          </p>
+          <p class="mt-5 text-lg leading-relaxed text-uhel-300/80">
+            Vyšlehne plamen. Většinou modrý, podle alkoholu i se žlutým nebo
+            oranžovým nádechem. Trvá asi
+            <span
+              class="cursor-help border-b border-dotted border-plamen-400/50 text-plamen-400"
+              title="Jednu sekundu, neboli jednu vteřinu — podle toho, v jaké době jste se narodili."
+              >vteřinu</span
+            >.
+          </p>
+          <p class="mt-5 text-lg leading-relaxed text-uhel-300/80">
+            A protože alkoholu je málo, je celý obřad překvapivě nudný z hlediska
+            bezpečnosti — což je přesně tak, jak to má být.
+          </p>
+        </div>
+
+        <div class="reveal">
+          <Zastupny
+            popis="Těsný detail hrdla láhve ve chvíli zážehu, modrý plamen vyrůstá přímo z hrdla, ve skle se zrcadlí modrá záře."
+            pomer="aspect-[3/4]"
+          />
+        </div>
       </div>
 
-      <ul class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <p class="reveal mt-16 text-lg leading-relaxed text-uhel-300/70">
+        Zbytek už nedělá fyzika. Dělá ho těch pět lidí kolem, kteří ztichnou a
+        dívají se na hrdlo láhve. Buliban je krátký. Večer, který se kolem něj
+        postaví, dlouhý být může.
+      </p>
+
+      <ul class="mt-14 grid gap-5 sm:grid-cols-3">
         {
-          pripravene.map(({ id, nazev }, i) => (
+          cisla.map(({ hodnota, popis }, i) => (
             <li
-              id={id}
-              class="reveal scroll-mt-24 rounded-2xl border border-white/8 bg-white/[0.03] p-7 transition hover:border-plamen-400/30 hover:bg-white/[0.05]"
-              style={`transition-delay: ${i * 70}ms`}
+              class="reveal rounded-2xl border border-white/8 bg-white/[0.03] p-7"
+              style={`transition-delay: ${i * 90}ms`}
             >
-              <span class="font-display text-3xl text-plamen-400/30">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 class="mt-3 font-display text-xl text-white">{nazev}</h3>
+              <p class="font-display text-4xl text-plamen-400">{hodnota}</p>
+              <p class="mt-3 text-sm leading-relaxed text-uhel-300/65">
+                {popis}
+              </p>
             </li>
           ))
         }
       </ul>
+    </div>
+  </section>
+
+  <!-- ========================= HISTORIE ========================= -->
+  <section id="historie" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal">
+        <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
+          Kapitola druhá
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Historie Bulibana
+        </h2>
+      </div>
+
+      <ol class="mt-16 border-l border-white/10 pl-8 sm:pl-12">
+        {
+          casovaOsa.map(({ stitek, text }, i) => (
+            <li
+              class="reveal relative pb-14 last:pb-0"
+              style={`transition-delay: ${i * 90}ms`}
+            >
+              <span
+                class="absolute top-2 -left-[2.3rem] h-3 w-3 rounded-full bg-plamen-400 sm:-left-[3.55rem]"
+                aria-hidden="true"
+              />
+              <h3 class="font-display text-2xl text-white">{stitek}</h3>
+              <p class="mt-4 max-w-2xl text-lg leading-relaxed text-uhel-300/75">
+                {text}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="mt-16 grid items-start gap-10 md:grid-cols-[1.2fr_1fr]">
+        <aside
+          class="reveal rounded-3xl border border-kour-400/25 bg-kour-400/[0.04] p-8 sm:p-10"
+        >
+          <h3 class="font-display text-2xl text-kour-400">V čem to dělali?</h3>
+          <p class="mt-6 leading-relaxed text-uhel-300/80">
+            Sklo, jak ho známe, tehdy neexistovalo. První skleněné nádoby se
+            objevují až kolem roku 1500 př. n. l. v Egyptě. Staří Bulibanové tedy
+            museli pracovat s keramikou, kovem — nebo s technologiemi, které jsme
+            mezitím zapomněli.
+          </p>
+          <p class="mt-5 leading-relaxed text-uhel-300/80">
+            Materiály té doby vedly teplo podstatně hůř než sklo. Nabízejí se dvě
+            vysvětlení: buď měli tenkostěnné nádoby z lépe vodivého materiálu,
+            nebo <strong class="font-normal text-white"
+              >rituál prostě opakovali tak dlouho, dokud teplota nestačila.</strong
+            >
+          </p>
+          <p class="mt-5 leading-relaxed text-uhel-300/80">
+            Tou druhou možností se
+            <a
+              href="#opakovane-zapaleni"
+              class="text-kour-400 underline decoration-kour-400/40 underline-offset-4 transition hover:decoration-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
+              >opakované zapálení</a
+            > mění z novinky na nejstarší část celé tradice.
+          </p>
+        </aside>
+
+        <div class="reveal">
+          <Zastupny
+            popis="Láhev rumu na kovové mřížce nad uhlíky, cihlová zeď, teplé oranžové světlo."
+            pomer="aspect-square"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= ZAHŘÍVÁNÍ ========================= -->
+  <section
+    id="zahrivani"
+    class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
+  >
+    <div class="mx-auto max-w-6xl">
+      <div class="reveal max-w-3xl">
+        <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
+          Kapitola třetí
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Způsoby zahřívání
+        </h2>
+        <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+          Celý rituál stojí na jedné podmínce: v láhvi musí být páry. Ty se samy
+          neudělají — sklo je potřeba zahřát zhruba na 40 až 50 stupňů.
+        </p>
+        <p class="mt-5 text-lg leading-relaxed text-uhel-300/80">
+          Metod je víc, než by člověk čekal. Liší se rychlostí, bezpečností a
+          tím, jak moc se u nich lidé smějí.
+        </p>
+      </div>
+
+      <ul class="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {
+          zpusoby.map(({ nazev, stitky, text, pozn }, i) => (
+            <li
+              class="reveal flex flex-col rounded-2xl border border-white/8 bg-white/[0.03] p-7 transition hover:border-plamen-400/30 hover:bg-white/[0.05]"
+              style={`transition-delay: ${i * 60}ms`}
+            >
+              <span class="font-display text-3xl text-plamen-400/30">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+
+              <h3 class="mt-3 font-display text-xl leading-snug text-white">
+                {nazev}
+              </h3>
+
+              <ul class="mt-4 flex flex-wrap gap-2">
+                {stitky.map((stitek) => (
+                  <li class="rounded-full border border-white/10 px-3 py-1 text-[0.7rem] tracking-wide text-uhel-300/60">
+                    {stitek}
+                  </li>
+                ))}
+              </ul>
+
+              <Zastupny
+                popis="Teplé zlaté světlo, lucerny, láhev uprostřed dění, kolem smějící se lidé."
+                pomer="aspect-square"
+                trida="mt-6 !p-5"
+              />
+
+              <p class="mt-6 leading-relaxed text-uhel-300/75">{text}</p>
+
+              <p class="mt-4 border-l-2 border-jiskra-400/40 pl-4 text-sm leading-relaxed text-uhel-300/55 italic">
+                {pozn}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="reveal mt-14 max-w-3xl text-lg leading-relaxed text-uhel-300/70">
+        Který způsob je nejlepší? Žádný. Výsledek ovlivňuje i druh alkoholu, jeho
+        množství a tvar láhve. Cílem je vždycky pořádně zahřát — ne rozpálit.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================ VERTIKÁLNÍ × HORIZONTÁLNÍ ================ -->
+  <section
+    id="vertikalni-horizontalni"
+    class="scroll-mt-24 bg-noc-950 px-6 py-32"
+  >
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal max-w-3xl">
+        <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
+          Kapitola čtvrtá
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Vertikálně, nebo horizontálně?
+        </h2>
+        <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+          Zahřívat můžete v jakékoli poloze — láhev je uzavřená a uzávěr se
+          sundává až těsně před zapálením. Ve chvíli, kdy jde ven, se ale
+          rozhoduje o tom, jak bude celý efekt vypadat.
+        </p>
+      </div>
+
+      <div class="mt-16 grid gap-8 md:grid-cols-2">
+        <div
+          class="reveal rounded-3xl border border-plamen-400/20 bg-plamen-400/[0.04] p-8 sm:p-10"
+        >
+          <h3 class="font-display text-2xl text-plamen-400">Vertikální</h3>
+          <p class="mt-2 text-sm tracking-wide text-uhel-300/55">
+            Láhev stojí dnem dolů.
+          </p>
+
+          <Zastupny
+            popis="Stojící láhev, modrý plamen šlehá vzhůru z hrdla, černé pozadí."
+            pomer="aspect-[4/3]"
+            druh="smyčka"
+            trida="mt-8"
+          />
+
+          <p class="mt-8 leading-relaxed text-uhel-300/80">
+            Plyn se hromadí u hrdla, takže zážeh je soustředěný do jednoho místa.
+            Krátký modrý plamen sjede od hrdla ke dnu a je po všem.
+          </p>
+
+          <ul class="mt-6 space-y-2.5 text-uhel-300/70">
+            <li class="flex gap-3">
+              <span class="text-plamen-400" aria-hidden="true">—</span>
+              koncentrovaný, ostrý efekt
+            </li>
+            <li class="flex gap-3">
+              <span class="text-plamen-400" aria-hidden="true">—</span>
+              nejrychlejší z obou
+            </li>
+            <li class="flex gap-3">
+              <span class="text-plamen-400" aria-hidden="true">—</span>
+              pro menší skupinu, která stojí blízko
+            </li>
+          </ul>
+
+          <p class="mt-7 text-sm text-uhel-300/55 italic">
+            Klasika. Tak to dělali v horách.
+          </p>
+        </div>
+
+        <div
+          class="reveal rounded-3xl border border-kour-400/20 bg-kour-400/[0.04] p-8 sm:p-10"
+          style="transition-delay: 120ms"
+        >
+          <h3 class="font-display text-2xl text-kour-400">Horizontální</h3>
+          <p class="mt-2 text-sm tracking-wide text-uhel-300/55">
+            Láhev leží na boku.
+          </p>
+
+          <Zastupny
+            popis="Ležící láhev, modrý plamen se táhne podél celého těla, černé pozadí."
+            pomer="aspect-[4/3]"
+            druh="smyčka"
+            trida="mt-8"
+          />
+
+          <p class="mt-8 leading-relaxed text-uhel-300/80">
+            Páry se rozprostřou po celé délce, takže plamen neběží dolů, ale
+            napříč. Je jemnější a trvá o něco déle — dá se sledovat.
+          </p>
+
+          <ul class="mt-6 space-y-2.5 text-uhel-300/70">
+            <li class="flex gap-3">
+              <span class="text-kour-400" aria-hidden="true">—</span>
+              rozptýlený efekt po celé láhvi
+            </li>
+            <li class="flex gap-3">
+              <span class="text-kour-400" aria-hidden="true">—</span>
+              déle viditelný
+            </li>
+            <li class="flex gap-3">
+              <span class="text-kour-400" aria-hidden="true">—</span>
+              pro větší skupinu
+            </li>
+          </ul>
+
+          <p class="mt-7 text-sm text-uhel-300/55 italic">Hezčí na video.</p>
+        </div>
+      </div>
+
+      <p class="reveal mt-12 max-w-3xl text-lg leading-relaxed text-uhel-300/70">
+        Vertikální je tradice a intenzita. Horizontální je podívaná. Rozumné je
+        vyzkoušet obojí — a k tomu slouží
+        <a
+          href="#opakovane-zapaleni"
+          class="text-plamen-400 underline decoration-plamen-400/40 underline-offset-4 transition hover:decoration-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          >opakované zapálení</a
+        >.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========================= JAK VYPUSTIT ========================= -->
+  <section
+    id="jak-vypustit"
+    class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
+  >
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal max-w-3xl">
+        <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
+          Kapitola pátá
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Jak vypustit Bulibana
+        </h2>
+        <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+          Zahřáli jste láhev. Teď přijde ta vteřina, kvůli které to celé bylo.
+        </p>
+      </div>
+
+      <div class="mt-14 grid items-start gap-10 md:grid-cols-[1fr_0.8fr]">
+        <div>
+          <!-- Bezpečnostní zásady patří nahoru, ne pod návod. -->
+          <aside
+            class="reveal rounded-2xl border border-jiskra-400/30 bg-jiskra-400/[0.05] p-7"
+          >
+            <h3 class="font-display text-xl text-jiskra-400">Tři pravidla</h3>
+            <ol class="mt-5 space-y-3 text-uhel-300/85">
+              <li class="flex gap-3">
+                <span class="text-jiskra-400/70">1.</span> Hlavu nikdy nad hrdlo.
+              </li>
+              <li class="flex gap-3">
+                <span class="text-jiskra-400/70">2.</span> Alkoholu jen na dně.
+              </li>
+              <li class="flex gap-3">
+                <span class="text-jiskra-400/70">3.</span> Venku nebo tam, kde je
+                vzduch.
+              </li>
+            </ol>
+            <p class="mt-5 text-sm text-uhel-300/55 italic">
+              Zbytek je otázka vkusu.
+            </p>
+          </aside>
+
+          <ol class="mt-12 space-y-8">
+            {
+              kroky.map(({ nazev, text }, i) => (
+                <li
+                  class="reveal flex gap-5"
+                  style={`transition-delay: ${i * 80}ms`}
+                >
+                  <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-plamen-400/30 font-display text-lg text-plamen-400"
+                    aria-hidden="true"
+                  >
+                    {i + 1}
+                  </span>
+                  <div>
+                    <h3 class="font-display text-xl text-white">{nazev}</h3>
+                    <p class="mt-2 leading-relaxed text-uhel-300/75">{text}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <div class="reveal">
+          <Zastupny
+            popis="Okamžik zážehu z boku: v jedné ruce láhev, ve druhé plynový zapalovač u hrdla, hlava mimo osu hrdla."
+            pomer="aspect-[3/4]"
+          />
+        </div>
+      </div>
+
+      <div class="reveal mt-20">
+        <h3 class="font-display text-2xl text-white">Čím zapálit</h3>
+        <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+          {
+            zapalovace.map(({ nazev, text }) => (
+              <li class="rounded-2xl border border-white/8 bg-white/[0.03] p-6">
+                <h4 class="font-display text-lg text-plamen-400">{nazev}</h4>
+                <p class="mt-2 text-sm leading-relaxed text-uhel-300/70">
+                  {text}
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= OPAKOVANÉ ZAPÁLENÍ ========================= -->
+  <section id="opakovane-zapaleni" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal max-w-3xl">
+        <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
+          Kapitola šestá
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Opakované zapálení
+        </h2>
+        <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+          Po prvním zážehu v láhvi skoro vždycky něco zbude. Stačí znovu krátce
+          zahřát — dlaněmi, ručníkem, čímkoli šetrným — a máte druhý pokus.
+        </p>
+        <p class="mt-5 text-lg leading-relaxed text-uhel-300/80">
+          A tady přichází nečekaná část:
+          <strong class="font-normal text-plamen-400"
+            >druhý a třetí Buliban bývá delší a hezčí než ten první.</strong
+          > Nikdo pořádně neví proč. Zkuste to a uvidíte.
+        </p>
+      </div>
+
+      <div class="reveal mt-14">
+        <Zastupny
+          popis="Tři až čtyři snímky téže láhve v řadě, každý s trochu jiným plamenem — jednou vyšší, jednou stranou, jednou skoro nic."
+          pomer="aspect-[21/9]"
+        />
+      </div>
+
+      <aside
+        class="reveal mt-14 rounded-3xl border border-kour-400/25 bg-kour-400/[0.04] p-8 sm:p-10"
+      >
+        <p class="leading-relaxed text-uhel-300/80">
+          Opakování mimochodem není moderní vynález. Staří Bulibanové neměli sklo
+          a jejich nádoby vedly teplo mizerně — museli tedy rituál opakovat, aby
+          se vůbec dostali na potřebnou teplotu. To, co dnes děláme pro zábavu,
+          dělali oni z nutnosti.
+        </p>
+      </aside>
+
+      <ul class="mt-14 grid gap-5 sm:grid-cols-2">
+        {
+          tipy.map(({ nazev, text }, i) => (
+            <li
+              class="reveal rounded-2xl border border-white/8 bg-white/[0.03] p-6"
+              style={`transition-delay: ${i * 70}ms`}
+            >
+              <p class="leading-relaxed text-uhel-300/75">
+                <strong class="font-normal text-white">{nazev}</strong> {text}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <aside
+        class="reveal mt-14 rounded-3xl border border-plamen-400/25 bg-plamen-400/[0.04] p-8 sm:p-10"
+      >
+        <h3 class="font-display text-2xl text-plamen-400">Můžu si dolít?</h3>
+        <p class="mt-6 leading-relaxed text-uhel-300/80">
+          Můžete. Z připravené sklenice, pár mililitrů, nic se nestane.
+        </p>
+        <p class="mt-4 leading-relaxed text-uhel-300/80">
+          Jen si uvědomte, že tím porušujete tradice původních vynálezců, starých
+          Bulibanů.
+        </p>
+      </aside>
+
+      <p class="reveal mt-14 max-w-3xl text-lg leading-relaxed text-uhel-300/70">
+        Právě opakováním se z jedné vteřiny stane večer. Každý si sáhne, každý
+        zkusí svůj styl a nikomu nevyjde totéž.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========================= BULIBAN DNES ========================= -->
+  <section
+    id="dnes"
+    class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
+  >
+    <div class="mx-auto max-w-5xl">
+      <div class="grid items-center gap-14 md:grid-cols-2">
+        <div class="reveal">
+          <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
+            Kapitola sedmá
+          </p>
+          <h2
+            class="font-display text-4xl leading-tight font-semibold text-white sm:text-5xl"
+          >
+            Buliban dnes
+          </h2>
+          <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
+            Vize v plameni už nevykládá stařešina. Vykládají je čtyři lidi u
+            ohně, každý úplně jinak, a pak se to dá na Instagram.
+          </p>
+          <p class="mt-5 text-lg leading-relaxed text-uhel-300/80">
+            Pod hashtagem <span class="text-plamen-400">#buliban</span> se schází
+            ti, kterým to nestačilo jednou. Sdílejí záběry, triky na zahřívání i
+            pokusy o dokonalý zážeh. Soutěží se přitom o dvě věci: kdo natočí
+            hezčí plamen — a kdo v něm uvidí zajímavější vizi.
+          </p>
+        </div>
+
+        <div class="reveal">
+          <Zastupny
+            popis="Někdo drží mobil a natáčí, v záběru mobilu modrý plamen z hrdla láhve. Teplé okolní světlo proti studenému displeji."
+            pomer="aspect-[4/3]"
+          />
+        </div>
+      </div>
+
+      <div
+        class="reveal mt-16 rounded-3xl border border-plamen-400/25 bg-plamen-400/[0.05] p-10 text-center sm:p-14"
+      >
+        <h3 class="font-display text-3xl text-white sm:text-4xl">
+          Přidej se k novodobým Bulibanům
+        </h3>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-uhel-300/80">
+          Zahřej, zapal, natoč. Dej to na Instagram nebo YouTube s hashtagem
+          <span class="text-plamen-400">#buliban</span>.
+        </p>
+        <p class="mx-auto mt-4 max-w-xl leading-relaxed text-uhel-300/65">
+          Každý další záblesk je důkaz, že legenda žije dál. Dneska je řada na
+          tobě.
+        </p>
+      </div>
+
+      <p class="reveal mt-12 text-lg leading-relaxed text-uhel-300/70">
+        Nejlepší kousky si necháváme. Podívej se do
+        <a
+          href={`${zaklad}/vystrely/`}
+          class="text-plamen-400 underline decoration-plamen-400/40 underline-offset-4 transition hover:decoration-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          >kroniky výstřelů</a
+        > — nebo nám ten svůj pošli.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========================= KONTAKT ========================= -->
+  <section id="kontakt" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+    <div class="mx-auto max-w-3xl">
+      <div class="reveal text-center">
+        <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
+          Spolupráce
+        </p>
+        <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Ozvěte se
+        </h2>
+      </div>
+
+      <div class="reveal mt-12 grid gap-6 sm:grid-cols-2">
+        <div class="rounded-2xl border border-white/8 bg-white/[0.03] p-7">
+          <h3 class="font-display text-xl text-plamen-400">
+            Máte alkohol k propagaci?
+          </h3>
+          <p class="mt-3 leading-relaxed text-uhel-300/75">
+            Vyrábíte rum? Buliban se dělá z toho, co zbylo na dně — a na dně bývá
+            vidět etiketa. Vaše láhev může být vidět a slyšet v komunitních
+            videích na webu i na YouTube.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-white/8 bg-white/[0.03] p-7">
+          <h3 class="font-display text-xl text-kour-400">
+            Nebo se vám povedl výstřel?
+          </h3>
+          <p class="mt-3 leading-relaxed text-uhel-300/75">
+            Pošlete ho a může skončit v
+            <a
+              href={`${zaklad}/vystrely/`}
+              class="text-kour-400 underline decoration-kour-400/40 underline-offset-4 transition hover:decoration-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
+              >kronice</a
+            >.
+          </p>
+        </div>
+      </div>
+
+      <form
+        class="reveal mt-12 space-y-6"
+        action="https://api.web3forms.com/submit"
+        method="POST"
+      >
+        <input type="hidden" name="access_key" value={PRISTUPOVY_KLIC} />
+
+        <!-- Past na roboty. Člověk pole nevidí, takže ho nevyplní. -->
+        <input
+          type="checkbox"
+          name="botcheck"
+          class="hidden"
+          style="display:none"
+          tabindex="-1"
+          autocomplete="off"
+        />
+
+        <div>
+          <label
+            for="duvod"
+            class="block text-sm tracking-wide text-uhel-300/70"
+          >
+            Důvod zprávy
+          </label>
+          <select
+            id="duvod"
+            name="Důvod zprávy"
+            class="mt-2 w-full rounded-xl border border-white/10 bg-noc-900 px-4 py-3 text-uhel-300 transition focus:border-plamen-400/50 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          >
+            <option>Propagace alkoholu</option>
+            <option>Výstřel do kroniky</option>
+            <option>Něco jiného</option>
+          </select>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label
+              for="jmeno"
+              class="block text-sm tracking-wide text-uhel-300/70"
+            >
+              Jméno
+            </label>
+            <input
+              id="jmeno"
+              name="Jméno"
+              type="text"
+              required
+              autocomplete="name"
+              class="mt-2 w-full rounded-xl border border-white/10 bg-noc-900 px-4 py-3 text-uhel-300 transition placeholder:text-uhel-300/30 focus:border-plamen-400/50 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+            />
+          </div>
+
+          <div>
+            <label
+              for="email"
+              class="block text-sm tracking-wide text-uhel-300/70"
+            >
+              E-mail
+            </label>
+            <input
+              id="email"
+              name="E-mail"
+              type="email"
+              required
+              autocomplete="email"
+              class="mt-2 w-full rounded-xl border border-white/10 bg-noc-900 px-4 py-3 text-uhel-300 transition placeholder:text-uhel-300/30 focus:border-plamen-400/50 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="zprava"
+            class="block text-sm tracking-wide text-uhel-300/70"
+          >
+            Zpráva
+          </label>
+          <textarea
+            id="zprava"
+            name="Zpráva"
+            rows="5"
+            required
+            class="mt-2 w-full rounded-xl border border-white/10 bg-noc-900 px-4 py-3 text-uhel-300 transition placeholder:text-uhel-300/30 focus:border-plamen-400/50 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          ></textarea>
+        </div>
+
+        <!-- Sem přijde widget Cloudflare Turnstile (PLAN.md, fáze 3, krok 9). -->
+
+        <div class="flex flex-wrap items-center gap-5">
+          <button
+            type="submit"
+            disabled={!PRISTUPOVY_KLIC}
+            class="rounded-full border border-plamen-400/40 bg-plamen-400/10 px-8 py-3.5 text-sm font-medium tracking-wide text-plamen-400 transition hover:border-plamen-400 hover:bg-plamen-400/20 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-plamen-400/40 disabled:hover:bg-plamen-400/10"
+          >
+            Odeslat
+          </button>
+
+          {
+            !PRISTUPOVY_KLIC && (
+              <p class="text-sm text-uhel-300/45">
+                Odesílání se zapne, jakmile bude přístupový klíč Web3Forms.
+              </p>
+            )
+          }
+        </div>
+
+        <p class="text-sm text-uhel-300/45">
+          Údaje použijeme jen na odpověď. Nikam je nedáváme.
+        </p>
+      </form>
     </div>
   </section>
 </Base>
