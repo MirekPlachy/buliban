@@ -34,8 +34,13 @@ jobs:
       - name: Instalace závislostí
         run: npm ci
 
+      # NAHLED=1 staví web pro adresu mirekplachy.github.io/buliban/.
+      # Až se přepne na vlastní doménu, celý blok `env` níže smazat
+      # (viz PLAN.md, fáze 4).
       - name: Build
         run: npm run build
+        env:
+          NAHLED: '1'
 
       - name: Nahrání artefaktu
         uses: actions/upload-pages-artifact@v3

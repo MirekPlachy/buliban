@@ -3,6 +3,9 @@
 Webová prezentace Bulibanu. Statický web postavený v [Astro](https://astro.build)
 s Tailwind CSS, nasazovaný automaticky na GitHub Pages.
 
+> **Postup prací a rozhodnutí najdete v [PLAN.md](PLAN.md).** Tenhle soubor
+> popisuje jen technické zacházení s repozitářem.
+
 ---
 
 ## Lokální vývoj
@@ -33,37 +36,41 @@ astro.config.mjs               doména, sitemap, fonty
 
 ---
 
-## Nasazení — jednorázové nastavení
+## Nasazení
 
-### 1. Repozitář na GitHubu
+Repozitář: `https://github.com/MirekPlachy/buliban`. Každý push do `main`
+spustí workflow `.github/workflows/deploy.yml`, který web postaví a publikuje.
+Průběh sledujte v záložce **Actions**; běh trvá zhruba dvě minuty.
 
-Založte repozitář (třeba `buliban`) a nahrajte do něj tento adresář:
+### Jednorázové zapnutí Pages
 
-```bash
-git init
-git add .
-git commit -m "Základ webu"
-git branch -M main
-git remote add origin https://github.com/UZIVATEL/buliban.git
-git push -u origin main
-```
+**Settings → General:** repozitář musí být **veřejný** — bez toho Pages na
+bezplatném plánu neběží.
 
-> Na bezplatném GitHub plánu musí být repozitář **veřejný**, aby fungovaly Pages.
+**Settings → Pages → Build and deployment → Source: GitHub Actions.**
 
-### 2. Zapnutí GitHub Pages
+Web pak naběhne na `https://mirekplachy.github.io/buliban/`.
 
-V repozitáři **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+### Náhledový režim
 
-Tím se aktivuje workflow `.github/workflows/deploy.yml`. Průběh nasazení
-uvidíte v záložce **Actions**. První běh trvá zhruba dvě minuty.
+Dokud web běží na github.io, běží v **podadresáři** `/buliban/`. Proto
+workflow staví s proměnnou `NAHLED=1`, která v `astro.config.mjs` přepne
+`base` na `/buliban` a `site` na `https://mirekplachy.github.io`. Bez toho
+by odkazy na CSS a fonty mířily do kořene domény a stránka by se načetla
+bez stylů. Náhled zároveň dostane `noindex`.
 
-Ověřte, že web běží na `https://UZIVATEL.github.io/buliban/`.
-(Než je nastavená vlastní doména, obrázky a odkazy v podadresáři nemusí sedět —
-po nasazení domény bude web v kořeni a problém zmizí.)
+Lokálně si stejný režim vyzkoušíte přes `NAHLED=1 npm run build`.
 
-### 3. DNS u CZECHIA.COM
+**Při přepnutí na vlastní doménu** (podle [PLAN.md](PLAN.md), fáze 4) se
+blok `env: NAHLED` z workflow smaže a založí se `public/CNAME` s řádkem
+`buliban.cz`. Ten soubor v repozitáři schválně **není** — jakmile je
+v nasazeném výstupu, GitHub si podle něj nastaví vlastní doménu, a dokud
+na něj nemíří A záznamy, byl by web nedostupný na obou adresách.
 
-V DNS manažeru u domény `buliban.cz` nastavte:
+### Přepnutí na vlastní doménu
+
+Celý postup včetně pořadí kroků je v [PLAN.md](PLAN.md), fáze 4 a 5.
+Ve zkratce — v DNS manažeru u CZECHIA.COM nastavit:
 
 | Typ | Název | Hodnota |
 |---|---|---|
@@ -71,28 +78,16 @@ V DNS manažeru u domény `buliban.cz` nastavte:
 | A | `@` | `185.199.109.153` |
 | A | `@` | `185.199.110.153` |
 | A | `@` | `185.199.111.153` |
-| CNAME | `www` | `UZIVATEL.github.io.` |
+| CNAME | `www` | `mirekplachy.github.io.` |
 
 Volitelně i AAAA záznamy pro IPv6:
 `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
 
 **Nameservery se nemění** — doména i pošta zůstávají tam, kde jsou.
-Stávající MX záznamy nechte být.
+Stávající MX a TXT záznamy nechte být.
 
-### 4. Vlastní doména v GitHubu
-
-**Settings → Pages → Custom domain** → `buliban.cz` → Save.
-GitHub si ověří DNS (může trvat i pár hodin) a pak zpřístupní volbu
-**Enforce HTTPS** — tu zaškrtněte. Certifikát se vystaví automaticky.
-
-Soubor `public/CNAME` už doménu obsahuje, takže se nastavení
-nepřepíše při dalším nasazení.
-
-### 5. Až potom vypnout starý web
-
-Teprve když nová adresa funguje včetně HTTPS, zrušte u CZECHIA.COM
-starou inPage prezentaci. Pozor na e-mailové schránky na doméně —
-ty na webhostingu často visí taky.
+Pak vrátit `public/CNAME`, v **Settings → Pages → Custom domain** zadat
+`buliban.cz` a po úspěšné kontrole DNS zaškrtnout **Enforce HTTPS**.
 
 ---
 

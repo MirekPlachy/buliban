@@ -9,6 +9,14 @@ interface Props {
 
 const { title, description } = Astro.props;
 const kanonicka = new URL(Astro.url.pathname, Astro.site);
+
+// V náhledovém režimu běží web v podadresáři, takže odkazy na soubory
+// z public/ musí začínat základní cestou.
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Náhled se nesmí dostat do vyhledávačů — jinak by soupeřil se starým webem
+// o stejná klíčová slova. Přepne se samo, jakmile `site` ukazuje na ostrou doménu.
+const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
 ---
 
 <!doctype html>
@@ -19,8 +27,9 @@ const kanonicka = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={kanonicka} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={`${zaklad}/favicon.svg`} type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />
+    {!jeOstra && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
