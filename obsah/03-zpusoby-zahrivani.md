@@ -27,7 +27,7 @@ Stránka je nejobsáhlejší z celého webu a zároveň nejlepší kandidát na 
 - Cílem je intenzivní ohřev, **ne** přehřátí nebo extrémní žár.
 - Každý způsob dodá jinou atmosféru — vyplatí se experimentovat.
 - Zásady: ohřívat krátce, s minimem alkoholu.
-- Odkaz na **Mr. Egga** jako varovný příklad („riziková událost, jako si zažil např. Mr. Egg"). Interní vtip — ověřit u zadavatele, jestli má na novém webu žít dál. Pokud ano, patří do sekce [Výstřely](../src/content/vystrely/), kde se dá vyprávět celý.
+- Odkaz na **Mr. Egga** jako varovný příklad („riziková událost, jako si zažil např. Mr. Egg"). Interní vtip — ověřit u zadavatele, jestli má na novém webu žít dál. Pokud ano, patří do sekce [Zážehy](../src/content/zazehy/), kde se dá vyprávět celý.
 
 ---
 

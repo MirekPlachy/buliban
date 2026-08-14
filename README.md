@@ -28,10 +28,10 @@ Node.js 22 nebo novější.
 public/                        soubory kopírované 1:1 (favicon, robots.txt, video)
 src/layouts/Base.astro         HTML kostra, meta tagy, fonty, navigace, patička
 src/components/                Navigace, Paticka, Video, Plamen
-src/content/vystrely/          kronika výstřelů — jeden soubor = jeden výstřel
+src/content/zazehy/            kronika zážehů — jeden soubor = jeden zážeh
 src/content.config.ts          schéma kroniky
 src/pages/index.astro          jednostránka
-src/pages/vystrely.astro       kronika výstřelů
+src/pages/zazehy.astro         kronika zážehů
 src/pages/minihra.astro        zástupná stránka minihry
 src/styles/global.css          barvy, písma, animace — designový systém webu
 grafika/                       stylová bible a zadání pro generování obrázků
@@ -41,17 +41,17 @@ astro.config.mjs               doména, náhledový režim, sitemap, fonty
 
 **Barvy a písma se mění na jednom místě:** v bloku `@theme` v `src/styles/global.css`.
 
-### Přidání výstřelu do kroniky
+### Přidání zážehu do kroniky
 
-Nový soubor v `src/content/vystrely/`:
+Nový soubor v `src/content/zazehy/`:
 
 ```markdown
 ---
-nazev: Název výstřele
+nazev: Název zážehu
 datum: 2026-08-14
 popis: Krátký popis do karty.
-# obrazek: ./nazev.png      volitelně
-# video: /video/vystrel-05  volitelně, bez přípony
+# obrazek: ./nazev.png     volitelně
+# video: /video/zazeh-05   volitelně, bez přípony
 ---
 
 Delší vyprávění do detailu.

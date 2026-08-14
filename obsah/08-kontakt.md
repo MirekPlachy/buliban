@@ -20,7 +20,7 @@ Stránka se jmenuje „Kontaktní formulář", ale nadpis uvnitř zní **„Prop
 
 - Existuje YouTube kanál a jaká je jeho adresa? Ve výzvě v sekci [Buliban dnes](07-buliban-dnes.md) se na něj odkazuje.
 - Existuje instagramový profil, nebo jen hashtag?
-- Má formulář sloužit jen partnerům, nebo i lidem, kteří chtějí poslat vlastní výstřel do kroniky? To rozhoduje o tom, jestli bude mít pole „důvod zprávy".
+- Má formulář sloužit jen partnerům, nebo i lidem, kteří chtějí poslat vlastní zážeh do kroniky? To rozhoduje o tom, jestli bude mít pole „důvod zprávy".
 
 ---
 
@@ -38,7 +38,7 @@ Alternativa, pokud má být sekce zároveň obecným kontaktem:
 >
 > **Máte alkohol k propagaci?** Zejména rum. Vaše láhev může být vidět a slyšet v komunitních videích na webu i na YouTube.
 >
-> **Nebo se vám povedl výstřel?** Pošlete ho a může skončit v [kronice](/vystrely/).
+> **Nebo se vám povedl zážeh?** Pošlete ho a může skončit v [kronice](/zazehy/).
 
 ---
 
@@ -51,7 +51,7 @@ Podle [PLAN.md](../PLAN.md), kroku 9, jde o Web3Forms + Cloudflare Turnstile.
 | Jméno | `text` | ano |
 | E-mail | `email` | ano |
 | Zpráva | `textarea` | ano |
-| Důvod zprávy | `select` — propagace / výstřel do kroniky / jiné | ne (jen pokud sekce slouží obojímu) |
+| Důvod zprávy | `select` — propagace / zážeh do kroniky / jiné | ne (jen pokud sekce slouží obojímu) |
 | `botcheck` | honeypot, skrytý | — |
 | `access_key` | skryté | — |
 

@@ -89,10 +89,10 @@ Starý web má 9 položek menu. Z téhle tabulky vychází jednak stavba stránk
 
 | Stránka | URL | Stav |
 |---|---|---|
-| Výstřely — kronika jednotlivých výstřelů | `/vystrely/` | hotová kostra, plní se z Markdownu |
+| Zážehy — kronika jednotlivých zážehů | `/zazehy/` | hotová kostra, plní se z Markdownu |
 | Minihra | `/minihra/` | zástupná stránka, obsah vymyslíme později |
 
-**Výstřely** jsou Astro content collection: jeden výstřel = jeden soubor v `src/content/vystrely/`. Přidat záznam znamená přidat soubor, nic jiného se nemění. Schéma je v [`src/content.config.ts`](src/content.config.ts) — název, datum, popis, nepovinný obrázek a nepovinná videosmyčka.
+**Zážehy** jsou Astro content collection: jeden zážeh = jeden soubor v `src/content/zazehy/`. Přidat záznam znamená přidat soubor, nic jiného se nemění. Schéma je v [`src/content.config.ts`](src/content.config.ts) — název, datum, popis, nepovinný obrázek a nepovinná videosmyčka.
 
 ---
 
@@ -129,7 +129,7 @@ Cílem je ověřit potrubí dřív, než se do něj nalije obsah.
 
 ### Fáze 2 — obsah a design (hlavní práce)
 
-Kostra stojí: navigace, patička, stránka Výstřely, zástupná Minihra, komponenty `Video` a `Plamen`. Zbývá naplnit obsahem.
+Kostra stojí: navigace, patička, stránka Zážehy, zástupná Minihra, komponenty `Video` a `Plamen`. Zbývá naplnit obsahem.
 
 
 5. Naskládat sekce podle tabulky v kapitole 4. **Každá sekce dostane `id` přesně podle sloupce „Kotva"** — na tom pak stojí přesměrování.
@@ -233,7 +233,7 @@ GitHub Pages dává 1 GB na web a měkký limit ~100 GB přenosu měsíčně. Vi
 - autoplay zapíná JavaScript, ne HTML — jinak by video jelo i lidem se zapnutým omezením pohybu
 - **YouTube embed ne** — vrátil by cookies, a s nimi cookie lištu, kterou jsme si zrušili
 
-**Pozor na video u každého výstřelu.** Při čtyřech záznamech je to v pohodě, při čtyřiceti ne. Až se kronika rozroste, přesunout klipy na externí úložiště (Cloudflare R2 má štědrý free tier) — pole `video` ve schématu bere i absolutní URL, takže to je změna v datech, ne v kódu.
+**Pozor na video u každého zážehu.** Při čtyřech záznamech je to v pohodě, při čtyřiceti ne. Až se kronika rozroste, přesunout klipy na externí úložiště (Cloudflare R2 má štědrý free tier) — pole `video` ve schématu bere i absolutní URL, takže to je změna v datech, ne v kódu.
 
 ---
 

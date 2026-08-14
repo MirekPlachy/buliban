@@ -2,7 +2,7 @@
 nazev: Tichý společník
 datum: 2024-12-24
 popis: >-
-  Výstřel, který nikdo neslyšel a všichni poznali. Připomínka, že hlasitost
+  Zážeh, který nikdo neslyšel a všichni poznali. Připomínka, že hlasitost
   a účinek spolu nesouvisejí.
 poradi: 4
 ---
@@ -11,5 +11,5 @@ poradi: 4
 přesto, že po akustické stránce se nestalo vůbec nic.
 
 Tichý společník posunul chápání toho, co se vlastně měří. Do té doby se
-výstřely hodnotily hlavně podle zvuku; od Štědrého dne 2024 se hodnotí
+zážehy hodnotily hlavně podle zvuku; od Štědrého dne 2024 se hodnotí
 podle **dosahu**.

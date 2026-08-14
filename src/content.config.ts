@@ -4,13 +4,13 @@ import { glob } from 'astro/loaders';
 import { z } from 'zod';
 
 /**
- * Jednotlivé výstřely — kronika pozoruhodných okamžiků.
+ * Jednotlivé zážehy — kronika pozoruhodných okamžiků.
  *
- * Každý záznam je jeden Markdown soubor v `src/content/vystrely/`.
- * Přidat nový výstřel znamená přidat soubor; nic dalšího se nemění.
+ * Každý záznam je jeden Markdown soubor v `src/content/zazehy/`.
+ * Přidat nový zážeh znamená přidat soubor; nic dalšího se nemění.
  */
-const vystrely = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/vystrely' }),
+const zazehy = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/zazehy' }),
   schema: ({ image }) =>
     z.object({
       nazev: z.string(),
@@ -20,7 +20,7 @@ const vystrely = defineCollection({
       /** Obrázek vedle Markdownu. Zatím nepovinný — než bude grafika hotová. */
       obrazek: image().optional(),
       /**
-       * Cesta ke smyčce bez přípony, např. `/video/vystrel-01`.
+       * Cesta ke smyčce bez přípony, např. `/video/zazeh-01`.
        * Očekává dvojici `.webm` + `.mp4` v `public/`.
        */
       video: z.string().optional(),
@@ -29,4 +29,4 @@ const vystrely = defineCollection({
     }),
 });
 
-export const collections = { vystrely };
+export const collections = { zazehy };

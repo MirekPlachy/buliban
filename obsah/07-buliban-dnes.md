@@ -53,11 +53,11 @@ Nejcennější detail, který se nesmí ztratit: **soutěží se v tom, kdo v pl
 >
 > `[ #buliban na Instagramu ]` `[ YouTube kanál ]`
 
-**Propojení s Výstřely:**
+**Propojení se Zážehy:**
 
-> Nejlepší kousky si necháváme. Podívej se do [kroniky výstřelů](/vystrely/) — nebo nám ten svůj pošli.
+> Nejlepší kousky si necháváme. Podívej se do [kroniky zážehů](/zazehy/) — nebo nám ten svůj pošli.
 
-Tohle je zároveň jediné rozumné místo, odkud na jednostránce odkázat na samostatnou stránku [Výstřely](../src/content/vystrely/).
+Tohle je zároveň jediné rozumné místo, odkud na jednostránce odkázat na samostatnou stránku [Zážehy](../src/content/zazehy/).
 
 ---
 

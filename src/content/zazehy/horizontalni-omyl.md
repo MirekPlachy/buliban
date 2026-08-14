@@ -8,7 +8,7 @@ poradi: 3
 ---
 
 Nauka rozlišuje polohu vertikální a horizontální z dobrého důvodu, a
-právě tenhle výstřel je ten důvod.
+právě tenhle zážeh je ten důvod.
 
 Pokus proběhl vleže, na pohovce, bez jakékoli přípravy okolí. Výsledkem
 byl propálený povlak, tři týdny zákazu vstupu do obývacího pokoje a
