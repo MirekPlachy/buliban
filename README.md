@@ -63,9 +63,31 @@ Nic dalšího se nemění — stránka se přestaví sama.
 
 ## Grafika
 
-Obrázky dělá **Recraft V3**, smyčky **fal.ai** (image-to-video z hotových
-obrázků, aby video nemohlo ujet jinam než zbytek webu). Klíče patří do `.env`
-(vzor v `.env.example`); web ani jeho nasazení je nepotřebují.
+Obrázky dělá **Recraft**, smyčky **fal.ai** (image-to-video z hotových
+obrázků, aby video nemohlo ujet jinam než zbytek webu).
+
+### API klíče
+
+Klíče patří **výhradně do souboru `.env`** v kořeni projektu:
+
+```bash
+cp .env.example .env     # a doplnit hodnoty
+```
+
+`.env` je v `.gitignore`, takže se do repozitáře nedostane. Navíc je tu
+pojistka — hák, který commit s klíčem zastaví. **Jednou po naklonování**
+ho zapněte (nastavení háků se neklonuje):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Klíče potřebují jen skripty v `scripts/`, které běží u vás na počítači.
+Web ani jeho nasazení na GitHub Pages je nepoužívají, takže do nastavení
+repozitáře na GitHubu nepatří.
+
+> **Nikdy nepojmenujte proměnnou `PUBLIC_…`** — takové Astro záměrně vloží
+> do JavaScriptu poslaného do prohlížeče a klíč by byl veřejný.
 
 ```bash
 # 1. do grafika/reference/ vložte 1–5 obrázků s cílovou náladou

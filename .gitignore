@@ -11,9 +11,17 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# prostředí
+# prostředí — API klíče. Repozitář je veřejný, takže tohle je to
+# nejdůležitější pravidlo v celém souboru. Ignoruje se všechno, co začíná
+# na .env, kromě vzoru s prázdnými hodnotami.
 .env
-.env.production
+.env.*
+!.env.example
+
+# ať se klíč neschová ani pod domácký název
+klice.txt
+klice.json
+secrets.*
 
 # editory a OS
 .DS_Store

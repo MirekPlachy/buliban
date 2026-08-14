@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Poslední pojistka před tím, než klíč skončí ve veřejném repozitáři.
+#
+# .gitignore chrání soubor .env, ale neochrání před překlepem v názvu
+# (.env.zaloha, klice-recraft.txt) ani před klíčem omylem vlepeným
+# doprostřed jiného souboru. Tenhle hák se dívá na to, co se opravdu
+# commituje.
+#
+# Zapnutí (jednou po naklonování):
+#     git config core.hooksPath .githooks
+#
+# Obejít ve výjimečném případě: git commit --no-verify
+
+zastavit() {
+  echo ""
+  echo "  ✖ COMMIT ZASTAVEN — vypadá to na únik API klíče"
+  echo ""
+  echo "    $1"
+  echo ""
+  echo "  Klíče patří výhradně do .env, který se necommituje."
+  echo "  Pokud jde o planý poplach: git commit --no-verify"
+  echo ""
+  exit 1
+}
+
+# 1) Soubor, který vypadá jako schránka na klíče
+for soubor in $(git diff --cached --name-only --diff-filter=ACM); do
+  case "$soubor" in
+    .env.example) ;;
+    .env | .env.*) zastavit "Do commitu se dostal soubor: $soubor" ;;
+    *klice* | *secret* | *token*)
+      zastavit "Podezřelý název souboru: $soubor" ;;
+  esac
+done
+
+# 2) Klíč vlepený do obsahu jakéhokoli souboru.
+#    Hledá se přiřazení s hodnotou delší než 12 znaků, aby prázdný vzor
+#    v .env.example a zmínky v dokumentaci neshodily commit.
+nalez=$(git diff --cached -U0 |
+  grep -nE '^\+.*(RECRAFT_API_TOKEN|FAL_KEY|API_KEY|SECRET)[[:space:]]*[=:][[:space:]]*["'"'"']?[A-Za-z0-9_\-]{12,}')
+
+if [ -n "$nalez" ]; then
+  zastavit "Nalezeno v obsahu:
+    $(echo "$nalez" | head -3)"
+fi
+
+exit 0
