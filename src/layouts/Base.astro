@@ -1,0 +1,65 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const kanonicka = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={kanonicka} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Buliban" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={kanonicka} />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-display-raw" preload />
+    <Font cssVariable="--font-body-raw" preload />
+  </head>
+
+  <body class="min-h-dvh antialiased">
+    <slot />
+
+    <script>
+      // Odhalování prvků při scrollování.
+      const prvky = document.querySelectorAll<HTMLElement>('.reveal');
+      const klidnyRezim = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (klidnyRezim || !('IntersectionObserver' in window)) {
+        prvky.forEach((prvek) => prvek.classList.add('je-videt'));
+      } else {
+        const pozorovatel = new IntersectionObserver(
+          (zaznamy) => {
+            zaznamy.forEach((zaznam) => {
+              if (zaznam.isIntersecting) {
+                zaznam.target.classList.add('je-videt');
+                pozorovatel.unobserve(zaznam.target);
+              }
+            });
+          },
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.1 },
+        );
+
+        prvky.forEach((prvek) => pozorovatel.observe(prvek));
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+# build výstup
+dist/
+.astro/
+
+# závislosti
+node_modules/
+
+# logy
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# prostředí
+.env
+.env.production
+
+# editory a OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

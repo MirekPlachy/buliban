@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------
+   Designový systém Bulibanu
+   Temná, mystická základna + veselé, sytě zářivé akcenty.
+   Barvy měňte tady, ne po jednotlivých komponentách.
+   --------------------------------------------------------------- */
+@theme {
+  /* Základna — noc v mlžném údolí */
+  --color-noc-950: #07040f;
+  --color-noc-900: #0d0819;
+  --color-noc-800: #171029;
+  --color-noc-700: #241a40;
+
+  /* Akcenty — plamen, jiskra, kouř */
+  --color-plamen-400: #ffb347; /* zlatá / plamen */
+  --color-plamen-500: #f59120;
+  --color-jiskra-400: #ff5fa2; /* magenta / veselý prvek */
+  --color-kour-400: #4fd6d1; /* tyrkys / chladný protiklad */
+  --color-uhel-300: #c9bfe0; /* tlumený text */
+
+  /* Písma. Proměnné --font-*-raw plní Astro (viz astro.config.mjs),
+     tady k nim jen dopisujeme záložní řadu pro případ, že se font nenačte. */
+  --font-display: var(--font-display-raw, Georgia), 'Georgia', serif;
+  --font-body: var(--font-body-raw, system-ui), system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-noc-950);
+  color: var(--color-uhel-300);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Odhalování sekcí při scrollování.
+   Bez JS nebo při prefers-reduced-motion je obsah rovnou vidět. */
+.reveal {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.je-videt {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .dychani {
+    animation: none !important;
+  }
+}
+
+/* Pomalé „dýchání" světla za nadpisem */
+@keyframes dychani {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+.dychani {
+  animation: dychani 7s ease-in-out infinite;
+}
