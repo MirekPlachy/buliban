@@ -46,18 +46,18 @@ for (const polozka of kUdelani) {
   const vstup = {
     prompt: `${styl.spolecnyPrompt} ${polozka.prompt}`,
     negative_prompt: styl.negativni,
-    model: 'recraftv3',
+    model: styl.model ?? 'recraftv4_1',
     size: polozka.velikost,
     n: 1,
     response_format: 'url',
   };
 
   // style_id a style se vzájemně vylučují — API odmítne oba naráz.
+  // Bez vlastního stylu se aspoň vnutí značková paleta přes controls.
   if (styl.styleId) {
     vstup.style_id = styl.styleId;
   } else {
     vstup.style = styl.zakladniStyl;
-    if (styl.podstyl) vstup.substyle = styl.podstyl;
     vstup.controls = { colors: styl.barvy.map(({ rgb }) => ({ rgb })) };
   }
 

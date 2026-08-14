@@ -190,6 +190,28 @@ Web má působit svižně a dynamicky. Většinu té dynamiky ale nedělá video
 
 Klíče patří do `.env` (vzor v [`.env.example`](.env.example)), který je v `.gitignore`. Web ani jeho nasazení klíče nepotřebují — jsou jen pro skripty.
 
+### Co u Recraftu koupit
+
+**Neplatit měsíční předplatné.** Recraft má dva oddělené peněžní systémy a pro nás je správný ten druhý:
+
+| | Kredity předplatného | **API jednotky** |
+|---|---|---|
+| K čemu | webová aplikace Recraftu | **naše skripty** |
+| Platba | měsíčně (Basic $10, Advanced $27…) | dobití předem, 1 000 jednotek = $1 |
+| Platnost | resetují se každý měsíc, nepřevádějí se | nevyprší |
+
+Tlačítko na vygenerování API tokenu se v profilu objeví, **až když je zůstatek API jednotek nad nulou**. Předplatné ho neodemkne.
+
+Ceník podstatných operací (V4.1):
+
+| Operace | Jednotky | Cena |
+|---|---|---|
+| Založení vlastního stylu | 40 | $0,04 |
+| Rastrový obrázek | 35 | $0,035 |
+| Vektorový obrázek (SVG) | 80 | $0,08 |
+
+Pět obrázků ze `zadani.json` stojí $0,18. I s bohatým experimentováním (~25 pokusů a pár variant stylu) se první verze webu vejde zhruba do **$1**. Dobití za $10 tedy vydrží dlouho — a protože jsou **API jednotky nevratné a nestornovatelné**, nemá cenu kupovat víc.
+
 ### Postup
 
 1. Do `grafika/reference/` vložit 1–5 obrázků s náladou, jakou má web mít.
