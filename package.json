@@ -10,7 +10,8 @@
     "check": "astro check",
     "styl": "node --env-file-if-exists=.env scripts/styl.mjs",
     "obrazky": "node --env-file-if-exists=.env scripts/obrazky.mjs",
-    "video": "node --env-file-if-exists=.env scripts/video.mjs"
+    "video": "node --env-file-if-exists=.env scripts/video.mjs",
+    "vzory": "node --env-file-if-exists=.env scripts/vzory.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

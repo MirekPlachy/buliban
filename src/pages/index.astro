@@ -1,7 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Video from '../components/Video.astro';
-import Plamen from '../components/Plamen.astro';
+import obrazekNauka from '../assets/generovane/nauka.webp';
 
 const title = 'Buliban — zkroť svůj plamen';
 const description =
@@ -140,8 +141,14 @@ const pripravene = [
         </p>
       </div>
 
-      <div class="reveal hidden md:block">
-        <Plamen velikost="velka" />
+      <div class="reveal">
+        <Image
+          src={obrazekNauka}
+          alt="Plamen hořící v temné kovárně"
+          widths={[400, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 40vw"
+          class="rounded-3xl border border-white/8 shadow-2xl shadow-black/50"
+        />
       </div>
     </div>
   </section>

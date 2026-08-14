@@ -8,9 +8,21 @@
  *   npm run obrazky -- --jen=hero    jen jeden kus
  *   npm run obrazky -- --znovu       přepsat i to, co existuje
  */
-import { klic, nactiJson, existuje, stahni, posli, argumenty } from './lib.mjs';
+import { statSync } from 'node:fs';
+import {
+  klic, nactiJson, existuje, stahni, posli, argumenty,
+  preved, maFfmpeg, cesta,
+} from './lib.mjs';
 
 const API = 'https://external.api.recraft.ai/v1';
+
+const prevadet = maFfmpeg();
+if (!prevadet) {
+  console.warn(
+    '\n⚠ ffmpeg není na PATH — obrázky zůstanou jako WebP pod cizí příponou\n' +
+      '  a v plné velikosti. Doinstalujte ho a pusťte znovu s --znovu.\n',
+  );
+}
 
 const token = klic('RECRAFT_API_TOKEN', 'https://www.recraft.ai/ → API');
 const styl = await nactiJson('grafika/styl.json');
@@ -46,7 +58,7 @@ for (const polozka of kUdelani) {
   const vstup = {
     prompt: `${styl.spolecnyPrompt} ${polozka.prompt}`,
     negative_prompt: styl.negativni,
-    model: styl.model ?? 'recraftv4_1',
+    model: styl.model ?? 'recraftv3',
     size: polozka.velikost,
     n: 1,
     response_format: 'url',
@@ -75,7 +87,19 @@ for (const polozka of kUdelani) {
   if (!url) throw new Error(`Odpověď bez obrázku: ${JSON.stringify(data)}`);
 
   await stahni(url, polozka.cil);
-  console.log(`  ✓ ${polozka.cil}`);
+
+  // Recraft vrací WebP bez ohledu na příponu, kterou si zvolíme, a v plné
+  // velikosti. Převod srovná formát s příponou a soubor zmenší.
+  if (prevadet) {
+    if (preved(polozka.cil, polozka.uprava)) {
+      const mb = statSync(cesta(polozka.cil)).size / 1048576;
+      console.log(`  ✓ ${polozka.cil} (${mb.toFixed(2)} MB)`);
+    } else {
+      console.warn(`  ⚠ ${polozka.cil} — převod selhal, ponechán původní soubor`);
+    }
+  } else {
+    console.log(`  ✓ ${polozka.cil} (bez převodu — chybí ffmpeg)`);
+  }
 }
 
 console.log('\nHotovo. Obrázky v src/assets/ zpracuje Astro samo;');

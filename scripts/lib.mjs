@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, renameSync, unlinkSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,6 +50,43 @@ export async function stahni(url, cilRelativni) {
   await zajistiSlozku(cil);
   await writeFile(cil, Buffer.from(await odpoved.arrayBuffer()));
   return cil;
+}
+
+export const maFfmpeg = () =>
+  spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0;
+
+/**
+ * Převede stažený obrázek do formátu, který odpovídá jeho příponě.
+ *
+ * Recraft vrací WebP bez ohledu na to, jak si soubor pojmenujeme. Uložit ho
+ * jako `.jpg` znamená, že server pošle hlavičku `image/jpeg` s WebP obsahem —
+ * prohlížeče to obvykle přežijí, ale scrapery náhledů pro sociální sítě
+ * takový obrázek odmítnou. Navíc chodí v plné velikosti, klidně přes 2 MB.
+ *
+ * `uprava` je volitelný filtr pro ffmpeg, např. ořez a zmenšení na přesný
+ * rozměr otevíracího obrázku.
+ */
+export function preved(cilRelativni, uprava) {
+  const cil = cesta(cilRelativni);
+  const docasny = `${cil}.stazeno`;
+
+  renameSync(cil, docasny);
+
+  const prepinace = ['-y', '-i', docasny];
+  if (uprava) prepinace.push('-vf', uprava);
+  if (/\.jpe?g$/i.test(cil)) prepinace.push('-q:v', '4');
+  prepinace.push(cil);
+
+  const vysledek = spawnSync('ffmpeg', prepinace, { stdio: 'ignore' });
+
+  if (vysledek.status !== 0) {
+    // Radši nechat původní soubor než skončit s ničím.
+    renameSync(docasny, cil);
+    return false;
+  }
+
+  unlinkSync(docasny);
+  return true;
 }
 
 /**

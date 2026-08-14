@@ -1,23 +1,38 @@
 {
   "_comment": "Stylová bible webu. Tenhle soubor je jediné místo, kde se rozhoduje, jak web vypadá. Každý generovaný obrázek jím projde, takže konzistence není otázka disciplíny, ale zapojení.",
-
-  "styleId": null,
+  "styleId": "39de046c-d530-4c66-8938-0499b3422056",
   "_styleId": "Vyplní `npm run styl` z referenčních obrázků v grafika/reference/. Dokud je null, jede se na základní styl níže — výsledky budou hezké, ale méně jednotné.",
-
-  "model": "recraftv4_1",
-  "_model": "V4.1 je novější i levnější než V3 (35 vs 40 API jednotek za obrázek). Kdyby vlastní styl s V4.1 dělal potíže, přepněte na 'recraftv3'. Vektorový výstup: přidat příponu '_vector'.",
-
-  "zakladniStyl": "digital_illustration",
-
-  "spolecnyPrompt": "Temná mystická scéna v mlžném horském údolí za noci. Hluboká noční modročerná základna, jediným zdrojem světla je teplý zlatooranžový plamen. Jemné magentové a tyrkysové odlesky v kouři. Filmové boční nasvícení, měkké mlhavé přechody, zrnitá texturovaná atmosféra. Bez textu, bez písmen, bez log, bez lidských tváří. Vážný pseudo-sakrální nádech s náznakem nadsázky.",
-
-  "negativni": "text, písmena, nápisy, loga, vodoznak, lidské tváře, jasné denní světlo, bílé pozadí, pestrá duha, kýčovité barvy",
-
+  "model": "recraftv3",
+  "_model": "MUSÍ zůstat V3. Vlastní styly (style_id) jsou podle dokumentace Recraftu kompatibilní výhradně s recraftv3 a recraftv3_vector — modely V4 a V4.1 styly nepodporují vůbec a volání s nimi skončí chybou. V4.1 je sice o půl centu levnější, ale bez zamčeného stylu ztrácí grafika konzistenci, což je celý důvod, proč tu Recraft je. Vektorový výstup: 'recraftv3_vector'.",
+  "zakladniStyl": "realistic_image",
+  "spolecnyPrompt": "Low-key chiaroscuro still life photograph shot on 35mm film, near-monochrome, intimate close-up scale. The subject is raw fire, glowing embers, drifting smoke, weathered stone, old wood and hand-forged iron. No people, no living beings, no buildings, no interiors, no furniture. Deep darkness fills most of the frame. Small warm orange firelight is the only light source, leaving everything else in deep black. Fine film grain, muted desaturated colors, large empty dark areas around the subject. Solemn, quiet, ceremonial mood.",
+  "_spolecnyPrompt": "Anglicky záměrně — Recraft je trénovaný hlavně na anglických popiscích a české zadání si vykládal po svém. Popisuje VÝHRADNĚ styl, světlo a druh motivu; konkrétní scéna patří do zadani.json. Hlavní past jsou slova, která zároveň označují věc nebo místo: „měkký kužel světla\" přimaloval do každého snímku dopravní kužel, „cinematic\" posadil celou sérii do kinosálu. Proto tu žádné takové slovo není.",
+  "negativni": "people, person, human figure, silhouette of a person, animals, traffic cone, cinema, movie theatre, auditorium, rows of seats, indoor room, votive candle in a glass jar, burning building, house fire, disaster, firefighters, camera crew, wide landscape, desktop wallpaper, neon, synthwave, saturated pink sky, turquoise sky, aurora, rainbow, oversaturated colors, text, letters, captions, logo, watermark, daylight, white background",
   "barvy": [
-    { "rgb": [7, 4, 15], "_nazev": "noc-950" },
-    { "rgb": [23, 16, 41], "_nazev": "noc-800" },
-    { "rgb": [255, 179, 71], "_nazev": "plamen-400" },
-    { "rgb": [255, 95, 162], "_nazev": "jiskra-400" },
-    { "rgb": [79, 214, 209], "_nazev": "kour-400" }
-  ]
+    {
+      "rgb": [
+        7,
+        4,
+        15
+      ],
+      "_nazev": "noc-950 — nese většinu plochy"
+    },
+    {
+      "rgb": [
+        23,
+        16,
+        41
+      ],
+      "_nazev": "noc-800"
+    },
+    {
+      "rgb": [
+        255,
+        179,
+        71
+      ],
+      "_nazev": "plamen-400 — jediný teplý akcent"
+    }
+  ],
+  "_barvy": "Jen tmavá základna a plamen. Magenta (jiskra-400) a tyrkys (kour-400) jsou v designu webu drobné akcenty na pár pixelech; kdyby se sem připsaly, model je roztáhne přes celou plochu a vyjde neonová tapeta."
 }

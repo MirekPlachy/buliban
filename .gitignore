@@ -32,3 +32,6 @@ Thumbs.db
 
 # dočasné soubory
 _to_delete/
+
+# kandidáti na vzory jsou jednorázoví; vybrané vzory o složku výš se commitují
+grafika/reference/kandidati/

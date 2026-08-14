@@ -4,34 +4,37 @@
     "popis": "Podklad úvodní obrazovky. Slouží zároveň jako plakát pod hero video.",
     "prompt": "Široký záběr do mlžného horského údolí za noci, v dálce jediný osamělý plamen prosvítající mlhou.",
     "velikost": "1820x1024",
-    "cil": "public/video/hero.jpg"
+    "cil": "public/video/hero.jpg",
+    "uprava": "scale=1600:-1"
   },
   {
     "id": "nauka",
     "popis": "Doprovodný obrázek k sekci Co je to Buliban.",
     "prompt": "Detail klidně hořícího plamene ve tmě, kolem něj pomalu stoupající kouř s tyrkysovými odlesky.",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/nauka.png"
+    "cil": "src/assets/generovane/nauka.webp"
   },
   {
     "id": "historie",
     "popis": "Doprovodný obrázek k časové ose.",
     "prompt": "Řada dávných kamenných mohyl mizících v mlze, na každé doutná drobný uhlík.",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/historie.png"
+    "cil": "src/assets/generovane/historie.webp"
   },
   {
     "id": "zahrivani",
     "popis": "Doprovodný obrázek k technikám zahřívání.",
     "prompt": "Zátiší připravených rituálních předmětů na hrubém dřevěném stole, nasvícené odspodu plamenem.",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/zahrivani.png"
+    "cil": "src/assets/generovane/zahrivani.webp"
   },
   {
     "id": "og",
-    "popis": "Obrázek pro sdílení na sociálních sítích. Poměr 1200x630 se ořízne z 1200x640.",
+    "popis": "Obrázek pro sdílení na sociálních sítích. Na požadovaný poměr 1200x630 se ořízne.",
     "prompt": "Majestátní plamen uprostřed tmy, kompozice na střed, po stranách volné tmavé místo.",
-    "velikost": "1280x720",
-    "cil": "public/og.jpg"
+    "_velikost": "Recraft bere jen svůj seznam rozměrů — 1280x720 mezi ně nepatří a volání skončí chybou. Použitelné jsou např. 1024x1024, 1365x1024, 1536x1024, 1820x1024, 2048x1024 a jejich otočené varianty.",
+    "velikost": "1820x1024",
+    "cil": "public/og.jpg",
+    "uprava": "crop=1820:955,scale=1200:630"
   }
 ]
