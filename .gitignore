@@ -33,5 +33,12 @@ Thumbs.db
 # dočasné soubory
 _to_delete/
 
+# zálohy grafiky před přegenerováním — místní pojistka, do repozitáře nepatří
+# (staré verze obrázků drží i historie gitu)
+zaloha/
+
+# neposouzení kandidáti z `npm run kandidati`; do repozitáře jde až vítěz
+kandidati/
+
 # kandidáti na vzory jsou jednorázoví; vybrané vzory o složku výš se commitují
 grafika/reference/kandidati/

@@ -227,7 +227,8 @@ Přidat další obrázek znamená přidat položku do `grafika/zadani.json`. Pro
 
 GitHub Pages dává 1 GB na web a měkký limit ~100 GB přenosu měsíčně. Video je zdaleka největší soubor na stránce, takže:
 
-- **hero smyčka do 4 MB**, klipy u sekcí do ~2 MB
+- **úvodní obrazovka video nemá** — nese ji animovaný SVG plamen, který nestojí
+  ani bajt přenosu; klipy u sekcí do ~2 MB
 - vždy dvojice `.webm` (AV1, dostane ji většina návštěvníků) + `.mp4` (záchranná síť pro starší Safari)
 - [`Video.astro`](src/components/Video.astro) načítá až v dohledu (`preload="none"` + IntersectionObserver), takže klip na konci stránky nestáhne nikdo, kdo tam nedojede
 - autoplay zapíná JavaScript, ne HTML — jinak by video jelo i lidem se zapnutým omezením pohybu

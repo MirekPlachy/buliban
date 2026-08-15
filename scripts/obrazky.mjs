@@ -5,8 +5,11 @@
  * negeneruje znovu to, co už na disku je. Přegenerovat jde cíleně:
  *
  *   npm run obrazky              všechno, co chybí
- *   npm run obrazky -- --jen=hero    jen jeden kus
+ *   npm run obrazky -- --jen=og      jen jeden kus
  *   npm run obrazky -- --znovu       přepsat i to, co existuje
+ *
+ * Položka se `zamceno: true` je schválený obrázek, který se hromadnému
+ * `--znovu` neposkytne. Přegenerovat ji jde jen adresně přes `--jen=`.
  */
 import { statSync } from 'node:fs';
 import {
@@ -38,6 +41,16 @@ if (!styl.styleId) {
 
 const kUdelani = zadani.filter((polozka) => {
   if (jen && polozka.id !== jen) return false;
+
+  // Zámek na schválené obrázky. Bez něj stačí jedno `--znovu` a hotová věc,
+  // kterou si zadavatel vybral, je nenávratně přegenerovaná — přesně to se
+  // stalo obrázku `nauka`. Adresné `--jen=` zámek obejde, protože tam je
+  // úmysl zjevný.
+  if (polozka.zamceno && !jen) {
+    console.log(`🔒 ${polozka.id} — schválený obrázek, přeskakuji`);
+    return false;
+  }
+
   if (!znovu && existuje(polozka.cil)) {
     console.log(`· ${polozka.id} — už existuje, přeskakuji`);
     return false;
@@ -62,7 +75,12 @@ for (const polozka of kUdelani) {
     // Zákazy z bible platí všude; položka si může přidat vlastní. Nutné kvůli
     // barvě plamene: u modrého zážehu je oranžový plamen chyba, ale u táboráku
     // a svíčky je to přesně ono, takže do společného seznamu patřit nemůže.
-    negative_prompt: [styl.negativni, polozka.negativni]
+    //
+    // Pořadí je stejné jako u promptu a ze stejného důvodu: konkrétní zadání
+    // první. Seznam je dlouhý a model bere začátek vážněji než konec — když
+    // byly zákazy z bible vpředu, „blue light, blue clothing“ na konci se
+    // ztratilo a ze zahřívání vodou vyšla scéna v modrém.
+    negative_prompt: [polozka.negativni, styl.negativni]
       .filter(Boolean)
       .join(', '),
     model: styl.model ?? 'recraftv3',

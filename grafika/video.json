@@ -4,23 +4,17 @@
   "model": "fal-ai/wan-25-preview/image-to-video",
   "_model": "Endpointy se na fal občas přejmenují. Aktuální název najdete na https://fal.ai/models — hledejte image-to-video. Levné: wan. Kvalitní a dražší: kling, veo3.",
 
-  "_vyber": "Smyčky jsou schválně jen na místech, kde v záběru není tvář. Rozpohybovaný obličej je to první, co se u image-to-video rozpadne, a sekce se sedmi zapalovadly ani se šesti metodami zahřívání video nepotřebuje.",
+  "_vyber": "Smyčky jsou schválně jen na místech, kde v záběru není tvář. Rozpohybovaný obličej je to první, co se u image-to-video rozpadne, a sekce se sedmi zapalovadly ani se šesti metodami zahřívání video nepotřebuje. Úvodní obrazovka video taky nemá — nese ji animovaný plamen v SVG (components/Plamen.astro), který nestojí ani jeden síťový požadavek.",
+
+  "_smer": "Obě smyčky ukazují plamen UVNITŘ láhve a liší se jen tím, kudy se šíří. Vertikální: od hrdla ke dnu. Horizontální: ode dna k hrdlu. Přesně tak to popisují texty v kapitole čtvrté, takže se to nesmí prohodit.",
 
   "smycky": [
-    {
-      "id": "hero",
-      "popis": "Podklad úvodní obrazovky.",
-      "zdroj": "public/video/hero.jpg",
-      "prompt": "The blue flame at the bottle neck flickers gently and the hand holds still. The camera does not move. Very slow, calm motion.",
-      "delka": 5,
-      "cil": "public/video/hero"
-    },
     {
       "id": "vertikalni",
       "popis": "Smyčka ke kartě Vertikální.",
       "zdroj": "src/assets/generovane/vertikalni.webp",
       "_prompt": "Původní znění „The blue flame shoots up from the neck, burns briefly and dies down“ odmítl content checker fal.ai (content_policy_violation). Kombinace „shoots“, „neck“ a „dies“ se dá číst jako popis násilí; neutrální slovesa projdou.",
-      "prompt": "The blue flame above the bottle opening flickers gently and slowly fades. The bottle and the camera stay still.",
+      "prompt": "The blue fire inside the standing bottle travels slowly down the glass from the neck to the bottom and fades. Nothing burns outside the glass. The bottle and the camera stay still.",
       "delka": 5,
       "cil": "public/video/vertikalni"
     },
@@ -28,7 +22,7 @@
       "id": "horizontalni",
       "popis": "Smyčka ke kartě Horizontální.",
       "zdroj": "src/assets/generovane/horizontalni.webp",
-      "prompt": "The blue flame spreads slowly along the length of the lying bottle and then fades. The bottle and the camera stay still.",
+      "prompt": "The blue fire inside the lying bottle spreads slowly along the glass from the base towards the neck and fades. Nothing burns outside the glass. The bottle and the camera stay still.",
       "delka": 5,
       "cil": "public/video/horizontalni"
     }

@@ -35,6 +35,7 @@ src/pages/zazehy.astro         kronika zážehů
 src/pages/minihra.astro        zástupná stránka minihry
 src/styles/global.css          barvy, písma, animace — designový systém webu
 grafika/                       stylová bible a zadání pro generování obrázků
+kandidati/                     neposouzení kandidáti obrázků (mimo git)
 scripts/                       generování grafiky a videa
 astro.config.mjs               doména, náhledový režim, sitemap, fonty
 ```
@@ -95,11 +96,48 @@ npm run styl        # založí vlastní styl a zapíše jeho ID do grafika/styl.
 npm run obrazky     # vygeneruje vše z grafika/zadani.json
 npm run video       # rozpohybuje vybrané obrázky podle grafika/video.json
 
-npm run obrazky -- --jen=hero    # jen jeden kus
+npm run obrazky -- --jen=og      # jen jeden kus
 npm run obrazky -- --znovu       # přepsat i hotové
 ```
 
+Položka se `zamceno: true` v `grafika/zadani.json` je schválený obrázek —
+hromadné `--znovu` ji přeskočí a v běhu se ohlásí zámkem. Přepsat ji jde
+jen adresně: `npm run obrazky -- --jen=nauka --znovu`.
+
+### Výběr z kandidátů
+
+`--znovu` hotový soubor **přepíše**. U scén s lidmi, kde projde zhruba
+každý třetí pokus, to znamená, že povedený obrázek zmizí pod horším —
+a zpátky ho nikdo nedostane. Na opakování je proto druhý skript, který
+generuje bokem do `kandidati/` a v projektu nesáhne na nic:
+
+```bash
+npm run kandidati -- --jen=dnes --pocet=4   # vygeneruje výběr
+npm run kandidati -- --jen=dnes --nasad=2   # vítěz jde do projektu
+```
+
+Kandidáti se generují souběžně, takže čtyři kusy trvají stejně jako jeden.
+Složka `kandidati/` je v `.gitignore`; do repozitáře jde až nasazený vítěz.
+
 Podrobnosti a limity velikosti videa jsou v [PLAN.md](PLAN.md), kapitola 5a.
+
+### Dvě pravidla, která se nesmí porušit
+
+Nejsou to stylové preference, ale popis toho, co Buliban je. Zákazy k oběma
+drží společný negativní seznam v `grafika/styl.json`, takže platí na každý
+obrázek; v promptech se k nim dopisuje kladné znění.
+
+1. **Nádoba je vždycky láhev rumu, a je prázdná** — pár mililitrů na dně, nic
+   víc. Žádné víno, žádné skleničky, žádná karafa. Bez téhle věty v promptu
+   sklouzne scéna do barového zátiší: ze zadání „zahřívání fénem" vyšla parta
+   se sklenkami vína.
+2. **Plamen hoří uvnitř skla, nikdy nad hrdlem.** Buliban je ten plamen, co
+   po zahřátí vzplane u dna láhve a během vteřiny spálí i uvolněný plyn —
+   celé se to odehrává za sklem. „Modrý plamen u hrdla" si model vyloží jako
+   svářecí hořák nebo olejovou lampu s knotem; obojí už z generátoru vyšlo.
+
+Jediná výjimka je `nauka` — těsný detail nad hrdlem, který zadavatel schválil.
+Proto je zamčený.
 
 ### Co se při psaní promptů osvědčilo
 
@@ -113,12 +151,29 @@ Zkušenosti z první hotové sady. Ušetří peníze, protože každý pokus sto
   panák. Společný prompt popisuje jen film, tmu a zrno.
 - **Slovo, které pojmenovává věc, tu věc přimaluje.** „Lantern“ udělalo z lucerny
   hlavní motiv a láhev zmizela. Píše se „teplé zlaté světlo“, ne zdroj.
+- **A přimaluje i to, co k té věci patří.** „Long nozzle of a kitchen gas
+  lighter“ nedalo zapalovač, ale zahnutou hubici, a k ní model dokreslil celý
+  svářecí hořák nad láhví. Nástroj se pojmenovává celý a jednoduše — „hořící
+  špejle“ —, ne po jeho součástce.
+- **„Wide shot“ neznamená odstup, ale libovolný úhel.** U tření z něj vyšel
+  půdorys stolu s useknutými hlavami. Spolehlivě zabírá „seen from the side at
+  eye level, their faces lit and visible“ plus zákaz `view from above`.
 - **Modrá se rozlije, kde se nezakáže.** U scén s teplým světlem patří do
   `negativni` položky `blue light, blue clothing`, jinak vyjde noční modř.
   Naopak u zážehu se modrá zakázat nesmí — je to celý smysl webu.
 - **Zátiší vycházejí spolehlivě, scény s lidmi ne.** Láhev, plamen a zapalovadlo
   sednou na první pokus. U scény, kde má několik lidí dělat konkrétní věc, projde
-  zhruba každý třetí pokus — počítejte s opakováním přes `--jen=… --znovu`.
+  zhruba každý třetí pokus — na to je `npm run kandidati`.
+- **Věta začíná činností, ne kulisou.** „Three friends sit at a table…“ dalo partu
+  u stolu a metoda zmizela: u tření jen položená ruka, u fénu žádná láhev.
+  Podmětem musí být ten, kdo s láhví něco dělá; parta patří až do druhé věty.
+- **Barvu neuhlídá zákaz, jen kladné znění — a stejně je potřeba obojí.** Modrá
+  se do nočních scén tahá sama. „blue sweater“ v zákazech nestačilo, „krémový
+  svetr, teplé jantarové tóny“ v promptu taky ne; teprve dohromady to sedlo.
+- **Geometrii nepřepíšete slovy, jen jinou geometrií.** Dokud mířila hořící
+  špejle k hrdlu, dělal z toho model pochodeň a plamen vytáhl ven. Pomohlo až
+  přepsat scénu tak, že je zapalovadlo už odtažené. Totéž u řady lahví: hrdla
+  prostě nejsou v záběru, a plamen tak nemá kam utéct.
 - **Content filtry hlídají i nevinná spojení.** Recraft odmítl „rubs the bottle
   between his knees“, fal.ai odmítl „the flame shoots up from the neck and dies
   down“. Pomáhá neutrální sloveso.

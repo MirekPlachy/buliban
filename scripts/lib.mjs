@@ -92,15 +92,40 @@ export function preved(cilRelativni, uprava) {
 /**
  * Volání API s opakováním. Generátory občas vrátí 429 nebo 5xx a zopakování
  * po chvíli projde — nemá cenu kvůli tomu shodit celý běh.
+ *
+ * Dvě věci navíc, obojí vyplavalo při přegenerování celé sady:
+ *
+ * 1. **Strop na dobu čekání.** `fetch` sám o sobě čeká, jak dlouho je potřeba.
+ *    Jeden požadavek na Recraft se takhle zasekl na čtyři minuty a skončil
+ *    stavem 499 (server zahodil spojení), zatímco tentýž prompt normálně
+ *    doběhne za čtyři vteřiny. Bez stropu tenhle stav zdrží celý běh.
+ * 2. **Opakování i na 499 a na spadlé spojení.** Obojí je porucha přenosu,
+ *    ne odmítnutí zadání — a bez toho stačí jedno škytnutí sítě, aby se
+ *    dvacetikusová dávka zabila hned na prvním obrázku.
  */
-export async function posli(url, nastaveni, pokusu = 3) {
+export async function posli(url, nastaveni, pokusu = 3, limitMs = 120000) {
   for (let pokus = 1; pokus <= pokusu; pokus++) {
-    const odpoved = await fetch(url, nastaveni);
+    const posledni = pokus === pokusu;
+    let odpoved;
+
+    try {
+      odpoved = await fetch(url, {
+        ...nastaveni,
+        signal: AbortSignal.timeout(limitMs),
+      });
+    } catch (chyba) {
+      // Vypršelý strop i spadlé spojení končí tady, ne návratovým kódem.
+      if (posledni) throw new Error(`${url} → spojení selhalo: ${chyba.message}`);
+      console.warn(`  ⚠ ${chyba.message}, zkouším znovu…`);
+      await new Promise((hotovo) => setTimeout(hotovo, pokus * 4000));
+      continue;
+    }
+
     if (odpoved.ok) return odpoved;
 
     const telo = await odpoved.text();
-    const posledni = pokus === pokusu;
-    const zkusitZnovu = odpoved.status === 429 || odpoved.status >= 500;
+    const zkusitZnovu =
+      odpoved.status === 429 || odpoved.status === 499 || odpoved.status >= 500;
 
     if (posledni || !zkusitZnovu) {
       throw new Error(`${url} → ${odpoved.status}\n${telo.slice(0, 500)}`);
@@ -112,7 +137,7 @@ export async function posli(url, nastaveni, pokusu = 3) {
   }
 }
 
-/** Argumenty typu `--jen=hero` nebo `--znovu`. */
+/** Argumenty typu `--jen=og` nebo `--znovu`. */
 export function argumenty() {
   const args = process.argv.slice(2);
   return {

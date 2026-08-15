@@ -2,11 +2,11 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Video from '../components/Video.astro';
+import Plamen from '../components/Plamen.astro';
 
 // Grafika z `npm run obrazky`. Zadání ke každému souboru je v grafika/zadani.json,
 // takže je dohledatelné, proč obrázek vypadá, jak vypadá.
 import obrNauka from '../assets/generovane/nauka.webp';
-import obrHistorie from '../assets/generovane/historie.webp';
 import obrJakVypustit from '../assets/generovane/jak-vypustit.webp';
 import obrOpakovane from '../assets/generovane/opakovane.webp';
 import obrDnes from '../assets/generovane/dnes.webp';
@@ -70,7 +70,8 @@ const zpusoby = [
   {
     nazev: 'Tření mezi dlaněmi nebo koleny',
     obrazek: obrTreni,
-    popisek: 'Parta u stolu, jeden z nich zahřívá láhev třením mezi dlaněmi.',
+    popisek:
+      'Parta u stolu, jeden z nich zahřívá prázdnou láhev rumu třením mezi dlaněmi.',
     stitky: ['tradiční', 'nejrychlejší'],
     text: 'Klasika. Láhev pevně mezi dlaně nebo mezi kolena a plynule třít, dokud se sklo nezahřeje. Teplotu máte pod kontrolou, takže nehrozí přehřátí ani prasklé sklo.',
     pozn: 'V přítomnosti dámské společnosti vyvolává tato metoda situace, které bývají mylně vykládány jako příslib intimního pokračování večera.',
@@ -78,7 +79,8 @@ const zpusoby = [
   {
     nazev: 'Krátké ponoření do teplé vody',
     obrazek: obrVoda,
-    popisek: 'Ponoření láhve do dřezu s horkou vodou, kolem stoupá pára.',
+    popisek:
+      'Ponoření prázdné láhve rumu do dřezu s horkou vodou, kolem stoupá pára.',
     stitky: ['domácí', 'pro pokročilé'],
     text: 'Pár desítek sekund v dřezu s horkou vodou — ne vroucí. Prohřeje rovnoměrně sklo i obsah.',
     pozn: 'Doporučujeme až pro třetí a další opakování. Ohřev je tak dokonalý, že efekt přijde dřív, než se stihnete podívat.',
@@ -86,7 +88,7 @@ const zpusoby = [
   {
     nazev: 'Teplý ručník',
     obrazek: obrRucnik,
-    popisek: 'Láhev zabalená do nahřátého ručníku.',
+    popisek: 'Prázdná láhev rumu zabalená do nahřátého ručníku.',
     stitky: ['pomalé', 'bezpečné'],
     text: 'Zabalit do nahřátého ručníku nebo deky a počkat. Nejmírnější způsob ze všech.',
     pozn: 'Nikdy se pořádně neuchytil. Nikdo se u něj nezasměje.',
@@ -94,7 +96,7 @@ const zpusoby = [
   {
     nazev: 'Fén',
     obrazek: obrFen,
-    popisek: 'Zahřívání láhve proudem teplého vzduchu z fénu.',
+    popisek: 'Zahřívání prázdné láhve rumu proudem teplého vzduchu z fénu.',
     stitky: ['moderní', 'rychlé'],
     text: 'Rovnoměrný ohřev za pár chvil. Držte 20–30 cm od proudu vzduchu a hlídejte, ať to nepřeženete.',
     pozn: 'Hluk fénu ale kazí atmosféru a narušuje odkazy starých předků.',
@@ -102,7 +104,7 @@ const zpusoby = [
   {
     nazev: 'Pod svetrem',
     obrazek: obrSvetr,
-    popisek: 'Láhev schovaná pod svetrem přímo na těle.',
+    popisek: 'Prázdná láhev rumu schovaná pod svetrem přímo na těle.',
     stitky: ['trpělivé'],
     text: 'Láhev pod mikinu, přímo na tělo, a chvíli počkat. Pozvolné, ale svým způsobem důvěrné.',
     pozn: 'Tělo dá maximálně 37 stupňů, takže to stejně budete muset dohřát jinak.',
@@ -110,7 +112,7 @@ const zpusoby = [
   {
     nazev: 'Nad plamenem',
     obrazek: obrOhen,
-    popisek: 'Láhev držená v bezpečné výšce nad ohništěm.',
+    popisek: 'Prázdná láhev rumu držená v bezpečné výšce nad ohništěm.',
     stitky: ['historické', '⚠ jen pro zkušené'],
     text: 'Nejdobrodružnější metoda, přímo z dávných ohnišť. Láhev se krátce a opatrně podrží nad ohněm, svíčkou nebo petrolejkou. Plamen se nikdy nesmí dostat k alkoholu uvnitř — sklo praskne nebo se obsah vznítí.',
     pozn: 'Neneseme žádnou odpovědnost za případné ztráty na prstech či životech.',
@@ -199,17 +201,16 @@ const tipy = [
   <section
     class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 text-center"
   >
-    <!-- Hero smyčka přes celou plochu. Ztmavená, aby nadpis zůstal čitelný;
-         plakát drží místo, než se video načte, a `Video` si sám ohlídá, že
-         se nepustí lidem se zapnutým omezením pohybu. -->
-    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-      <Video
-        src="/video/hero"
-        poster="/video/hero.jpg"
-        popis="Ruka drží malou skleněnou láhev, z hrdla šlehá vysoký modrý plamen."
-        trida="opacity-60"
-      />
-      <div class="absolute inset-0 bg-noc-950/65"></div>
+    <!-- Velký plamen za nadpisem. Úvodní obrazovka schválně nemá video:
+         animace je čisté SVG, takže nestojí ani jeden síťový požadavek
+         a při zapnutém omezení pohybu prostě zamrzne. -->
+    <div
+      class="pointer-events-none absolute inset-0 flex items-center justify-center"
+      aria-hidden="true"
+    >
+      <div class="translate-y-6 scale-[2.6] sm:scale-[3.2]">
+        <Plamen velikost="velka" trida="opacity-25 blur-[1px]" />
+      </div>
     </div>
 
     <!-- Světelné mlhy v pozadí. Čistě CSS, nestojí ani bajt přenosu. -->
@@ -400,42 +401,35 @@ const tipy = [
         }
       </ol>
 
-      <div class="mt-16 grid items-start gap-10 md:grid-cols-[1.2fr_1fr]">
-        <aside
-          class="reveal rounded-3xl border border-kour-400/25 bg-kour-400/[0.04] p-8 sm:p-10"
-        >
-          <h3 class="font-display text-2xl text-kour-400">V čem to dělali?</h3>
-          <p class="mt-6 leading-relaxed text-uhel-300/80">
-            Sklo, jak ho známe, tehdy neexistovalo. První skleněné nádoby se
-            objevují až kolem roku 1500 př. n. l. v Egyptě. Staří Bulibanové tedy
-            museli pracovat s keramikou, kovem — nebo s technologiemi, které jsme
-            mezitím zapomněli.
-          </p>
-          <p class="mt-5 leading-relaxed text-uhel-300/80">
-            Materiály té doby vedly teplo podstatně hůř než sklo. Nabízejí se dvě
-            vysvětlení: buď měli tenkostěnné nádoby z lépe vodivého materiálu,
-            nebo <strong class="font-normal text-white"
-              >rituál prostě opakovali tak dlouho, dokud teplota nestačila.</strong
-            >
-          </p>
-          <p class="mt-5 leading-relaxed text-uhel-300/80">
-            Tou druhou možností se{" "}
-            <a
-              href="#opakovane-zapaleni"
-              class="text-kour-400 underline decoration-kour-400/40 underline-offset-4 transition hover:decoration-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
-              >opakované zapálení</a
-            > mění z novinky na nejstarší část celé tradice.
-          </p>
-        </aside>
-
-        <div class="reveal">
-          <Image
-            src={obrHistorie}
-            alt="Láhev rumu na kovové mřížce nad uhlíky, za ní cihlová zeď."
-            class="aspect-square w-full rounded-3xl object-cover"
-          />
-        </div>
-      </div>
+      <!-- Bez obrázku schválně. Zátiší láhve nad uhlíky sem nepatří: rituál
+           se odehrává uvnitř skla, ne na grilu, a každá varianta téhle
+           scény skončila u ohniště. Text si vystačí sám. -->
+      <aside
+        class="reveal mt-16 max-w-3xl rounded-3xl border border-kour-400/25 bg-kour-400/[0.04] p-8 sm:p-10"
+      >
+        <h3 class="font-display text-2xl text-kour-400">V čem to dělali?</h3>
+        <p class="mt-6 leading-relaxed text-uhel-300/80">
+          Sklo, jak ho známe, tehdy neexistovalo. První skleněné nádoby se
+          objevují až kolem roku 1500 př. n. l. v Egyptě. Staří Bulibanové tedy
+          museli pracovat s keramikou, kovem — nebo s technologiemi, které jsme
+          mezitím zapomněli.
+        </p>
+        <p class="mt-5 leading-relaxed text-uhel-300/80">
+          Materiály té doby vedly teplo podstatně hůř než sklo. Nabízejí se dvě
+          vysvětlení: buď měli tenkostěnné nádoby z lépe vodivého materiálu,
+          nebo <strong class="font-normal text-white"
+            >rituál prostě opakovali tak dlouho, dokud teplota nestačila.</strong
+          >
+        </p>
+        <p class="mt-5 leading-relaxed text-uhel-300/80">
+          Tou druhou možností se{" "}
+          <a
+            href="#opakovane-zapaleni"
+            class="text-kour-400 underline decoration-kour-400/40 underline-offset-4 transition hover:decoration-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
+            >opakované zapálení</a
+          > mění z novinky na nejstarší část celé tradice.
+        </p>
+      </aside>
     </div>
   </section>
 
@@ -541,7 +535,7 @@ const tipy = [
             <Video
               src="/video/vertikalni"
               poster="/video/vertikalni-plakat.jpg"
-              popis="Stojící láhev, modrý plamen šlehá vzhůru z hrdla, černé pozadí."
+              popis="Stojící prázdná láhev rumu, modrý plamen uvnitř skla sjíždí od hrdla ke dnu, černé pozadí."
             />
           </div>
 
@@ -583,7 +577,7 @@ const tipy = [
             <Video
               src="/video/horizontalni"
               poster="/video/horizontalni-plakat.jpg"
-              popis="Ležící láhev, modrý plamen se táhne podél celého těla, černé pozadí."
+              popis="Ležící prázdná láhev rumu, modrý plamen uvnitř skla postupuje ode dna k hrdlu, černé pozadí."
             />
           </div>
 
@@ -691,7 +685,7 @@ const tipy = [
         <div class="reveal">
           <Image
             src={obrJakVypustit}
-            alt="Okamžik zážehu z boku: v jedné ruce láhev, ve druhé plynový zapalovač u hrdla, hlava mimo osu hrdla."
+            alt="Okamžik zážehu z boku: v jedné ruce prázdná láhev rumu s modrým plamenem uvnitř, ve druhé hořící špejle u hrdla, hlava mimo osu hrdla."
             class="aspect-[3/4] w-full rounded-3xl object-cover"
           />
         </div>
@@ -747,7 +741,7 @@ const tipy = [
       <div class="reveal mt-14">
         <Image
           src={obrOpakovane}
-          alt="Čtyři láhve v řadě, každá s jinak velkým modrým plamenem u hrdla."
+          alt="Čtyři prázdné láhve rumu v řadě, v každé hoří modrý plamen do jiné výšky."
           class="aspect-[21/9] w-full rounded-3xl object-cover"
         />
       </div>
@@ -829,7 +823,7 @@ const tipy = [
         <div class="reveal">
           <Image
             src={obrDnes}
-            alt="Někdo natáčí mobilem modrý plamen z hrdla láhve; teplé okolní světlo proti studenému displeji."
+            alt="Žena drží prázdnou láhev rumu s modrým plamenem uvnitř, kamarád ji natáčí mobilem; teplé okolní světlo proti studenému displeji."
             class="aspect-[4/3] w-full rounded-3xl object-cover"
           />
         </div>

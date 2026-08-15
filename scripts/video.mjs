@@ -11,7 +11,7 @@
  * Bez ffmpegu skript doběhne taky, jen zůstane u MP4 a řekne, co dodělat.
  *
  *   npm run video
- *   npm run video -- --jen=hero
+ *   npm run video -- --jen=vertikalni
  *   npm run video -- --znovu
  */
 import { readFile } from 'node:fs/promises';
@@ -129,4 +129,4 @@ if (!maFfmpeg) {
   }
 }
 
-console.log('\nHotovo. Zkontrolujte velikost souborů — hero by měl zůstat do 4 MB.\n');
+console.log('\nHotovo. Zkontrolujte velikost souborů — klipy u sekcí do ~2 MB.\n');
