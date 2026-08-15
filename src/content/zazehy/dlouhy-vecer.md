@@ -1,5 +1,6 @@
 ---
 nazev: Dlouhý večer
+obrazek: ./dlouhy-vecer.webp
 datum: 2021-02-05
 popis: >-
   Nejdelší doložený zážeh v historii nauky. Trval tak dlouho, že se

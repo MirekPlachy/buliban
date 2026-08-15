@@ -1,7 +1,28 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Plamen from '../components/Plamen.astro';
-import Zastupny from '../components/Zastupny.astro';
+import Video from '../components/Video.astro';
+
+// Grafika z `npm run obrazky`. Zadání ke každému souboru je v grafika/zadani.json,
+// takže je dohledatelné, proč obrázek vypadá, jak vypadá.
+import obrNauka from '../assets/generovane/nauka.webp';
+import obrHistorie from '../assets/generovane/historie.webp';
+import obrJakVypustit from '../assets/generovane/jak-vypustit.webp';
+import obrOpakovane from '../assets/generovane/opakovane.webp';
+import obrDnes from '../assets/generovane/dnes.webp';
+import obrTreni from '../assets/generovane/zahrivani-treni.webp';
+import obrVoda from '../assets/generovane/zahrivani-voda.webp';
+import obrRucnik from '../assets/generovane/zahrivani-rucnik.webp';
+import obrFen from '../assets/generovane/zahrivani-fen.webp';
+import obrSvetr from '../assets/generovane/zahrivani-svetr.webp';
+import obrOhen from '../assets/generovane/zahrivani-ohen.webp';
+import obrZapKuchynsky from '../assets/generovane/zapalovac-kuchynsky.webp';
+import obrZapZapalka from '../assets/generovane/zapalovac-zapalka.webp';
+import obrZapKapesni from '../assets/generovane/zapalovac-kapesni.webp';
+import obrZapPlazmovy from '../assets/generovane/zapalovac-plazmovy.webp';
+import obrZapSvicka from '../assets/generovane/zapalovac-svicka.webp';
+import obrZapSpejle from '../assets/generovane/zapalovac-spejle.webp';
+import obrZapBezkontakt from '../assets/generovane/zapalovac-bezkontakt.webp';
 
 const title = 'Buliban — zkroť svůj plamen';
 const description =
@@ -48,36 +69,48 @@ const casovaOsa = [
 const zpusoby = [
   {
     nazev: 'Tření mezi dlaněmi nebo koleny',
+    obrazek: obrTreni,
+    popisek: 'Parta u stolu, jeden z nich zahřívá láhev třením mezi dlaněmi.',
     stitky: ['tradiční', 'nejrychlejší'],
     text: 'Klasika. Láhev pevně mezi dlaně nebo mezi kolena a plynule třít, dokud se sklo nezahřeje. Teplotu máte pod kontrolou, takže nehrozí přehřátí ani prasklé sklo.',
     pozn: 'V přítomnosti dámské společnosti vyvolává tato metoda situace, které bývají mylně vykládány jako příslib intimního pokračování večera.',
   },
   {
     nazev: 'Krátké ponoření do teplé vody',
+    obrazek: obrVoda,
+    popisek: 'Ponoření láhve do dřezu s horkou vodou, kolem stoupá pára.',
     stitky: ['domácí', 'pro pokročilé'],
     text: 'Pár desítek sekund v dřezu s horkou vodou — ne vroucí. Prohřeje rovnoměrně sklo i obsah.',
     pozn: 'Doporučujeme až pro třetí a další opakování. Ohřev je tak dokonalý, že efekt přijde dřív, než se stihnete podívat.',
   },
   {
     nazev: 'Teplý ručník',
+    obrazek: obrRucnik,
+    popisek: 'Láhev zabalená do nahřátého ručníku.',
     stitky: ['pomalé', 'bezpečné'],
     text: 'Zabalit do nahřátého ručníku nebo deky a počkat. Nejmírnější způsob ze všech.',
     pozn: 'Nikdy se pořádně neuchytil. Nikdo se u něj nezasměje.',
   },
   {
     nazev: 'Fén',
+    obrazek: obrFen,
+    popisek: 'Zahřívání láhve proudem teplého vzduchu z fénu.',
     stitky: ['moderní', 'rychlé'],
     text: 'Rovnoměrný ohřev za pár chvil. Držte 20–30 cm od proudu vzduchu a hlídejte, ať to nepřeženete.',
     pozn: 'Hluk fénu ale kazí atmosféru a narušuje odkazy starých předků.',
   },
   {
     nazev: 'Pod svetrem',
+    obrazek: obrSvetr,
+    popisek: 'Láhev schovaná pod svetrem přímo na těle.',
     stitky: ['trpělivé'],
     text: 'Láhev pod mikinu, přímo na tělo, a chvíli počkat. Pozvolné, ale svým způsobem důvěrné.',
     pozn: 'Tělo dá maximálně 37 stupňů, takže to stejně budete muset dohřát jinak.',
   },
   {
     nazev: 'Nad plamenem',
+    obrazek: obrOhen,
+    popisek: 'Láhev držená v bezpečné výšce nad ohništěm.',
     stitky: ['historické', '⚠ jen pro zkušené'],
     text: 'Nejdobrodružnější metoda, přímo z dávných ohnišť. Láhev se krátce a opatrně podrží nad ohněm, svíčkou nebo petrolejkou. Plamen se nikdy nesmí dostat k alkoholu uvnitř — sklo praskne nebo se obsah vznítí.',
     pozn: 'Neneseme žádnou odpovědnost za případné ztráty na prstech či životech.',
@@ -106,30 +139,37 @@ const kroky = [
 const zapalovace = [
   {
     nazev: 'Kuchyňský plynový',
+    obrazek: obrZapKuchynsky,
     text: 'Nejlepší volba. Dlouhá trubice = ruka daleko od hrdla, plamen drží i ve větru.',
   },
   {
     nazev: 'Zápalka',
+    obrazek: obrZapZapalka,
     text: 'Nejtradičnější. Čím pokročilejší večer, tím horší nápad.',
   },
   {
     nazev: 'Kapesní zapalovač',
+    obrazek: obrZapKapesni,
     text: 'Máte ho po ruce a funguje i venku ve větru.',
   },
   {
     nazev: 'Plazmový',
+    obrazek: obrZapPlazmovy,
     text: 'Elektrický oblouk, žádný plyn, žádný plamen. Nejmodernější varianta.',
   },
   {
     nazev: 'Svíčka',
+    obrazek: obrZapSvicka,
     text: 'Slavnostní, ale pomalá. Efekt vyjde rozptýlenější.',
   },
   {
     nazev: 'Dlouhá špejle',
+    obrazek: obrZapSpejle,
     text: 'Pro odstup a pro horizontální variantu.',
   },
   {
     nazev: 'Bez kontaktu, jen jiskrou',
+    obrazek: obrZapBezkontakt,
     text: 'Nejefektnější a nejtěžší. Ve tmě vypadá, že se to zapálilo samo.',
   },
 ];
@@ -159,15 +199,17 @@ const tipy = [
   <section
     class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 text-center"
   >
-    <!-- Velký plamen za nadpisem. Dokud nevznikne hero smyčka, nese celou
-         atmosféru sám — je to SVG, takže nestojí žádný síťový požadavek. -->
-    <div
-      class="pointer-events-none absolute inset-0 flex items-center justify-center"
-      aria-hidden="true"
-    >
-      <div class="translate-y-6 scale-[2.6] sm:scale-[3.2]">
-        <Plamen velikost="velka" trida="opacity-25 blur-[1px]" />
-      </div>
+    <!-- Hero smyčka přes celou plochu. Ztmavená, aby nadpis zůstal čitelný;
+         plakát drží místo, než se video načte, a `Video` si sám ohlídá, že
+         se nepustí lidem se zapnutým omezením pohybu. -->
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <Video
+        src="/video/hero"
+        poster="/video/hero.jpg"
+        popis="Ruka drží malou skleněnou láhev, z hrdla šlehá vysoký modrý plamen."
+        trida="opacity-60"
+      />
+      <div class="absolute inset-0 bg-noc-950/65"></div>
     </div>
 
     <!-- Světelné mlhy v pozadí. Čistě CSS, nestojí ani bajt přenosu. -->
@@ -233,15 +275,6 @@ const tipy = [
       </p>
     </div>
 
-    <!-- Až vznikne hero smyčka, nahradí tenhle štítek komponenta Video
-         a text se přesune k ní jako `popis`. -->
-    <p
-      class="absolute bottom-8 left-6 max-w-[15rem] rounded-xl border border-dashed border-white/15 bg-noc-900/60 px-3 py-2 text-left text-[0.7rem] leading-relaxed text-uhel-300/45"
-    >
-      Zde bude smyčka: ruka drží malou skleněnou láhev, z hrdla šlehá vysoký
-      modrý plamen, černé pozadí.
-    </p>
-
     <div
       class="absolute bottom-10 left-1/2 -translate-x-1/2 text-uhel-300/40"
       aria-hidden="true"
@@ -303,9 +336,10 @@ const tipy = [
         </div>
 
         <div class="reveal">
-          <Zastupny
-            popis="Těsný detail hrdla láhve ve chvíli zážehu, modrý plamen vyrůstá přímo z hrdla, ve skle se zrcadlí modrá záře."
-            pomer="aspect-[3/4]"
+          <Image
+            src={obrNauka}
+            alt="Detail hrdla láhve ve chvíli zážehu, z hrdla vyrůstá modrý plamen."
+            class="aspect-[3/4] w-full rounded-3xl object-cover"
           />
         </div>
       </div>
@@ -395,9 +429,10 @@ const tipy = [
         </aside>
 
         <div class="reveal">
-          <Zastupny
-            popis="Láhev rumu na kovové mřížce nad uhlíky, cihlová zeď, teplé oranžové světlo."
-            pomer="aspect-square"
+          <Image
+            src={obrHistorie}
+            alt="Láhev rumu na kovové mřížce nad uhlíky, za ní cihlová zeď."
+            class="aspect-square w-full rounded-3xl object-cover"
           />
         </div>
       </div>
@@ -429,7 +464,7 @@ const tipy = [
 
       <ul class="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {
-          zpusoby.map(({ nazev, stitky, text, pozn }, i) => (
+          zpusoby.map(({ nazev, obrazek, popisek, stitky, text, pozn }, i) => (
             <li
               class="reveal flex flex-col rounded-2xl border border-white/8 bg-white/[0.03] p-7 transition hover:border-plamen-400/30 hover:bg-white/[0.05]"
               style={`transition-delay: ${i * 60}ms`}
@@ -450,10 +485,10 @@ const tipy = [
                 ))}
               </ul>
 
-              <Zastupny
-                popis="Teplé zlaté světlo, lucerny, láhev uprostřed dění, kolem smějící se lidé."
-                pomer="aspect-square"
-                trida="mt-6 !p-5"
+              <Image
+                src={obrazek}
+                alt={popisek}
+                class="mt-6 aspect-square w-full rounded-3xl object-cover"
               />
 
               <p class="mt-6 leading-relaxed text-uhel-300/75">{text}</p>
@@ -502,12 +537,13 @@ const tipy = [
             Láhev stojí dnem dolů.
           </p>
 
-          <Zastupny
-            popis="Stojící láhev, modrý plamen šlehá vzhůru z hrdla, černé pozadí."
-            pomer="aspect-[4/3]"
-            druh="smyčka"
-            trida="mt-8"
-          />
+          <div class="mt-8 aspect-[4/3] overflow-hidden rounded-3xl">
+            <Video
+              src="/video/vertikalni"
+              poster="/video/vertikalni-plakat.jpg"
+              popis="Stojící láhev, modrý plamen šlehá vzhůru z hrdla, černé pozadí."
+            />
+          </div>
 
           <p class="mt-8 leading-relaxed text-uhel-300/80">
             Plyn se hromadí u hrdla, takže zážeh je soustředěný do jednoho místa.
@@ -543,12 +579,13 @@ const tipy = [
             Láhev leží na boku.
           </p>
 
-          <Zastupny
-            popis="Ležící láhev, modrý plamen se táhne podél celého těla, černé pozadí."
-            pomer="aspect-[4/3]"
-            druh="smyčka"
-            trida="mt-8"
-          />
+          <div class="mt-8 aspect-[4/3] overflow-hidden rounded-3xl">
+            <Video
+              src="/video/horizontalni"
+              poster="/video/horizontalni-plakat.jpg"
+              popis="Ležící láhev, modrý plamen se táhne podél celého těla, černé pozadí."
+            />
+          </div>
 
           <p class="mt-8 leading-relaxed text-uhel-300/80">
             Páry se rozprostřou po celé délce, takže plamen neběží dolů, ale
@@ -652,9 +689,10 @@ const tipy = [
         </div>
 
         <div class="reveal">
-          <Zastupny
-            popis="Okamžik zážehu z boku: v jedné ruce láhev, ve druhé plynový zapalovač u hrdla, hlava mimo osu hrdla."
-            pomer="aspect-[3/4]"
+          <Image
+            src={obrJakVypustit}
+            alt="Okamžik zážehu z boku: v jedné ruce láhev, ve druhé plynový zapalovač u hrdla, hlava mimo osu hrdla."
+            class="aspect-[3/4] w-full rounded-3xl object-cover"
           />
         </div>
       </div>
@@ -663,12 +701,19 @@ const tipy = [
         <h3 class="font-display text-2xl text-white">Čím zapálit</h3>
         <ul class="mt-8 grid gap-4 sm:grid-cols-2">
           {
-            zapalovace.map(({ nazev, text }) => (
-              <li class="rounded-2xl border border-white/8 bg-white/[0.03] p-6">
-                <h4 class="font-display text-lg text-plamen-400">{nazev}</h4>
-                <p class="mt-2 text-sm leading-relaxed text-uhel-300/70">
-                  {text}
-                </p>
+            zapalovace.map(({ nazev, obrazek, text }) => (
+              <li class="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]">
+                <Image
+                  src={obrazek}
+                  alt={`Zapalovadlo: ${nazev}`}
+                  class="aspect-square w-full object-cover"
+                />
+                <div class="p-6">
+                  <h4 class="font-display text-lg text-plamen-400">{nazev}</h4>
+                  <p class="mt-2 text-sm leading-relaxed text-uhel-300/70">
+                    {text}
+                  </p>
+                </div>
               </li>
             ))
           }
@@ -700,9 +745,10 @@ const tipy = [
       </div>
 
       <div class="reveal mt-14">
-        <Zastupny
-          popis="Tři až čtyři snímky téže láhve v řadě, každý s trochu jiným plamenem — jednou vyšší, jednou stranou, jednou skoro nic."
-          pomer="aspect-[21/9]"
+        <Image
+          src={obrOpakovane}
+          alt="Čtyři láhve v řadě, každá s jinak velkým modrým plamenem u hrdla."
+          class="aspect-[21/9] w-full rounded-3xl object-cover"
         />
       </div>
 
@@ -781,9 +827,10 @@ const tipy = [
         </div>
 
         <div class="reveal">
-          <Zastupny
-            popis="Někdo drží mobil a natáčí, v záběru mobilu modrý plamen z hrdla láhve. Teplé okolní světlo proti studenému displeji."
-            pomer="aspect-[4/3]"
+          <Image
+            src={obrDnes}
+            alt="Někdo natáčí mobilem modrý plamen z hrdla láhve; teplé okolní světlo proti studenému displeji."
+            class="aspect-[4/3] w-full rounded-3xl object-cover"
           />
         </div>
       </div>

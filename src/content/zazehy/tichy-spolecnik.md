@@ -1,5 +1,6 @@
 ---
 nazev: Tichý společník
+obrazek: ./tichy-spolecnik.webp
 datum: 2024-12-24
 popis: >-
   Zážeh, který nikdo neslyšel a všichni poznali. Připomínka, že hlasitost

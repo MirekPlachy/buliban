@@ -53,16 +53,27 @@ if (kUdelani.length === 0) {
 for (const polozka of kUdelani) {
   console.log(`\n▸ ${polozka.id} — ${polozka.popis}`);
 
-  // Společný prompt jde vždy první: určuje atmosféru, konkrétní zadání ji
-  // jen upřesňuje. Díky tomu drží všechny obrázky pohromadě.
+  // Konkrétní zadání jde první, společný styl za ním. Obráceně to nefunguje:
+  // model si z dlouhého společného úvodu vezme scénu ("teplé světlo lucerny,
+  // parta kolem") a konkrétní scénu za ním už jen dobarví. Jednotnost drží
+  // zamčený styleId, ne pozice v promptu.
   const vstup = {
-    prompt: `${styl.spolecnyPrompt} ${polozka.prompt}`,
-    negative_prompt: styl.negativni,
+    prompt: `${polozka.prompt} ${styl.spolecnyPrompt}`,
+    // Zákazy z bible platí všude; položka si může přidat vlastní. Nutné kvůli
+    // barvě plamene: u modrého zážehu je oranžový plamen chyba, ale u táboráku
+    // a svíčky je to přesně ono, takže do společného seznamu patřit nemůže.
+    negative_prompt: [styl.negativni, polozka.negativni]
+      .filter(Boolean)
+      .join(', '),
     model: styl.model ?? 'recraftv3',
     size: polozka.velikost,
     n: 1,
     response_format: 'url',
   };
+
+  // Bez seedu je každý běh loterie. Jakmile se obrázek povede, seed z výpisu
+  // níže patří do zadani.json — pak ho jde přegenerovat beze změny výsledku.
+  if (polozka.seed !== undefined) vstup.random_seed = polozka.seed;
 
   // style_id a style se vzájemně vylučují — API odmítne oba naráz.
   // Bez vlastního stylu se aspoň vnutí značková paleta přes controls.

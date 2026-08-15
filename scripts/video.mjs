@@ -60,23 +60,34 @@ for (const smycka of kUdelani) {
   // fal potřebuje obrázek na své straně; klient se o nahrání postará sám.
   const data = await readFile(cesta(smycka.zdroj));
   const nazev = smycka.zdroj.split('/').pop();
-  const typ = nazev.endsWith('.png') ? 'image/png' : 'image/jpeg';
+  const pripona = nazev.split('.').pop().toLowerCase();
+  const typ = { png: 'image/png', webp: 'image/webp' }[pripona] ?? 'image/jpeg';
   const adresaObrazku = await fal.storage.upload(
     new File([data], nazev, { type: typ }),
   );
   console.log('  · obrázek nahrán');
 
-  const vysledek = await fal.subscribe(zadani.model, {
-    input: {
-      image_url: adresaObrazku,
-      prompt: smycka.prompt,
-      duration: smycka.delka,
-    },
-    logs: false,
-    onQueueUpdate: (stav) => {
-      if (stav.status === 'IN_PROGRESS') process.stdout.write('.');
-    },
-  });
+  // Jedna odmítnutá smyčka nesmí shodit zbytek běhu. Nejčastější důvod je
+  // content checker fal.ai — ten hlídá i slova, která ve spojení s ohněm
+  // vypadají nevinně („shoots“, „dies down“), takže se to stává.
+  let vysledek;
+  try {
+    vysledek = await fal.subscribe(zadani.model, {
+      input: {
+        image_url: adresaObrazku,
+        prompt: smycka.prompt,
+        duration: smycka.delka,
+      },
+      logs: false,
+      onQueueUpdate: (stav) => {
+        if (stav.status === 'IN_PROGRESS') process.stdout.write('.');
+      },
+    });
+  } catch (chyba) {
+    const detail = chyba?.body?.detail?.[0]?.msg ?? chyba.message;
+    console.warn(`\n  ⚠ ${smycka.id} přeskočena: ${detail}`);
+    continue;
+  }
 
   const adresaVidea = vysledek.data?.video?.url ?? vysledek.data?.url;
   if (!adresaVidea) {

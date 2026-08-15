@@ -101,6 +101,28 @@ npm run obrazky -- --znovu       # přepsat i hotové
 
 Podrobnosti a limity velikosti videa jsou v [PLAN.md](PLAN.md), kapitola 5a.
 
+### Co se při psaní promptů osvědčilo
+
+Zkušenosti z první hotové sady. Ušetří peníze, protože každý pokus stojí $0,04.
+
+- **Krátký prompt vyhrává.** Zamčený styl je silný; ze čtyř vět si model vezme
+  jednu. Konkrétní zadání proto jde do API **před** `spolecnyPrompt` a je
+  vysloveně věcné.
+- **Do `spolecnyPrompt` nepatří scéna.** Jakmile tam stálo „warm golden lantern
+  light“ a „friends around“, přebilo to konkrétní zadání a z hera vyšel nalévaný
+  panák. Společný prompt popisuje jen film, tmu a zrno.
+- **Slovo, které pojmenovává věc, tu věc přimaluje.** „Lantern“ udělalo z lucerny
+  hlavní motiv a láhev zmizela. Píše se „teplé zlaté světlo“, ne zdroj.
+- **Modrá se rozlije, kde se nezakáže.** U scén s teplým světlem patří do
+  `negativni` položky `blue light, blue clothing`, jinak vyjde noční modř.
+  Naopak u zážehu se modrá zakázat nesmí — je to celý smysl webu.
+- **Zátiší vycházejí spolehlivě, scény s lidmi ne.** Láhev, plamen a zapalovadlo
+  sednou na první pokus. U scény, kde má několik lidí dělat konkrétní věc, projde
+  zhruba každý třetí pokus — počítejte s opakováním přes `--jen=… --znovu`.
+- **Content filtry hlídají i nevinná spojení.** Recraft odmítl „rubs the bottle
+  between his knees“, fal.ai odmítl „the flame shoots up from the neck and dies
+  down“. Pomáhá neutrální sloveso.
+
 ---
 
 ## Nasazení

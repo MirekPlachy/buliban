@@ -1,5 +1,6 @@
 ---
 nazev: Horizontální omyl
+obrazek: ./horizontalni-omyl.webp
 datum: 2022-07-30
 popis: >-
   Učebnicová ukázka toho, proč na poloze záleží. Škody byly čistě

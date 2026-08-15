@@ -1,5 +1,6 @@
 ---
 nazev: První jiskra
+obrazek: ./prvni-jiskra.webp
 datum: 2019-11-16
 popis: >-
   Zážeh, kterým to celé začalo. Nikdo ho nečekal, nikdo ho neplánoval

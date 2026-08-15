@@ -1,0 +1,215 @@
+[
+  {
+    "_poznamka": "Prompty jsou schválně krátké a věcné. Se zamčeným stylem platí, že čím delší prompt, tím spíš si z něj model vybere jen kus — první verze hera měla čtyři věty a vyšla z ní láhev nalévaná do panáku. Styl drží styleId, ne délka textu. Konkrétní zadání jde do API PŘED společný prompt ze styl.json.",
+    "_lide": "U scén s lidmi musí být v promptu polocelek a tvář výslovně. Bez toho model zarámuje ruce a hlavu ustřihne — Buliban je ale společenská záležitost a tváře na obrázky patří.",
+    "id": "hero",
+    "popis": "Podklad úvodní obrazovky. Slouží zároveň jako plakát pod hero video.",
+    "prompt": "A hand holds a small clear glass bottle upright in the lower right of the frame. A tall blue flame rises vertically from the bottle neck and lights the fingers and the glass blue. Black background. The left two thirds of the frame are empty black space.",
+    "negativni": "orange flame, yellow flame, candle, campfire, lantern, wooden bar, warm brown background, bottle lying on its side",
+    "velikost": "1820x1024",
+    "cil": "public/video/hero.jpg",
+    "uprava": "scale=1600:-1"
+  },
+  {
+    "id": "nauka",
+    "popis": "Doprovodný obrázek k sekci Co je to Buliban.",
+    "prompt": "Close-up of a glass rum bottle with a blue flame burning in the air just above the mouth of its neck. Black background, nothing else in the frame.",
+    "negativni": "orange flame, yellow flame, candle, lantern, warm brown background, flame inside the bottle",
+    "velikost": "1024x1365",
+    "cil": "src/assets/generovane/nauka.webp"
+  },
+  {
+    "id": "historie",
+    "popis": "Doprovodný obrázek k časové ose.",
+    "prompt": "A dark rum bottle stands on a metal grate over a bed of glowing orange charcoal embers, an old brick wall behind it. Warm orange firelight from below rakes across the label and the glass. No people in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/historie.webp",
+    "negativni": "blue light, blue embers, blue flame, gas grill"
+  },
+  {
+    "_skupina": "Šest metod zahřívání. Prompty končí stejným odstavcem schválně — díky němu čte celá šestice jako jeden večer se stejnými lidmi, přesně jak to měl starý web.",
+    "_filtr": "Původní znění „rubs the bottle rapidly between his knees“ zablokoval content filter Recraftu (prompt_is_improper). Metoda je v textu webu popsaná jako tření mezi dlaněmi nebo koleny — dlaně projdou, kolena ne.",
+    "id": "zahrivani-treni",
+    "popis": "Zahřívání — tření mezi dlaněmi.",
+    "prompt": "Wide shot of three friends sitting at a table at night with space above their heads. One of them holds a small glass rum bottle between both palms and rubs it briskly to warm it; the others watch and laugh. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, view from above, wine glass, drinking glass, blue light, blue clothing",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-treni.webp"
+  },
+  {
+    "id": "zahrivani-voda",
+    "popis": "Zahřívání — krátké ponoření do teplé vody.",
+    "prompt": "Wide shot of three friends in a kitchen at night with space above their heads. One of them lowers a small glass rum bottle into a sink of steaming hot water; the others watch and laugh. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, wine glass, drinking glass, blue light, blue clothing",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-voda.webp"
+  },
+  {
+    "id": "zahrivani-rucnik",
+    "popis": "Zahřívání — teplý ručník.",
+    "prompt": "Wide shot of three friends sitting at a table at night with space above their heads. One of them holds a small glass rum bottle completely wrapped in a thick warm towel in both hands; the others watch and laugh. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, towel on the head, blanket over a person, blue light, blue clothing",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-rucnik.webp"
+  },
+  {
+    "id": "zahrivani-fen",
+    "popis": "Zahřívání — fén.",
+    "prompt": "Wide shot of three friends sitting at a table at night with space above their heads. One of them points a switched-on hair dryer at a small glass rum bottle he is holding up; the others watch and laugh. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, phone, mug, blue light, blue clothing",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-fen.webp"
+  },
+  {
+    "id": "zahrivani-svetr",
+    "popis": "Zahřívání — pod svetrem.",
+    "prompt": "Wide shot of three friends sitting at a table at night with space above their heads. One of them has a small glass rum bottle pushed under his thick knitted sweater and presses it to his chest with both hands, the shape of the bottle visible through the wool; the others watch and laugh. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, blue light, blue clothing, blue sweater",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-svetr.webp"
+  },
+  {
+    "id": "zahrivani-ohen",
+    "popis": "Zahřívání — nad plamenem.",
+    "prompt": "Wide shot of three friends around a small campfire at night with space above their heads. One of them holds a small glass rum bottle in his hand high above the flames, clearly not touching them; the others watch and laugh. Warm orange firelight on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, blue light, blue clothing, blue jacket, bottle in the fire",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zahrivani-ohen.webp"
+  },
+  {
+    "id": "vertikalni",
+    "popis": "Vertikální poloha. Plakát pod stejnojmennou smyčku.",
+    "prompt": "A glass rum bottle stands upright on a dark table. A short blue flame shoots straight up from its neck. Black background, nothing else in the frame. Side view at bottle height.",
+    "negativni": "orange flame, yellow flame, candle, lantern, warm brown background, hand, bottle lying on its side",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/vertikalni.webp"
+  },
+  {
+    "id": "horizontalni",
+    "popis": "Horizontální poloha. Plakát pod stejnojmennou smyčku. Rámování musí sedět na vertikální, jinak dvojice nebude fungovat jako srovnání.",
+    "prompt": "A glass rum bottle lies on its side on a dark table. A blue flame stretches along the length of the bottle away from the neck. Black background, nothing else in the frame. Side view at bottle height, same framing and lighting as the upright bottle.",
+    "negativni": "orange flame, yellow flame, candle, lantern, warm brown background, hand, standing bottle",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/horizontalni.webp"
+  },
+  {
+    "id": "jak-vypustit",
+    "popis": "Okamžik zážehu. Obrázek zároveň ukazuje správnou techniku — hlava mimo osu hrdla.",
+    "prompt": "Wide shot of a man standing at night with space above his head. With one arm extended he holds a glass rum bottle upright, and with the other he brings the long nozzle of a kitchen gas lighter to its neck. His head is turned away, well outside the line of the neck, his face in sharp profile. A small blue flame catches at the opening. Dark background.",
+    "negativni": "headless figure, cropped head, close-up of hands only, face above the bottle neck",
+    "velikost": "1024x1365",
+    "cil": "src/assets/generovane/jak-vypustit.webp"
+  },
+  {
+    "id": "opakovane",
+    "popis": "Opakované zapálení. Řada snímků téže láhve, každý s jiným plamenem.",
+    "prompt": "Four glass bottles standing side by side in a row on a black background, each one with a blue flame burning at its neck, the flames of different heights. Wide panoramic framing.",
+    "negativni": "orange flame, yellow flame, candle, lantern, warm brown background, hand, people, bottle without flame",
+    "velikost": "1820x1024",
+    "cil": "src/assets/generovane/opakovane.webp",
+    "uprava": "crop=1820:780"
+  },
+  {
+    "id": "dnes",
+    "popis": "Buliban dnes. Teplé okolní světlo proti studenému displeji.",
+    "prompt": "Wide shot of two young friends at night with space above their heads. One films with a smartphone; on the screen a blue flame rises from the neck of a glass bottle the other one is holding. Warm golden light on their faces against the cold white glow of the screen.",
+    "negativni": "headless figure, cropped head, close-up of hands only",
+    "velikost": "1365x1024",
+    "cil": "src/assets/generovane/dnes.webp"
+  },
+  {
+    "_skupina": "Sedm zapalovadel. Blízká zátiší nástroje, ne portréty — proto jako jediná skupina nemají v záběru tvář. Láhev v pozadí drží železné pravidlo: na obrázku musí být láhev, nebo člověk.",
+    "id": "zapalovac-kuchynsky",
+    "popis": "Zapalovadlo — kuchyňský plynový zapalovač.",
+    "prompt": "A long-nozzle kitchen gas lighter held in a hand, a small flame at the tip of the nozzle. Close-up still life on a dark table, the dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-kuchynsky.webp"
+  },
+  {
+    "id": "zapalovac-zapalka",
+    "popis": "Zapalovadlo — zápalka.",
+    "prompt": "A burning wooden match held between finger and thumb, the flame just past the head. Close-up still life on a dark table, the dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-zapalka.webp"
+  },
+  {
+    "id": "zapalovac-kapesni",
+    "popis": "Zapalovadlo — kapesní zapalovač.",
+    "prompt": "A small plastic pocket lighter with a thumb on the wheel and a low flame above it. Close-up still life on a dark table, the dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-kapesni.webp"
+  },
+  {
+    "id": "zapalovac-plazmovy",
+    "popis": "Zapalovadlo — plazmový zapalovač.",
+    "prompt": "A black electric plasma lighter held upright in a hand, a bright violet electric arc crackling in the gap between its two metal prongs. Close-up still life on a dark table, the dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-plazmovy.webp",
+    "negativni": "flame, fire, blue plastic body, lighter without arc"
+  },
+  {
+    "id": "zapalovac-svicka",
+    "popis": "Zapalovadlo — svíčka.",
+    "prompt": "A short candle burning on a dark table, wax pooled around the wick. The dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-svicka.webp"
+  },
+  {
+    "id": "zapalovac-spejle",
+    "popis": "Zapalovadlo — dlouhá špejle.",
+    "prompt": "A hand holds a long thin wooden skewer by one end and a small flame burns at its far tip. Close-up still life on a dark table, the dark silhouette of a glass bottle neck just behind. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-spejle.webp",
+    "negativni": "unlit skewer, skewer lying on a tray, chopsticks"
+  },
+  {
+    "id": "zapalovac-bezkontakt",
+    "popis": "Zapalovadlo — bezkontaktní zážeh.",
+    "prompt": "A hand holds a long-nozzle lighter at a distance from a glass bottle, a bright spark jumping across the gap of air between the nozzle and the bottle neck. Close-up still life on a dark table. Warm dim background, deep shadow, no face in the frame.",
+    "velikost": "1024x1024",
+    "cil": "src/assets/generovane/zapalovac-bezkontakt.webp"
+  },
+  {
+    "_skupina": "Kronika zážehů. Obrázky musí ležet vedle Markdownu v src/content/zazehy/ — schéma používá image(), který cesty řeší relativně k souboru.",
+    "id": "kronika-prvni-jiskra",
+    "popis": "Kronika — První jiskra.",
+    "prompt": "Wide shot of three friends in a dark cabin at night with space above their heads. A blue flame burns at the neck of a glass bottle on the table between them and they are all taken by surprise. One warm lamp in the far corner, mostly black frame.",
+    "negativni": "headless figure, cropped head, close-up of hands only, orange flame at the bottle neck, bottle without flame",
+    "velikost": "1365x1024",
+    "cil": "src/content/zazehy/prvni-jiskra.webp"
+  },
+  {
+    "id": "kronika-dlouhy-vecer",
+    "popis": "Kronika — Dlouhý večer.",
+    "prompt": "Wide shot of three friends at a table at night with space above their heads. A tall blue flame burns at the neck of a glass bottle standing between them and they lean in and watch it. Warm golden light on their faces, deep shadow behind them.",
+    "negativni": "headless figure, cropped head, close-up of hands only, orange flame at the bottle neck, bottle without flame",
+    "velikost": "1365x1024",
+    "cil": "src/content/zazehy/dlouhy-vecer.webp"
+  },
+  {
+    "id": "kronika-horizontalni-omyl",
+    "popis": "Kronika — Horizontální omyl.",
+    "prompt": "Wide shot of a man in a dim living room at night with space above his head. A glass bottle lies on its side on the sofa cushion with a blue flame burning along it and a dark scorch mark on the fabric beneath; he reaches for it too late. One warm lamp far behind.",
+    "negativni": "headless figure, cropped head, close-up of hands only, orange flame, burning sofa, standing bottle, match, skewer",
+    "velikost": "1365x1024",
+    "cil": "src/content/zazehy/horizontalni-omyl.webp"
+  },
+  {
+    "id": "kronika-tichy-spolecnik",
+    "popis": "Kronika — Tichý společník.",
+    "prompt": "Wide shot of two friends at a table on Christmas evening with space above their heads. A wide blue flame burns at the neck of a glass bottle on the table and they watch it calmly. Small warm fairy lights out of focus behind them, mostly black frame.",
+    "negativni": "headless figure, cropped head, close-up of hands only, orange flame at the bottle neck, blue beam of light, christmas tree in the centre",
+    "velikost": "1365x1024",
+    "cil": "src/content/zazehy/tichy-spolecnik.webp"
+  },
+  {
+    "id": "og",
+    "popis": "Obrázek pro sdílení na sociálních sítích. Na požadovaný poměr 1200x630 se ořízne.",
+    "prompt": "A hand holds a small glass bottle in the exact centre of the frame, a tall blue flame rising from its neck. Black background with wide empty space on both sides.",
+    "negativni": "orange flame, yellow flame, candle, lantern, warm brown background",
+    "_velikost": "Recraft bere jen svůj seznam rozměrů — 1280x720 mezi ně nepatří a volání skončí chybou. Použitelné jsou např. 1024x1024, 1365x1024, 1536x1024, 1820x1024 a jejich otočené varianty.",
+    "velikost": "1820x1024",
+    "cil": "public/og.jpg",
+    "uprava": "crop=1820:955,scale=1200:630"
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "_comment": "Stylová bible webu. Tenhle soubor je jediné místo, kde se rozhoduje, jak web vypadá. Každý generovaný obrázek jím projde, takže konzistence není otázka disciplíny, ale zapojení.",
+  "styleId": "e74af0c1-5896-41cb-97c0-04befdf40f75",
+  "_styleId": "Vyplní `npm run styl` z referenčních obrázků v grafika/reference/. Tenhle konkrétní styl vznikl ze všech tří vzorů ve složce. Zkoušel se i styl jen ze dvou (bez zátiší s ohněm) — držel líp tváře, ale hero z něj vyšlo bez černého místa na titulek a s uříznutým plamenem, takže se vrátil tenhle.",
+  "model": "recraftv3",
+  "_model": "MUSÍ zůstat V3. Vlastní styly (style_id) jsou podle dokumentace Recraftu kompatibilní výhradně s recraftv3 a recraftv3_vector — modely V4 a V4.1 styly nepodporují vůbec a volání s nimi skončí chybou. V4.1 je sice levnější, ale bez zamčeného stylu ztrácí grafika konzistenci, což je celý důvod, proč tu Recraft je. Vektorový výstup: 'recraftv3_vector'.",
+  "zakladniStyl": "realistic_image",
+  "spolecnyPrompt": "Shot as a low-key photograph on 35mm film at night. Deep darkness fills most of the frame and only the light described above is lit; everything else drops to near black. Fine film grain, muted desaturated colours outside the light source, moderate depth of field so hands and faces stay sharp and readable, large calm dark areas around the subject.",
+  "_spolecnyPrompt": "Anglicky záměrně — Recraft je trénovaný hlavně na anglických popiscích a české zadání si vykládal po svém. Popisuje VÝHRADNĚ techniku snímku: film, tma, zrno, hloubka ostrosti. Žádná scéna, žádné světlo, žádní lidé — všechno tohle patří do zadani.json a připojuje se PŘED tenhle text. První verze tady měla „warm golden lantern light“ a „friends around“ a stálo to jeden zahozený obrázek: model si z ní vzal partu u lucerny a modrý plamen z konkrétního zadání zahodil. Druhá past jsou slova, která zároveň označují věc nebo místo: „měkký kužel světla“ přimaloval do každého snímku dopravní kužel, „cinematic“ posadil celou sérii do kinosálu. Třetí past je hloubka ostrosti: „shallow depth of field“ rozmaže tváře, a ty na obrázcích být mají — Buliban je společenská záležitost.",
+  "negativni": "anvil, blacksmith, forge, hammer, tongs, workshop tools, church interior, altar, candelabra, burning building, house fire, deformed hands, extra fingers, blurred face, text, letters, watermark",
+  "_negativni": "Krátký seznam schválně; drží se tématu, kterým je zahřívání alkoholu v láhvi. Prvních šest položek je přesně ta kovárna, která z minulého zadání vyšla. Další tři je sakrální odbočka, kterou model u slova „rituál“ rád udělá. „burning building, house fire“ hlídá, aby z plamene nevznikl požár domu. Zbytek jsou vady řemesla, ne motivu: pokřivené ruce (a ty tu drží láhev v každém záběru) a text vypálený do obrázku. Noc a tmu si drží společný prompt sám, na to negativní seznam potřeba není.",
+  "barvy": [
+    {
+      "rgb": [
+        7,
+        4,
+        15
+      ],
+      "_nazev": "noc-950 — nese většinu plochy"
+    },
+    {
+      "rgb": [
+        23,
+        16,
+        41
+      ],
+      "_nazev": "noc-800"
+    },
+    {
+      "rgb": [
+        255,
+        179,
+        71
+      ],
+      "_nazev": "plamen-400 — jediný teplý akcent"
+    }
+  ],
+  "_barvy": "Jen tmavá základna a plamen. Uplatní se pouze u `npm run vzory`, protože při vyplněném styleId je obrazky.mjs neposílá. Modrou sem nepřidávat — v obrázcích patří dovnitř plamene, kdežto v paletě by ji model roztáhl přes celou plochu a vyšla by neonová tapeta."
+}
