@@ -37,6 +37,15 @@ if (!maFfmpeg) {
 
 const kUdelani = zadani.smycky.filter((smycka) => {
   if (jen && smycka.id !== jen) return false;
+
+  // Zámek na schválené smyčky, stejně jako u obrázků v obrazky.mjs. Smyčka
+  // stojí víc než obrázek a přetočit ji znamená i nový plakát, takže omylem
+  // spuštěné `--znovu` je tu ještě dražší chyba.
+  if (smycka.zamceno && !jen) {
+    console.log(`🔒 ${smycka.id} — schválená smyčka, přeskakuji`);
+    return false;
+  }
+
   if (!znovu && existuje(`${smycka.cil}.mp4`)) {
     console.log(`· ${smycka.id} — už existuje, přeskakuji`);
     return false;

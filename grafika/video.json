@@ -1,13 +1,9 @@
 {
   "_comment": "Zadání pro rozpohybování obrázků. Každá smyčka vychází z hotového obrázku, takže video nemůže ujet jinam než zbytek webu.",
-
   "model": "fal-ai/wan-25-preview/image-to-video",
   "_model": "Endpointy se na fal občas přejmenují. Aktuální název najdete na https://fal.ai/models — hledejte image-to-video. Levné: wan. Kvalitní a dražší: kling, veo3.",
-
   "_vyber": "Smyčky jsou schválně jen na místech, kde v záběru není tvář. Rozpohybovaný obličej je to první, co se u image-to-video rozpadne, a sekce se sedmi zapalovadly ani se šesti metodami zahřívání video nepotřebuje. Úvodní obrazovka video taky nemá — nese ji animovaný plamen v SVG (components/Plamen.astro), který nestojí ani jeden síťový požadavek.",
-
   "_smer": "Obě smyčky ukazují plamen UVNITŘ láhve a liší se jen tím, kudy se šíří. Vertikální: od hrdla ke dnu. Horizontální: ode dna k hrdlu. Přesně tak to popisují texty v kapitole čtvrté, takže se to nesmí prohodit.",
-
   "smycky": [
     {
       "id": "vertikalni",
@@ -16,7 +12,8 @@
       "_prompt": "Původní znění „The blue flame shoots up from the neck, burns briefly and dies down“ odmítl content checker fal.ai (content_policy_violation). Kombinace „shoots“, „neck“ a „dies“ se dá číst jako popis násilí; neutrální slovesa projdou.",
       "prompt": "The blue fire inside the standing bottle travels slowly down the glass from the neck to the bottom and fades. Nothing burns outside the glass. The bottle and the camera stay still.",
       "delka": 5,
-      "cil": "public/video/vertikalni"
+      "cil": "public/video/vertikalni",
+      "zamceno": true
     },
     {
       "id": "horizontalni",
@@ -24,7 +21,9 @@
       "zdroj": "src/assets/generovane/horizontalni.webp",
       "prompt": "The blue fire inside the lying bottle spreads slowly along the glass from the base towards the neck and fades. Nothing burns outside the glass. The bottle and the camera stay still.",
       "delka": 5,
-      "cil": "public/video/horizontalni"
+      "cil": "public/video/horizontalni",
+      "zamceno": true
     }
-  ]
+  ],
+  "_zamek": "Obě smyčky jsou schválené a zamčené. Hromadné --znovu je přeskočí; přetočit jde jen adresně přes --jen=<id> --znovu. Zámek podporuje scripts/video.mjs."
 }

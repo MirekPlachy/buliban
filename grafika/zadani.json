@@ -21,7 +21,8 @@
     "prompt": "A man holds an empty clear glass rum bottle between both of his palms and rubs it fast up and down to warm it, at a table at night. Two friends sit beside him watching and laughing, all three seen from the side at eye level with their whole heads in the frame. The bottle is open and holds no liquid. Warm golden light on their faces, deep shadow behind them.",
     "negativni": "blue light, blue clothing, liquid in the bottle, full bottle, headless figure, cropped head, close-up of hands only, view from above, top-down view, hand resting on the bottle",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-treni.webp"
+    "cil": "src/assets/generovane/zahrivani-treni.webp",
+    "zamceno": true
   },
   {
     "id": "zahrivani-voda",
@@ -29,7 +30,8 @@
     "prompt": "A man dips an empty clear glass rum bottle into a kitchen sink full of steaming hot water, holding it by the neck, at night. Two friends stand beside him watching and laughing, all three seen from the side at eye level with their whole heads in the frame. The bottle is open and holds no liquid. Warm golden light on their faces, deep shadow behind them.",
     "negativni": "blue light, blue clothing, blue sweater, blue shirt, cold blue tones, liquid in the bottle, full bottle, plastic water bottle, running tap filling the bottle, washing up, soap suds, headless figure, cropped head, close-up of hands only, view from above",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-voda.webp"
+    "cil": "src/assets/generovane/zahrivani-voda.webp",
+    "zamceno": true
   },
   {
     "id": "zahrivani-rucnik",
@@ -37,7 +39,8 @@
     "prompt": "A man holds an empty clear glass rum bottle tightly wrapped in a thick warm towel in both hands, only the open neck of the bottle sticking out of the cloth, at a table at night. Two friends sit beside him watching and laughing, all three seen from the side at eye level with their whole heads in the frame. The bottle is open and holds no liquid. Warm golden light on their faces, deep shadow behind them.",
     "negativni": "blue light, blue clothing, blue towel, blue cloth, cold blue tones, whisky glass on the table, tumbler in the background, liquid in the bottle, full bottle, bare bottle without cloth, towel on the head, towel over the shoulder, blanket over a person, headless figure, cropped head, close-up of hands only, view from above",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-rucnik.webp"
+    "cil": "src/assets/generovane/zahrivani-rucnik.webp",
+    "zamceno": true
   },
   {
     "id": "zahrivani-fen",
@@ -45,7 +48,8 @@
     "prompt": "A man aims a switched-on hair dryer at an empty clear glass rum bottle that he holds up in his other hand, at a table at night. Two friends sit beside him watching and laughing, all three seen from the side at eye level with their whole heads in the frame. The bottle is open and holds no liquid. Warm golden light on their faces, deep shadow behind them.",
     "negativni": "blue light, blue clothing, liquid in the bottle, full bottle, no bottle, hair dryer alone, phone, mug, headless figure, cropped head, close-up of hands only, view from above",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-fen.webp"
+    "cil": "src/assets/generovane/zahrivani-fen.webp",
+    "zamceno": true
   },
   {
     "id": "zahrivani-svetr",
@@ -54,7 +58,8 @@
     "_barvy": "Modrá se sem tahá nejvíc ze všech scén a jde srazit jenom obojím naráz: kladně napsanou barvou svetru a teplými tóny v promptu, A ZÁROVEŇ zákazem modré v seznamu. Zkoušelo se každé zvlášť a ani jedno samo nestačilo — bez zákazu vyšel jasně modrý svetr přes celý záběr.",
     "negativni": "blue light, blue clothing, blue sweater, cold blue tones, liquid in the bottle, full bottle, bottle standing on the table, bottle held out in the open, headless figure, cropped head, close-up of hands only, view from above",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-svetr.webp"
+    "cil": "src/assets/generovane/zahrivani-svetr.webp",
+    "zamceno": true
   },
   {
     "id": "zahrivani-ohen",
@@ -62,7 +67,8 @@
     "prompt": "A man in a brown jacket holds an empty clear glass rum bottle by the neck above a small campfire, well clear of the flames. Two friends sit around the fire beside him watching and laughing, all three seen from the side at eye level with their whole heads in the frame and their faces lit orange by the fire. The whole picture is in warm orange and amber tones.",
     "negativni": "blue light, blue clothing, blue jacket, cold blue tones, liquid in the bottle, full bottle, bottle in the fire, bottle on fire, headless figure, cropped head, close-up of hands only, view from above, back of a head in the foreground",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zahrivani-ohen.webp"
+    "cil": "src/assets/generovane/zahrivani-ohen.webp",
+    "zamceno": true
   },
   {
     "_skupina": "Vertikální a horizontální poloha. Dvojice musí mít stejné rámování, jinak nefunguje jako srovnání. V obou případech hoří plamen UVNITŘ skla — liší se jen směr, kterým se šíří: nastojato od hrdla ke dnu, naležato ode dna k hrdlu. Oba obrázky jsou zároveň plakáty pod stejnojmenné smyčky ve video.json, takže se po přegenerování musí přetočit i videa.",
@@ -71,7 +77,8 @@
     "prompt": "Blue fire trapped inside an empty clear glass rum bottle standing upright on a dark table. The bottle is open, has no cap and holds no liquid at all. The flames fill the empty glass body from the neck down to the bottom and glow through it, so the bottle shines blue in the dark. Pure black background, nothing else in the frame. Side view at bottle height.",
     "negativni": "liquid in the bottle, half full bottle, amber liquid, cork, glass stopper, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, lamp burner, orange flame, yellow flame, candle, lantern, warm brown background, hand, bottle lying on its side",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/vertikalni.webp"
+    "cil": "src/assets/generovane/vertikalni.webp",
+    "zamceno": true
   },
   {
     "id": "horizontalni",
@@ -79,17 +86,19 @@
     "prompt": "Blue fire trapped inside an empty clear glass rum bottle lying on its side on a dark table. The bottle is open, has no cap and holds no liquid at all. The flames run along the inside of the empty glass body from the base towards the neck and glow through it, so the bottle shines blue in the dark. Pure black background, nothing else in the frame. Side view at bottle height.",
     "negativni": "metal pipe, copper tube, second bottle, two bottles, liquid in the bottle, half full bottle, amber liquid, cork, glass stopper, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, lamp burner, orange flame, yellow flame, candle, lantern, warm brown background, hand, standing bottle",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/horizontalni.webp"
+    "cil": "src/assets/generovane/horizontalni.webp",
+    "zamceno": true
   },
   {
     "id": "jak-vypustit",
-    "popis": "Okamžik zážehu. Obrázek zároveň ukazuje správnou techniku — hlava mimo osu hrdla.",
-    "_nasada": "Předchozí verze měla nad láhví zahnutou kovovou hubici svářecího hořáku. Vzniklo to ze spojení „long nozzle of a kitchen gas lighter“ — model si z něj vybral hubici a dokreslil k ní celý hořák. Zapalovadlem je proto špejle: drží stejný odstup od hrdla, ale žádnou násadu si k ní model nevymyslí.",
-    "prompt": "Blue fire trapped inside an empty clear glass rum bottle that a man holds upright in one outstretched hand, well away from his body. The bottle is open and holds no liquid at all; the flames fill the empty glass body and glow through it, so the bottle shines blue in the dark. He has just lit it and his other arm is lowered to his side, holding a long thin wooden skewer well away from the bottle. His face is in sharp profile at eye level, lit and fully visible, his head clearly to one side of the bottle. Dark background.",
-    "_odtazeni": "Zapalovadlo je schválně UŽ ODTAŽENÉ. Dokud špejle mířila k hrdlu, model z té dvojice pokaždé udělal pochodeň a plamen vytáhl ven — geometrie „hořící tyčka u ústí“ je silnější než jakýkoli zákaz. Se svěšenou rukou oheň zůstane uvnitř skla.",
-    "negativni": "seen from behind, back of the head, face hidden, metal nozzle, curved pipe above the bottle, gas burner, kitchen gas lighter, smoke, smouldering stick, wooden plank, ladder, liquid in the bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, face above the bottle",
+    "popis": "Okamžik zážehu ve společnosti — jeden drží láhev, ostatní se dívají.",
+    "_zapalovadlo": "V záběru NENÍ žádné zapalovadlo, a je to schválně. Dokud v ruce cokoli hořelo — hubice hořáku, špejle —, model z toho udělal pochodeň a plamen vytáhl z láhve ven; ze všech zkoušených znění vydržel oheň uvnitř skla jenom tehdy, když v ruce nic dalšího není. Zapalovadlům patří vlastní sekce hned pod tímhle obrázkem, takže tady nechybí.",
+    "_parta": "Zážeh je společenská věc, takže tu musí být parta, ne jeden člověk. Zároveň je obrázek na výšku do úzkého sloupce, kde se čtyři lidé vedle sebe nevejdou — proto „gathered close together“ a jen tři lidé. Bez toho model hlavy ustřihne.",
+    "prompt": "Blue fire trapped inside an empty clear glass rum bottle that a man holds up in one hand. The bottle is open and holds no liquid at all; the flames fill the empty glass body and glow through it, so the bottle shines blue in his hand. Two friends stand gathered close together beside him and watch it in admiration, all three seen from the side at eye level with their whole heads in the frame and their faces lit blue by the bottle. Nothing else is in their hands. Dark background.",
+    "negativni": "wooden stick, skewer, wooden handle, burning stick, torch, lighter, match, smoke, one person alone, single figure, empty room, liquid in the bottle, water in the bottle, half full bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, seen from behind, back of the head, face hidden, headless figure, cropped head, close-up of hands only",
     "velikost": "1024x1365",
-    "cil": "src/assets/generovane/jak-vypustit.webp"
+    "cil": "src/assets/generovane/jak-vypustit.webp",
+    "zamceno": true
   },
   {
     "id": "opakovane",
@@ -99,7 +108,8 @@
     "negativni": "liquid in the bottle, half full bottle, amber liquid, cork, glass stopper, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, lamp burner, orange flame, yellow flame, candle, warm brown background, hand, people, blue glass, coloured glass",
     "velikost": "1820x1024",
     "cil": "src/assets/generovane/opakovane.webp",
-    "uprava": "crop=1820:780"
+    "uprava": "crop=1820:780",
+    "zamceno": true
   },
   {
     "id": "dnes",
@@ -107,7 +117,8 @@
     "prompt": "Blue fire trapped inside an empty clear glass rum bottle that a smiling young woman holds up in one hand, facing the camera. The bottle is open and holds no liquid at all; the flames fill the empty glass body and glow through it, so the bottle shines blue in her hand. Her friend stands beside her filming it on a smartphone, also facing the camera. Both faces are lit and fully visible at eye level. Warm golden light on their faces against the cold white glow of the screen.",
     "negativni": "seen from behind, back of the head, over the shoulder shot, faces turned away, liquid in the bottle, half full bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, burning cloth, torch in the hand",
     "velikost": "1365x1024",
-    "cil": "src/assets/generovane/dnes.webp"
+    "cil": "src/assets/generovane/dnes.webp",
+    "zamceno": true
   },
   {
     "_skupina": "Sedm zapalovadel. Blízká zátiší nástroje, ne portréty — proto jako jediná skupina nemají v záběru tvář. Láhev v pozadí drží železné pravidlo: na obrázku musí být láhev, nebo člověk. Musí to být prázdná láhev rumu; z „glass bottle neck“ dělal model plné láhve vína.",
@@ -116,7 +127,8 @@
     "prompt": "A long-nozzle kitchen gas lighter held in a hand, a small lit flame burning at the tip of its nozzle. Close-up still life on a dark table, an empty clear glass rum bottle standing just behind, holding no liquid at all, see-through with nothing but air inside. Warm dim background, deep shadow, no face in the frame.",
     "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label, unlit lighter, lighter without flame",
     "velikost": "1024x1024",
-    "cil": "src/assets/generovane/zapalovac-kuchynsky.webp"
+    "cil": "src/assets/generovane/zapalovac-kuchynsky.webp",
+    "zamceno": true
   },
   {
     "id": "zapalovac-zapalka",
@@ -124,7 +136,8 @@
     "prompt": "A burning wooden match held between finger and thumb, the flame just past the head. Close-up still life on a dark table, an empty clear glass rum bottle standing just behind, holding no liquid at all, see-through with nothing but air inside. Warm dim background, deep shadow, no face in the frame.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-zapalka.webp",
-    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label"
+    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label",
+    "zamceno": true
   },
   {
     "id": "zapalovac-kapesni",
@@ -132,7 +145,8 @@
     "prompt": "A small plastic pocket lighter with a thumb on the wheel and a low flame above it. Close-up still life on a dark table, an empty clear glass rum bottle standing just behind, holding no liquid at all, see-through with nothing but air inside. Warm dim background, deep shadow, no face in the frame.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-kapesni.webp",
-    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label"
+    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label",
+    "zamceno": true
   },
   {
     "id": "zapalovac-plazmovy",
@@ -140,7 +154,8 @@
     "prompt": "A black electric plasma lighter held upright in a hand, a bright violet electric arc crackling in the gap between its two metal prongs. Close-up still life on a dark table, an empty clear glass rum bottle standing just behind, holding no liquid at all, see-through with nothing but air inside. Warm dim background, deep shadow, no face in the frame.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-plazmovy.webp",
-    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label, flame, fire, blue plastic body, lighter without arc"
+    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label, flame, fire, blue plastic body, lighter without arc",
+    "zamceno": true
   },
   {
     "id": "zapalovac-svicka",
@@ -149,7 +164,8 @@
     "_negativni": "„wick“ a „candle“ tu nejsou zakázané schválně — svíčka je celý motiv. Proto ta dvě slova nesmí být ve společném seznamu ve styl.json, ale jen u lahvových položek. Modrá barva se naopak zakázat musí: bez toho vyšla modrá svíčka v modré láhvi.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-svicka.webp",
-    "negativni": "blue candle, blue glass bottle, coloured glass, blue light, liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label"
+    "negativni": "blue candle, blue glass bottle, coloured glass, blue light, liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label",
+    "zamceno": true
   },
   {
     "id": "zapalovac-spejle",
@@ -157,7 +173,8 @@
     "prompt": "A hand holds a long thin wooden skewer by one end and a small flame burns at its far tip. Close-up still life on a dark table, an empty clear glass rum bottle standing just behind, holding no liquid at all, see-through with nothing but air inside. Warm dim background, deep shadow, no face in the frame.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-spejle.webp",
-    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label, unlit skewer, skewer lying on a tray, chopsticks"
+    "negativni": "liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label, unlit skewer, skewer lying on a tray, chopsticks",
+    "zamceno": true
   },
   {
     "id": "zapalovac-bezkontakt",
@@ -165,7 +182,8 @@
     "prompt": "A hand holds a long-nozzle lighter at a distance from an empty glass rum bottle with nothing inside, a bright spark jumping across the gap of air between the nozzle and the bottle neck. Close-up still life on a dark table. Warm dim background, deep shadow, no face in the frame.",
     "velikost": "1024x1024",
     "cil": "src/assets/generovane/zapalovac-bezkontakt.webp",
-    "negativni": "dark bottle in the background, bottle with a label, full bottle in the background, liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label"
+    "negativni": "dark bottle in the background, bottle with a label, full bottle in the background, liquid in the bottle, dark liquid in the bottle, amber liquid, full bottle, half full bottle, bottle with a label",
+    "zamceno": true
   },
   {
     "_skupina": "Kronika zážehů. Obrázky musí ležet vedle Markdownu v src/content/zazehy/ — schéma používá image(), který cesty řeší relativně k souboru.",
@@ -174,7 +192,8 @@
     "prompt": "Three friends in a dark cabin at night, seen from the side at eye level, their whole heads in the frame and their faces lit and visible. On the table between them stands an empty clear glass rum bottle, open and holding no liquid at all, with blue fire trapped inside the empty glass body glowing through it, so the bottle shines blue on the table. They are all taken by surprise. One warm lamp in the far corner, mostly black frame.",
     "negativni": "liquid in the bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, view from above, orange fire in the bottle",
     "velikost": "1365x1024",
-    "cil": "src/content/zazehy/prvni-jiskra.webp"
+    "cil": "src/content/zazehy/prvni-jiskra.webp",
+    "zamceno": true
   },
   {
     "id": "kronika-dlouhy-vecer",
@@ -182,7 +201,8 @@
     "prompt": "An empty clear glass rum bottle stands on a table at night burning inside with tall bright blue fire, the blue flames filling the empty glass body and glowing out through the glass. Three friends lean in around it and watch, all seen from the side at eye level with their whole heads in the frame and their faces lit and visible. Warm golden light on their faces, deep shadow behind them.",
     "negativni": "drinking glass, tumbler, glass on the table, liquid in the bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, view from above, orange fire in the bottle",
     "velikost": "1365x1024",
-    "cil": "src/content/zazehy/dlouhy-vecer.webp"
+    "cil": "src/content/zazehy/dlouhy-vecer.webp",
+    "zamceno": true
   },
   {
     "id": "kronika-horizontalni-omyl",
@@ -190,7 +210,8 @@
     "prompt": "A man in a dim living room at night, his whole head in the frame and his face lit and visible at eye level. An empty clear glass rum bottle lies on its side on the sofa cushion, open and holding no liquid at all, with blue fire trapped inside the empty glass body glowing through it and a dark scorch mark on the fabric beneath it. He reaches for it too late. One warm lamp far behind.",
     "negativni": "drinking glass, tumbler, burning glass, fire in a glass, liquid in the bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, orange fire, burning sofa, standing bottle, match, skewer",
     "velikost": "1365x1024",
-    "cil": "src/content/zazehy/horizontalni-omyl.webp"
+    "cil": "src/content/zazehy/horizontalni-omyl.webp",
+    "zamceno": true
   },
   {
     "id": "kronika-tichy-spolecnik",
@@ -198,7 +219,8 @@
     "prompt": "An empty clear glass rum bottle stands on a table on Christmas evening burning inside with wide bright blue fire, the blue flames filling the empty glass body and glowing out through the glass. Two friends sit at the table and watch it calmly, both seen from the side at eye level with their whole heads in the frame and their faces lit and visible. Small warm fairy lights out of focus behind them, mostly black frame.",
     "negativni": "drinking glass, tumbler, glass on the table, beer bottle, liquid in the bottle, amber liquid, cork, cap on the bottle, dark unlit bottle, bottle without fire, oil lamp, wick, headless figure, cropped head, close-up of hands only, orange fire in the bottle, blue beam of light, christmas tree in the centre",
     "velikost": "1365x1024",
-    "cil": "src/content/zazehy/tichy-spolecnik.webp"
+    "cil": "src/content/zazehy/tichy-spolecnik.webp",
+    "zamceno": true
   },
   {
     "id": "og",
@@ -208,6 +230,7 @@
     "_velikost": "Recraft bere jen svůj seznam rozměrů — 1280x720 mezi ně nepatří a volání skončí chybou. Použitelné jsou např. 1024x1024, 1365x1024, 1536x1024, 1820x1024 a jejich otočené varianty.",
     "velikost": "1820x1024",
     "cil": "public/og.jpg",
-    "uprava": "crop=1820:955,scale=1200:630"
+    "uprava": "crop=1820:955,scale=1200:630",
+    "zamceno": true
   }
 ]
