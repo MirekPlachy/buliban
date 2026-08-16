@@ -717,7 +717,8 @@ const tipy = [
 
       <div class="reveal mt-20">
         <h3 class="font-display text-2xl text-white">Čím zapálit</h3>
-        <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+        <!-- Tři sloupce, aby obrázky vyšly stejně velké jako u zahřívání. -->
+        <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {
             zapalovace.map(({ nazev, obrazek, text }) => (
               <li class="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]">
