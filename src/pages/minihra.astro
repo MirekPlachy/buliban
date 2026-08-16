@@ -1,58 +1,61 @@
 ---
-import Base from '../layouts/Base.astro';
-import Plamen from '../components/Plamen.astro';
+/**
+ * Minihra „Vypusť Bulibana!" — fáze 2, rozlévání.
+ *
+ * Stránka je schválně holá: žádná navigace ani patička, protože hra běží
+ * přes celou výšku okna a jakýkoli okraj by na mobilu ubral z hrací plochy.
+ * Odkaz zpět na web drží samotná hra až v závěrečné obrazovce.
+ */
+import '../styles/global.css';
 
-const title = 'Minihra — Buliban';
+const title = 'Vypusť Bulibana! — minihra';
 const description =
-  'Chystá se minihra. Zatím se jen zahřívá.';
+  'Rozlij láhev rumu mezi panáky na stole. Do každého se lije jednou a dolít se nedá.';
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+const kanonicka = new URL(Astro.url.pathname, Astro.site);
+const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
 ---
 
-<Base title={title} description={description}>
-  <section
-    class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 py-32 text-center"
-  >
-    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-      <div
-        class="dychani absolute top-1/3 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-jiskra-400/15 blur-[130px]"
-      >
-      </div>
-    </div>
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={kanonicka} />
+    <link rel="icon" href={`${zaklad}/favicon.svg`} type="image/svg+xml" />
+    <meta name="theme-color" content="#1a0f0a" />
+    {!jeOstra && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(`${zaklad}/og.jpg`, Astro.site)} />
+  </head>
 
-    <div class="relative z-10 mx-auto max-w-2xl">
-      <Plamen velikost="velka" trida="mx-auto" />
+  <body class="bg-hra-sklo">
+    <main class="flex h-dvh w-full flex-col">
+      <!-- `touch-action: none` je podmínka hratelnosti na mobilu, ne kosmetika:
+           bez toho si prohlížeč vyloží držení prstu jako scroll a nalévání
+           se v půlce přeruší. -->
+      <canvas
+        id="hra"
+        class="h-full w-full touch-none select-none"
+        aria-label="Rozlévání rumu do panáků. Držením levého tlačítka, prstu nebo mezerníku se nalévá."
+      ></canvas>
+    </main>
 
-      <p class="mt-10 text-xs tracking-[0.4em] text-kour-400 uppercase">
-        Zahřívací fáze
+    <noscript>
+      <p class="p-8 text-center text-hra-par">
+        Hra potřebuje JavaScript. Bez něj se nalévat nedá.
       </p>
+    </noscript>
 
-      <h1
-        class="mt-5 font-display text-5xl leading-tight font-bold text-white sm:text-7xl"
-      >
-        Minihra se chystá
-      </h1>
+    <script>
+      import { pripoj } from '../hra/index.ts';
 
-      <p class="mt-8 text-lg leading-relaxed text-uhel-300/75">
-        Tady jednou bude něco, u čeho se dá strávit pět minut a nepřiznat to.
-        Zatím je to prázdné místo se slibem.
-      </p>
-
-      <!-- Až budou pravidla hotová, nahradí tenhle blok samotná hra. -->
-      <div
-        class="mt-14 rounded-3xl border border-dashed border-plamen-400/25 bg-white/[0.02] p-10"
-      >
-        <p class="font-display text-2xl text-plamen-400/80">Co se tu chystá</p>
-        <p class="mt-4 leading-relaxed text-uhel-300/60">
-          Pravidla zatím nejsou. Až budou, přijde sem hrací plocha —
-          tenhle rámeček je pro ni připravené místo.
-        </p>
-      </div>
-
-      <a
-        href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/zazehy/`}
-        class="mt-12 inline-block rounded-full border border-plamen-400/40 bg-plamen-400/10 px-8 py-3.5 text-sm font-medium tracking-wide text-plamen-400 transition hover:border-plamen-400 hover:bg-plamen-400/20 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
-      >
-        Zatím si prohlédněte kroniku
-      </a>
-    </div>
-  </section>
-</Base>
+      const platno = document.getElementById('hra');
+      if (platno instanceof HTMLCanvasElement) pripoj(platno);
+    </script>
+  </body>
+</html>

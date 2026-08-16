@@ -34,7 +34,8 @@ src/assets/generovane/         obrázky z `npm run obrazky` — ke každému je 
 src/assets/vlastni/            obrázky přidané ručně, mimo generátor
 src/pages/index.astro          jednostránka
 src/pages/zazehy.astro         kronika zážehů
-src/pages/minihra.astro        zástupná stránka minihry
+src/pages/minihra.astro        stránka minihry (holá, hra běží přes celé okno)
+src/hra/                       minihra „Vypusť Bulibana!" — vlastní CLAUDE.md
 src/styles/global.css          barvy, písma, animace — designový systém webu
 grafika/                       stylová bible a zadání pro generování obrázků
 kandidati/                     neposouzení kandidáti obrázků (mimo git)
@@ -61,6 +62,34 @@ Delší vyprávění do detailu.
 ```
 
 Nic dalšího se nemění — stránka se přestaví sama.
+
+---
+
+## Minihra
+
+Kód hry žije v `src/hra/` jako soběstačná složka s vlastním
+[CLAUDE.md](src/hra/CLAUDE.md). Herní design je v
+[buliban-minihra-herni-design.md](buliban-minihra-herni-design.md).
+
+Hotová je **fáze 2 — rozlévání**, tedy jádro hry: devět levelů, tvary lahví
+i panáků, ukázka s výkladem, bodování a medaile. Běží na `/minihra/`.
+Chybí fáze 1 a 3 (korek, zahřátí, zážeh), věková brána, zvuk a ukládání.
+
+```bash
+npm test                                          # invarianty simulace
+npm run hra -- --level=3 --seed=1 --drzeni=1.8,1.7 # přehrání levelu v terminálu
+npm run hra -- --level=7 --seed=42 --ideal        # jak vypadá dokonalá hra
+npm run hra -- --hraci                            # medaile podle modelu hráče
+npm run hra -- --prehled                          # dosažitelnost napříč levely
+```
+
+Simulace v `src/hra/jadro/` **nesmí sáhnout na DOM ani canvas.** Díky tomu
+se ladí příkazem v terminálu, ne klikáním, a testy běží pod holým Node bez
+prohlížeče. Obtížnost se nastavuje přes `--hraci`, ne přes `--ideal`:
+dokonalé držení je lepší než kdokoli živý.
+
+Adresa hry bere `?seed=vecirek` (stejné podmínky pro všechny hráče),
+`?level=7` a `?debug=1` (objemy, průtok, fáze v reálném čase, přepínač levelu).
 
 ---
 

@@ -8,6 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "node --test \"src/hra/**/*.test.ts\"",
+    "hra": "node src/hra/harness.ts",
     "styl": "node --env-file-if-exists=.env scripts/styl.mjs",
     "obrazky": "node --env-file-if-exists=.env scripts/obrazky.mjs",
     "kandidati": "node --env-file-if-exists=.env scripts/kandidati.mjs",

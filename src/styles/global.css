@@ -19,6 +19,20 @@
   --color-kour-400: #4fd6d1; /* tyrkys / chladný protiklad */
   --color-uhel-300: #c9bfe0; /* tlumený text */
 
+  /* Minihra — „karibská noc". Scéna má barevnost tmavého skla lahve rumu,
+     ve které je kapalina jediné teplé místo.
+     Dvě barvy jsou sdílené s webem schválně: světlý rum JE `plamen-400`
+     a zážeh JE `kour-400`. Drží to hru a stránky jako jeden systém.
+     Studená barva je ve scéně jediná, takže když se objeví, má váhu.
+     Čte je i canvas přes getComputedStyle — jeden zdroj barev i pro hru. */
+  --color-hra-sklo: #1a0f0a; /* pozadí scény, tmavé sklo */
+  --color-hra-sklo-stin: #2b1a10; /* panely, karty, melasa */
+  --color-hra-rum: #c8721f; /* kapalina */
+  --color-hra-rum-svetlo: #ffb347; /* hladina, odlesky — = plamen-400 */
+  --color-hra-par: #ecd9c0; /* text, obrysy skla, teplý krém */
+  --color-hra-zazeh: #4fd6d1; /* linka rovnosti a plamen — = kour-400 */
+  --color-hra-zhava: #ff6b35; /* přelití, varování */
+
   /* Písma. Proměnné --font-*-raw plní Astro (viz astro.config.mjs),
      tady k nim jen dopisujeme záložní řadu pro případ, že se font nenačte. */
   --font-display: var(--font-display-raw, Georgia), 'Georgia', serif;
