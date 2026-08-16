@@ -30,6 +30,8 @@ src/layouts/Base.astro         HTML kostra, meta tagy, fonty, navigace, patička
 src/components/                Navigace, Paticka, Video, Plamen
 src/content/zazehy/            kronika zážehů — jeden soubor = jeden zážeh
 src/content.config.ts          schéma kroniky
+src/assets/generovane/         obrázky z `npm run obrazky` — ke každému je zadání
+src/assets/vlastni/            obrázky přidané ručně, mimo generátor
 src/pages/index.astro          jednostránka
 src/pages/zazehy.astro         kronika zážehů
 src/pages/minihra.astro        zástupná stránka minihry
