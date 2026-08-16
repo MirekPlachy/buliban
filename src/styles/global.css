@@ -37,6 +37,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Právě čtená sekce v hlavičce a v patičce.
+   Řeší se tady, ne přehazováním utilit — dvě podmínky v selektoru mají vyšší
+   specificitu než utilita, takže se nemusí řešit, která třída v CSS vyhraje. */
+[data-kotva][aria-current='location'] {
+  color: var(--color-plamen-400);
+  border-color: var(--color-plamen-400);
+}
+
+/* Linka postupu čtení. Skáče podle scrollu, takže žádný přechod —
+   ten by ji rozjezdil o zlomek vteřiny pozadu. */
+[data-postup] {
+  will-change: transform;
+}
+
 /* Odhalování sekcí při scrollování.
    Bez JS nebo při prefers-reduced-motion je obsah rovnou vidět. */
 .reveal {

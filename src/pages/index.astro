@@ -3,6 +3,13 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Video from '../components/Video.astro';
 import Plamen from '../components/Plamen.astro';
+import DalsiKapitola from '../components/DalsiKapitola.astro';
+
+// Nadočka a nadpisy sekcí se berou odsud, aby je navigace nemohla přežít
+// v původním znění. Pořadí odpovídá pořadí sekcí na stránce.
+import { kapitoly, kontakt } from '../data/kapitoly';
+const [nauka, historie, zahrivani, poloha, vypusteni, opakovani, dnes] =
+  kapitoly;
 
 // Grafika z `npm run obrazky`. Zadání ke každému souboru je v grafika/zadani.json,
 // takže je dohledatelné, proč obrázek vypadá, jak vypadá.
@@ -199,6 +206,7 @@ const tipy = [
 <Base title={title} description={description}>
   <!-- ========================= HERO ========================= -->
   <section
+    id="uvod"
     class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 text-center"
   >
     <!-- Velký plamen za nadpisem. Úvodní obrazovka schválně nemá video:
@@ -303,18 +311,19 @@ const tipy = [
   <!-- ========================= NAUKA ========================= -->
   <section
     id="nauka"
+    data-kapitola="nauka"
     class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
   >
     <div class="mx-auto max-w-5xl">
       <div class="grid items-center gap-14 md:grid-cols-2">
         <div class="reveal">
           <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
-            Kapitola první
+            {nauka.poradi}
           </p>
           <h2
             class="font-display text-4xl leading-tight font-semibold text-white sm:text-5xl"
           >
-            Co je to Buliban?
+            {nauka.nazev}
           </h2>
           <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
             Na dně láhve zbylo pár mililitrů. Zahřejete sklo — nejčastěji třením
@@ -366,18 +375,24 @@ const tipy = [
           ))
         }
       </ul>
+
+      <DalsiKapitola po="nauka" />
     </div>
   </section>
 
   <!-- ========================= HISTORIE ========================= -->
-  <section id="historie" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+  <section
+    id="historie"
+    data-kapitola="historie"
+    class="scroll-mt-24 bg-noc-950 px-6 py-32"
+  >
     <div class="mx-auto max-w-5xl">
       <div class="reveal">
         <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
-          Kapitola druhá
+          {historie.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Historie Bulibana
+          {historie.nazev}
         </h2>
       </div>
 
@@ -430,21 +445,24 @@ const tipy = [
           > mění z novinky na nejstarší část celé tradice.
         </p>
       </aside>
+
+      <DalsiKapitola po="historie" />
     </div>
   </section>
 
   <!-- ========================= ZAHŘÍVÁNÍ ========================= -->
   <section
     id="zahrivani"
+    data-kapitola="zahrivani"
     class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
   >
     <div class="mx-auto max-w-6xl">
       <div class="reveal max-w-3xl">
         <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
-          Kapitola třetí
+          {zahrivani.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Způsoby zahřívání
+          {zahrivani.nazev}
         </h2>
         <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
           Celý rituál stojí na jedné podmínce: v láhvi musí být páry. Ty se samy
@@ -499,21 +517,24 @@ const tipy = [
         Který způsob je nejlepší? Žádný. Výsledek ovlivňuje i druh alkoholu, jeho
         množství a tvar láhve. Cílem je vždycky pořádně zahřát — ne rozpálit.
       </p>
+
+      <DalsiKapitola po="zahrivani" />
     </div>
   </section>
 
   <!-- ================ VERTIKÁLNÍ × HORIZONTÁLNÍ ================ -->
   <section
     id="vertikalni-horizontalni"
+    data-kapitola="vertikalni-horizontalni"
     class="scroll-mt-24 bg-noc-950 px-6 py-32"
   >
     <div class="mx-auto max-w-5xl">
       <div class="reveal max-w-3xl">
         <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
-          Kapitola čtvrtá
+          {poloha.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Vertikálně, nebo horizontálně?
+          {poloha.nazev}
         </h2>
         <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
           Zahřívat můžete v jakékoli poloze — láhev je uzavřená a uzávěr se
@@ -614,21 +635,24 @@ const tipy = [
           >opakované zapálení</a
         >.
       </p>
+
+      <DalsiKapitola po="vertikalni-horizontalni" />
     </div>
   </section>
 
   <!-- ========================= JAK VYPUSTIT ========================= -->
   <section
     id="jak-vypustit"
+    data-kapitola="jak-vypustit"
     class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
   >
     <div class="mx-auto max-w-5xl">
       <div class="reveal max-w-3xl">
         <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
-          Kapitola pátá
+          {vypusteni.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Jak vypustit Bulibana
+          {vypusteni.nazev}
         </h2>
         <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
           Zahřáli jste láhev. Teď přijde ta vteřina, kvůli které to celé bylo.
@@ -713,18 +737,24 @@ const tipy = [
           }
         </ul>
       </div>
+
+      <DalsiKapitola po="jak-vypustit" />
     </div>
   </section>
 
   <!-- ========================= OPAKOVANÉ ZAPÁLENÍ ========================= -->
-  <section id="opakovane-zapaleni" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+  <section
+    id="opakovane-zapaleni"
+    data-kapitola="opakovane-zapaleni"
+    class="scroll-mt-24 bg-noc-950 px-6 py-32"
+  >
     <div class="mx-auto max-w-5xl">
       <div class="reveal max-w-3xl">
         <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
-          Kapitola šestá
+          {opakovani.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Opakované zapálení
+          {opakovani.nazev}
         </h2>
         <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
           Po prvním zážehu v láhvi skoro vždycky něco zbude. Stačí znovu krátce
@@ -789,24 +819,27 @@ const tipy = [
         Právě opakováním se z jedné vteřiny stane večer. Každý si sáhne, každý
         zkusí svůj styl a nikomu nevyjde totéž.
       </p>
+
+      <DalsiKapitola po="opakovane-zapaleni" />
     </div>
   </section>
 
   <!-- ========================= BULIBAN DNES ========================= -->
   <section
     id="dnes"
+    data-kapitola="dnes"
     class="scroll-mt-24 border-t border-white/5 bg-noc-900 px-6 py-32"
   >
     <div class="mx-auto max-w-5xl">
       <div class="grid items-center gap-14 md:grid-cols-2">
         <div class="reveal">
           <p class="mb-5 text-xs tracking-[0.35em] text-kour-400 uppercase">
-            Kapitola sedmá
+            {dnes.poradi}
           </p>
           <h2
             class="font-display text-4xl leading-tight font-semibold text-white sm:text-5xl"
           >
-            Buliban dnes
+            {dnes.nazev}
           </h2>
           <p class="mt-8 text-lg leading-relaxed text-uhel-300/80">
             Vize v plameni už nevykládá stařešina. Vykládají je čtyři lidi u
@@ -853,18 +886,24 @@ const tipy = [
           >kroniky zážehů</a
         > — nebo nám ten svůj pošli.
       </p>
+
+      <DalsiKapitola po="dnes" />
     </div>
   </section>
 
   <!-- ========================= KONTAKT ========================= -->
-  <section id="kontakt" class="scroll-mt-24 bg-noc-950 px-6 py-32">
+  <section
+    id="kontakt"
+    data-kapitola="kontakt"
+    class="scroll-mt-24 bg-noc-950 px-6 py-32"
+  >
     <div class="mx-auto max-w-3xl">
       <div class="reveal text-center">
         <p class="mb-5 text-xs tracking-[0.35em] text-jiskra-400 uppercase">
-          Spolupráce
+          {kontakt.poradi}
         </p>
         <h2 class="font-display text-4xl font-semibold text-white sm:text-5xl">
-          Ozvěte se
+          {kontakt.nazev}
         </h2>
       </div>
 

@@ -2,24 +2,22 @@
 /**
  * Hlavička webu.
  *
+ * Lišta kopíruje fyzickou stavbu webu: vlevo od svislé linky je obsah jedné
+ * scrolovací stránky v pořadí čtení, vpravo jsou samostatné stránky. Prostý
+ * text = pozice v tomhle sloupci, orámovaná pilulka = odchod jinam.
+ *
  * Odkazy na sekce míří vždy na kořen (`/#nauka`), ne na holou kotvu —
  * aby fungovaly i ze samostatných stránek Zážehy a Minihra.
  */
+import { kapitoly, kontakt, stranky } from '../data/kapitoly';
+
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-// Sekcí je na jednostránce osm, do hlavičky se ale všechny nevejdou.
-// Vybrané jsou ty, které nesou návod — zbytek se najde scrollováním.
-const odkazy = [
-  { text: 'Nauka', cil: '/#nauka' },
-  { text: 'Historie', cil: '/#historie' },
-  { text: 'Zahřívání', cil: '/#zahrivani' },
-  { text: 'Jak vypustit', cil: '/#jak-vypustit' },
-  { text: 'Zážehy', cil: '/zazehy/' },
-  { text: 'Kontakt', cil: '/#kontakt' },
-];
-
-// Zvýraznit položku, na které zrovna jsme.
+// Zvýraznit stránku, na které zrovna jsme. Kotvy si aktivní stav řeší samy
+// za běhu podle odscrollování — na serveru se nedá poznat, kde čtenář je.
 const cesta = Astro.url.pathname.replace(zaklad, '') || '/';
+
+const odkazSekce = 'transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none';
 ---
 
 <header
@@ -27,20 +25,76 @@ const cesta = Astro.url.pathname.replace(zaklad, '') || '/';
   data-hlavicka
 >
   <nav
-    class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
+    class="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4"
     aria-label="Hlavní"
   >
     <a
-      href={`${zaklad}/`}
-      class="font-display text-xl font-bold tracking-wide text-plamen-400 transition hover:text-jiskra-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+      href={`${zaklad}/#uvod`}
+      class="font-display shrink-0 text-xl font-bold tracking-wide text-plamen-400 transition hover:text-jiskra-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
     >
       Buliban
     </a>
 
-    <!-- Přepínač pro mobil -->
+    <!-- Obsah této stránky, v pořadí čtení. -->
+    <!-- Mezery jsou schválně těsné: osm položek + pilulky se musí vejít
+         na jeden řádek už od 1024 px, kde se lišta rozbaluje z hamburgeru. -->
+    <ul
+      class="hidden items-center gap-4 border-l border-white/10 py-1 pl-5 text-sm whitespace-nowrap lg:flex"
+    >
+      {
+        kapitoly.map(({ id, zkratka }) => (
+          <li>
+            <a
+              href={`${zaklad}/#${id}`}
+              data-kotva={id}
+              class={`border-b-2 border-transparent pb-0.5 text-uhel-300/70 ${odkazSekce}`}
+            >
+              {zkratka}
+            </a>
+          </li>
+        ))
+      }
+      <li aria-hidden="true" class="text-uhel-300/25">&middot;</li>
+      <li>
+        <a
+          href={`${zaklad}/#${kontakt.id}`}
+          data-kotva={kontakt.id}
+          class={`border-b-2 border-transparent pb-0.5 text-uhel-300/70 ${odkazSekce}`}
+        >
+          {kontakt.zkratka}
+        </a>
+      </li>
+    </ul>
+
+    <!-- Samostatné stránky. Jiný tvar, protože je to jiný druh cíle. -->
+    <ul class="ml-auto hidden shrink-0 items-center gap-2 text-sm lg:flex">
+      {
+        stranky.map(({ cil, text }) => {
+          const aktivni = cesta === cil || cesta === cil.replace(/\/$/, '');
+          return (
+            <li>
+              <a
+                href={`${zaklad}${cil}`}
+                aria-current={aktivni ? 'page' : undefined}
+                class:list={[
+                  'rounded-full border px-4 py-1.5 transition focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none',
+                  aktivni
+                    ? 'border-plamen-400/50 bg-plamen-400/10 text-plamen-400'
+                    : 'border-white/12 text-uhel-300/70 hover:border-plamen-400/40 hover:text-plamen-400',
+                ]}
+              >
+                {text}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <!-- Pod lg se obě skupiny nevejdou, sbalí se sem. -->
     <button
       type="button"
-      class="rounded-lg p-2 text-uhel-300 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none md:hidden"
+      class="ml-auto rounded-lg p-2 text-uhel-300 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none lg:hidden"
       aria-expanded="false"
       aria-controls="nabidka"
       aria-label="Otevřít nabídku"
@@ -54,25 +108,55 @@ const cesta = Astro.url.pathname.replace(zaklad, '') || '/';
           stroke-linecap="round"></path>
       </svg>
     </button>
+  </nav>
 
-    <ul
-      id="nabidka"
-      class="hidden gap-7 text-sm md:flex"
-      data-nabidka
-    >
+  <!-- Rozbalená nabídka pod lg. Svisle je místo, takže plné názvy. -->
+  <div
+    id="nabidka"
+    class="hidden border-t border-white/5 bg-noc-900/95 px-6 py-6 backdrop-blur lg:hidden"
+    data-nabidka
+  >
+    <p class="text-xs tracking-[0.35em] text-uhel-300/40 uppercase">Kapitoly</p>
+    <ul class="mt-3">
       {
-        odkazy.map(({ text, cil }) => {
-          const aktivni = cil.startsWith('/#')
-            ? false
-            : cesta === cil || cesta === cil.replace(/\/$/, '');
+        kapitoly.map(({ id, cislo, nazev }) => (
+          <li>
+            <a
+              href={`${zaklad}/#${id}`}
+              data-kotva={id}
+              class={`flex gap-3 py-2 text-uhel-300/80 ${odkazSekce}`}
+            >
+              <span class="w-8 shrink-0 text-uhel-300/40">{cislo}</span>
+              {nazev}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          href={`${zaklad}/#${kontakt.id}`}
+          data-kotva={kontakt.id}
+          class={`flex gap-3 py-2 text-uhel-300/80 ${odkazSekce}`}
+        >
+          <span class="w-8 shrink-0" aria-hidden="true"></span>
+          {kontakt.nazev}
+        </a>
+      </li>
+    </ul>
+
+    <p class="mt-6 text-xs tracking-[0.35em] text-uhel-300/40 uppercase">Web</p>
+    <ul class="mt-3">
+      {
+        stranky.map(({ cil, text }) => {
+          const aktivni = cesta === cil || cesta === cil.replace(/\/$/, '');
           return (
             <li>
               <a
                 href={`${zaklad}${cil}`}
                 aria-current={aktivni ? 'page' : undefined}
                 class:list={[
-                  'transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none',
-                  aktivni ? 'text-plamen-400' : 'text-uhel-300/70',
+                  'block py-2 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none',
+                  aktivni ? 'text-plamen-400' : 'text-uhel-300/80',
                 ]}
               >
                 {text}
@@ -82,55 +166,129 @@ const cesta = Astro.url.pathname.replace(zaklad, '') || '/';
         })
       }
     </ul>
-  </nav>
+  </div>
 
-  <!-- Rozbalená nabídka na mobilu -->
-  <ul
-    class="hidden border-t border-white/5 bg-noc-900/95 px-6 py-4 backdrop-blur md:hidden"
-    data-nabidka-mobil
+  <!-- Postup čtení. Skryje se na stránkách, které nemají kapitoly. -->
+  <div
+    class="hidden h-0.5 origin-left scale-x-0 bg-gradient-to-r from-plamen-400 to-jiskra-400"
+    data-postup
   >
-    {
-      odkazy.map(({ text, cil }) => (
-        <li>
-          <a
-            href={`${zaklad}${cil}`}
-            class="block py-2.5 text-uhel-300/80 transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
-          >
-            {text}
-          </a>
-        </li>
-      ))
-    }
-  </ul>
+  </div>
 </header>
 
 <script>
+  import { sekce } from '../data/kapitoly';
+
   const hlavicka = document.querySelector<HTMLElement>('[data-hlavicka]');
   const prepinac = document.querySelector<HTMLButtonElement>('[data-prepinac]');
-  const nabidkaMobil = document.querySelector<HTMLElement>('[data-nabidka-mobil]');
+  const nabidka = document.querySelector<HTMLElement>('[data-nabidka]');
+  const postup = document.querySelector<HTMLElement>('[data-postup]');
+  const kapitolyNaStrance = document.querySelectorAll<HTMLElement>('[data-kapitola]');
 
   // Po odscrollování z hera hlavičku podložit, ať jsou odkazy čitelné.
+  // Ve stejném průchodu se dopočítá i linka postupu — jeden listener stačí.
   if (hlavicka) {
-    const prepnoutPodklad = () => {
+    const maKapitoly = kapitolyNaStrance.length > 0;
+    postup?.classList.toggle('hidden', !maKapitoly);
+
+    const prekreslit = () => {
       const odscrollovano = window.scrollY > 40;
       hlavicka.classList.toggle('bg-noc-950/80', odscrollovano);
       hlavicka.classList.toggle('backdrop-blur', odscrollovano);
       hlavicka.classList.toggle('border-b', odscrollovano);
       hlavicka.classList.toggle('border-white/5', odscrollovano);
+
+      if (postup && maKapitoly) {
+        const dojezd = document.documentElement.scrollHeight - window.innerHeight;
+        const podil = dojezd > 0 ? Math.min(window.scrollY / dojezd, 1) : 0;
+        postup.style.transform = `scaleX(${podil})`;
+      }
     };
-    prepnoutPodklad();
-    window.addEventListener('scroll', prepnoutPodklad, { passive: true });
+
+    prekreslit();
+    window.addEventListener('scroll', prekreslit, { passive: true });
+    window.addEventListener('resize', prekreslit, { passive: true });
   }
 
-  if (prepinac && nabidkaMobil) {
+  // Nabídka pod lg.
+  if (prepinac && nabidka) {
+    const zavrit = () => {
+      prepinac.setAttribute('aria-expanded', 'false');
+      prepinac.setAttribute('aria-label', 'Otevřít nabídku');
+      nabidka.classList.add('hidden');
+    };
+
+    const jeOtevreno = () => prepinac.getAttribute('aria-expanded') === 'true';
+
     prepinac.addEventListener('click', () => {
-      const otevreno = prepinac.getAttribute('aria-expanded') === 'true';
-      prepinac.setAttribute('aria-expanded', String(!otevreno));
-      prepinac.setAttribute(
-        'aria-label',
-        otevreno ? 'Otevřít nabídku' : 'Zavřít nabídku',
-      );
-      nabidkaMobil.classList.toggle('hidden', otevreno);
+      if (jeOtevreno()) {
+        zavrit();
+        return;
+      }
+      prepinac.setAttribute('aria-expanded', 'true');
+      prepinac.setAttribute('aria-label', 'Zavřít nabídku');
+      nabidka.classList.remove('hidden');
     });
+
+    // Po skoku na kotvu musí panel zmizet — jinak překryje přesně to,
+    // kam čtenář právě skočil.
+    nabidka.addEventListener('click', (udalost) => {
+      if ((udalost.target as HTMLElement).closest('a')) zavrit();
+    });
+
+    document.addEventListener('keydown', (udalost) => {
+      if (udalost.key === 'Escape' && jeOtevreno()) {
+        zavrit();
+        prepinac.focus();
+      }
+    });
+
+    document.addEventListener('click', (udalost) => {
+      const cil = udalost.target as Node;
+      if (jeOtevreno() && !nabidka.contains(cil) && !prepinac.contains(cil)) {
+        zavrit();
+      }
+    });
+
+    // Po roztažení okna je panel skrytý přes lg:hidden, ale stav tlačítka
+    // by zůstal viset na „otevřeno".
+    window.matchMedia('(min-width: 64rem)').addEventListener('change', (u) => {
+      if (u.matches) zavrit();
+    });
+  }
+
+  // Kde ve čtení jsme. Sleduje se úzký pás pod hlavičkou; v heru neodpovídá
+  // žádná sekce, takže tam správně nesvítí nic.
+  if (kapitolyNaStrance.length > 0 && 'IntersectionObserver' in window) {
+    const kotvy = document.querySelectorAll<HTMLAnchorElement>('[data-kotva]');
+    const viditelne = new Set<string>();
+
+    const oznacit = () => {
+      // Pořadí sekcí, ne pořadí protnutí — při rychlém scrollu chodí zprávy
+      // pomíchaně a vyhrát má vždycky ta sekce, která je na stránce první.
+      const aktivni = sekce.find((s) => viditelne.has(s.id))?.id;
+
+      kotvy.forEach((kotva) => {
+        if (kotva.dataset.kotva === aktivni) {
+          kotva.setAttribute('aria-current', 'location');
+        } else {
+          kotva.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const pozorovatel = new IntersectionObserver(
+      (zaznamy) => {
+        zaznamy.forEach((zaznam) => {
+          const id = (zaznam.target as HTMLElement).dataset.kapitola!;
+          if (zaznam.isIntersecting) viditelne.add(id);
+          else viditelne.delete(id);
+        });
+        oznacit();
+      },
+      { rootMargin: '-20% 0px -70% 0px' },
+    );
+
+    kapitolyNaStrance.forEach((prvek) => pozorovatel.observe(prvek));
   }
 </script>

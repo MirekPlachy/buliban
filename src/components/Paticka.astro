@@ -1,30 +1,77 @@
 ---
+/**
+ * Patička jako rozcestník.
+ *
+ * Kdo dočetl, rozhoduje se, co dál — proto tu je celá mapa webu, ne jen
+ * rozloučení. Sloupec kapitol používá stejné `data-kotva` jako hlavička,
+ * takže se v něm rozsvěcuje právě čtená sekce.
+ */
+import { kapitoly, kontakt, stranky } from '../data/kapitoly';
+
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const odkaz =
+  'transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none';
+const nadpis = 'text-xs tracking-[0.35em] text-uhel-300/40 uppercase';
 ---
 
 <!-- Kotva #kontakt patří sekci s formulářem na jednostránce, ne sem —
      jinak by byla na stránce dvakrát a odkazy by mířily pod formulář. -->
-<footer class="border-t border-white/5 bg-noc-900 px-6 py-16 text-center">
-  <p class="font-display text-2xl text-plamen-400">Buliban</p>
+<footer class="border-t border-white/5 bg-noc-900 px-6 py-16">
+  <div class="mx-auto grid max-w-6xl gap-12 sm:grid-cols-2 md:grid-cols-3">
+    <div>
+      <p class={nadpis}>Kapitoly</p>
+      <ul class="mt-4 space-y-2.5 text-sm text-uhel-300/60">
+        {
+          kapitoly.map(({ id, nazev }) => (
+            <li>
+              <a href={`${zaklad}/#${id}`} data-kotva={id} class={odkaz}>
+                {nazev}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
 
-  <ul class="mt-6 flex flex-wrap justify-center gap-6 text-sm text-uhel-300/60">
-    <li>
-      <a
-        href={`${zaklad}/zazehy/`}
-        class="transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
-        >Zážehy</a
-      >
-    </li>
-    <li>
-      <a
-        href={`${zaklad}/minihra/`}
-        class="transition hover:text-plamen-400 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
-        >Minihra</a
-      >
-    </li>
-  </ul>
+    <div>
+      <p class={nadpis}>Web</p>
+      <ul class="mt-4 space-y-2.5 text-sm text-uhel-300/60">
+        {
+          stranky.map(({ cil, text }) => (
+            <li>
+              <a href={`${zaklad}${cil}`} class={odkaz}>
+                {text}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
 
-  <p class="mt-8 text-sm text-uhel-300/50">
+    <div>
+      <p class={nadpis}>{kontakt.poradi}</p>
+      <p class="mt-4 text-sm leading-relaxed text-uhel-300/60">
+        Máte zážeh, nápad nebo láhev s neobvyklým hrdlem?
+      </p>
+      <a
+        href={`${zaklad}/#${kontakt.id}`}
+        data-kotva={kontakt.id}
+        class={`mt-4 inline-block text-sm text-plamen-400 underline decoration-plamen-400/40 underline-offset-4 hover:decoration-plamen-400 ${odkaz}`}
+      >
+        {kontakt.nazev}
+      </a>
+    </div>
+  </div>
+
+  <div
+    class="mx-auto mt-14 flex max-w-6xl flex-wrap items-center justify-between gap-6 border-t border-white/5 pt-8"
+  >
+    <p class="font-display text-2xl text-plamen-400">Buliban</p>
+    <a href="#obsah" class={`text-sm text-uhel-300/60 ${odkaz}`}>Nahoru &uarr;</a>
+  </div>
+
+  <p class="mx-auto mt-6 max-w-6xl text-sm text-uhel-300/50">
     &copy; {new Date().getFullYear()} — recesistická prezentace. Žádní Bulibani
     nebyli při výrobě tohoto webu zraněni.
   </p>

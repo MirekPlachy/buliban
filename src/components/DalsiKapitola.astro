@@ -1,0 +1,60 @@
+---
+/**
+ * Listování na konci kapitoly.
+ *
+ * Web je jedna scrolovací stránka, takže je to prostá kotva — jen odscrolluje
+ * o kus níž. Přínos není v tom, že to jde rychleji, ale že čtenář ještě před
+ * skokem vidí, co ho čeká.
+ */
+import { dalsiPo, akcentTrida } from '../data/kapitoly';
+
+interface Props {
+  /** Kotva právě končící sekce. Následující se dohledá sama. */
+  po: string;
+}
+
+const { po } = Astro.props;
+const dalsi = dalsiPo(po);
+
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+{
+  dalsi && (
+    <a
+      href={`${zaklad}/#${dalsi.id}`}
+      class="reveal group mx-auto mt-20 flex w-full max-w-5xl items-center justify-between gap-6 rounded-2xl border border-white/8 bg-white/[0.02] px-7 py-6 transition hover:border-plamen-400/40 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+    >
+      <span>
+        <span
+          class:list={[
+            'block text-xs tracking-[0.35em] uppercase',
+            akcentTrida[dalsi.akcent],
+          ]}
+        >
+          {dalsi.poradi}
+        </span>
+        <span class="font-display mt-2 block text-xl text-white sm:text-2xl">
+          {dalsi.nazev}
+        </span>
+      </span>
+
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        class="shrink-0 text-plamen-400 transition-transform group-hover:translate-x-1"
+      >
+        <path
+          d="M5 12h14M13 6l6 6-6 6"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </a>
+  )
+}
