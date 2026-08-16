@@ -27,7 +27,7 @@
 
 > ## Co je to Buliban
 >
-> Na dně láhve zbylo pár mililitrů. Zahřejete sklo — nejčastěji třením mezi dlaněmi — dokud se v hrdle nenahromadí alkoholové páry. Pak je zapálíte.
+> Na dně láhve zbylo pár mililitrů. Zahřejete sklo — nejčastěji třením mezi dlaněmi — dokud se v láhvi rumu nenahromadí alkoholové výpary. Pak je zapálíte.
 >
 > Vyšlehne plamen. Většinou modrý, podle alkoholu i se žlutým nebo oranžovým nádechem. Trvá asi vteřinu.
 >
@@ -57,7 +57,7 @@ Sekce si říká o tři dlaždice s čísly — je to nejúspornější způsob,
 
 ## Obrázek
 
-Modrý plamen z hrdla láhve na černém pozadí, ruka drží láhev. Ikonický záběr starého webu — v hero je široký a filmový, tady stačí těsný detail hrdla, kde je vidět, jak plamen z hrdla přímo vyrůstá.
+Láhev rumu na černém pozadí, modrý plamen hoří **uvnitř** skla a prosvěcuje ho. Sekce Buliban definuje, takže obojí musí být na první pohled jasné: že hoří uvnitř láhve, a že je to láhev rumu — proto na ní etiketa se slovem RUM.
 
 - **Alternativa:** dvojice obrázků vedle sebe — vlevo studená láhev v dlaních, vpravo tentýž záběr ve chvíli zážehu. Vizuálně vysvětlí příčinu a následek beze slov.
-- **Nedělat:** oheň bez láhve. Sekce definuje Buliban, takže na obrázku musí být láhev.
+- **Nedělat:** oheň bez láhve a plamen šlehající nad hrdlo. Obojí sekci rozbíjí — první nemá co definovat, druhé ukazuje něco jiného, než o čem je text.
