@@ -59,6 +59,7 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
   let cilXPlynule = -1;
   let drzi = false;
   let cekaNaPusteni = false;
+  let poUkazce = false;
   let bezi = true;
 
   function novyStav(): StavRozlevani {
@@ -67,13 +68,21 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
     return zalozStav(konfig);
   }
 
-  /** Připraví level. Karta se ukáže vždy, když pro level nějaká je. */
+  /**
+   * Připraví level. Karta se ukáže vždy, když pro level nějaká je.
+   *
+   * Sled obrazovek levelu je **karta → (ukázka) → hra → výsledek**, tedy
+   * jedno odehrání levelu, a před ním nejvýš jedna ukázka. Ukázku má podle
+   * `levely.ts` jen level 1 — hlídá to invariant „ryska svítí jen v prvních
+   * dvou levelech a ukázka jen v prvním" v `rozlevani.test.ts`.
+   */
   function zalozLevel(): void {
     stav = novyStav();
     ukazka = null;
     vysledek = null;
     drzi = false;
     cekaNaPusteni = false;
+    poUkazce = false;
     cilXPlynule = -1;
     rezim = texty.karty[cisloLevelu] ? 'karta' : 'hra';
   }
@@ -94,6 +103,10 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
     ukazka = null;
     cilXPlynule = -1;
     rezim = 'hra';
+    // Kdo držel, když ukázka dojela, by jinak začal lít prvnímu panáku,
+    // aniž by o tom rozhodl. Nalití musí být vždy nový stisk.
+    drzi = false;
+    cekaNaPusteni = true;
   }
 
   function dalsiLevel(): void {
@@ -227,8 +240,11 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
     if (stav.faze !== 'hotovo') return;
 
     if (rezim === 'ukazka') {
-      // Ukázka doběhla — hráč dostane tutéž láhev.
+      // Ukázka doběhla — hráč dostane tutéž láhev. Předání je potřeba říct
+      // nahlas: scéna se nezmění, jen se ovládání předá hráči, a bez toho
+      // to prvních pár sekund vypadá jako pokračování ukázky.
       spustHrani();
+      poUkazce = true;
       return;
     }
     vysledek = vyhodnot(stav);
@@ -269,6 +285,9 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
       skore,
       karta: texty.karty[stav.konfig.level.cislo] ?? null,
       patkaKarty: texty.vysledek.dal,
+      // Předání po ukázce zmizí, jakmile hráč poprvé nalije — dál už je
+      // nápověda potřebnější než upozornění, že je na řadě.
+      poUkazce: poUkazce && stav.aktivni === 0 && stav.faze === 'ceka',
       komentar: texty.komentarUkazky(stav.faze, stav.aktivni, stav.konfig.panaku),
       medaile,
       debug,

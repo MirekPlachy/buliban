@@ -11,6 +11,11 @@
  * čtyřicetimililitrového panáku není 12,5× větší, ale 2,3× — nakreslit ji
  * „dvanáctkrát větší" by hráče spolehlivě obelhalo.
  *
+ * Druhá věc, kterou soubor drží, je **rám obrazovky**: horní lišta se stavem,
+ * spodní pás s nápovědou a mezi nimi herní plocha. Fáze 1 (otevírání láhve)
+ * a fáze 3 (zahřívání a zážeh) budou kreslit do téhož rámu — proto tu pásma
+ * jsou pojmenovaná a spočítaná, i když je zatím používá jen rozlévání.
+ *
  * Bez DOM, aby to šlo testovat pod holým Node.
  */
 
@@ -21,9 +26,79 @@ import type { ProfilPanaku } from '../jadro/panak.ts';
 /** Náklon plně otočené láhve. Za svislicí, aby opravdu tekla. */
 export const MAX_UHEL = 1.92;
 
+/** Výška horní lišty a spodního pásu v návrhových pixelech (× `ui`). */
+const HORNI_LISTA = 58;
+const SPODNI_LISTA = 54;
+
+/** Boční okraj scény v návrhových pixelech. */
+const OKRAJ = 24;
+
+/**
+ * Rozteč panáků v násobcích jejich šířky. 1,0 = sklo na sklo.
+ *
+ * Dřív se počítala jako „dostupná šířka děleno počtem", takže dva panáky na
+ * notebooku stály sedm set pixelů od sebe a scéna se rozpadla na dvě půlky.
+ * Rozteč je vlastnost **řady**, ne obrazovky: mezera mezi panáky má vypadat
+ * stejně u dvou i u osmi. Šířka obrazovky rozhoduje jen o tom, jak velké
+ * sklo se do ní vejde.
+ */
+const ROZTEC = 1.46;
+
+/**
+ * Mezera mezi dnem stojící láhve a okrajem panáků, v šířkách panáku.
+ *
+ * `ZAKLAD` je minimum, `STROP` hranice, po kterou se mezera roztahuje, když
+ * scéně zbyde svislé místo. Roztažení je jediný způsob, jak volnou výšku
+ * použít: šířku panáku často drží něco jiného (rozmach láhve na telefonu),
+ * takže „zvětšit celou scénu" nejde a bez roztažení by dole i nahoře zůstal
+ * pruh prázdna.
+ */
+const MEZERA_ZAKLAD = 0.5;
+const MEZERA_STROP = 3.4;
+
+/**
+ * Volný pás pod deskou a nad kompozicí, v návrhových pixelech.
+ * Bez nich se hrdlo láhve dotýká horní lišty a panáky stojí na hraně spodní.
+ */
+const PODSTAVA = 18;
+const VZDUCH = 14;
+
+/**
+ * Jak vysoko nad okrajem panáku je ústí, když je láhev plně nakloněná.
+ * V násobcích výšky panáku (plus poloměr hrdla, viz `lahevSpust`).
+ *
+ * Ústí je vrchol láhve, takže u stojící láhve visí celou její délku nad
+ * stolem. Kdyby si tu výšku držela i při nalévání, padal by rum do panáku
+ * z pěti set pixelů jako z okapu — a scéna by kvůli rozmachu potřebovala
+ * o polovinu délky láhve víc místa nad ní, které je pak zbytek času prázdné.
+ * Proto láhev při naklánění zároveň klesá k panáku, jak to dělá i ruka.
+ */
+const VYLITI_NAD_PANAKEM = 0.9;
+
+/** Strop výšky kompozice. Nad ním scéna neroste, jen se vycentruje. */
+const MAX_VYSKA_SCENY = 760;
+
+/** Šířka obsahového sloupce (karty, panely, odstavce). */
+const MAX_SLOUPEC = 560;
+
 export interface Rozvrh {
   sirka: number;
   vyska: number;
+  /**
+   * Měřítko textu a odsazení; 1 = návrhová velikost. Fixní velikosti písma
+   * vypadají na malém telefonu naducaně a na velkém monitoru jako drobné
+   * písmo pod obří lahví — proto se s plochou škálují.
+   */
+  ui: number;
+  /** Horní lišta se stavem: pás 0…`hornilistaY`. */
+  hornilistaY: number;
+  /** Spodní pás s nápovědou: od `spodniListaY` k dolní hraně. */
+  spodniListaY: number;
+  /** Herní plocha mezi lištami. Sem kreslí i fáze 1 a 3. */
+  plochaY: number;
+  plochaVyska: number;
+  /** Šířka vycentrovaného obsahového sloupce pro panely a odstavce. */
+  sloupec: number;
   /** Podstava panáků — společná linka stolu. */
   stulY: number;
   panakSirka: number;
@@ -34,17 +109,23 @@ export interface Rozvrh {
   lahevVyska: number;
   /** Výška, ve které je dno neotočené láhve. Otáčí se kolem tohoto bodu. */
   lahevDnoY: number;
+  /** O kolik ústí klesne mezi stojící a plně nakloněnou lahví. */
+  lahevSpust: number;
   /** px³ na mililitr. Společné pro láhev i panáky — v tom je celý vtip. */
   meritko: number;
 }
 
-const OKRAJ = 20;
-const HORNI_LISTA = 54;
-const SPODNI_LISTA = 46;
-const MEZERA_NAD_PANAKY = 30;
-
 export function stred(rozvrh: Rozvrh, index: number): number {
   return rozvrh.prvniPanakX + rozvrh.rozestup * index + rozvrh.rozestup / 2;
+}
+
+/** Levý okraj vycentrovaného obsahového sloupce. */
+export function sloupecX(rozvrh: Rozvrh): number {
+  return (rozvrh.sirka - rozvrh.sloupec) / 2;
+}
+
+function meritkoUi(sirka: number, vyska: number): number {
+  return Math.min(1.3, Math.max(0.85, Math.min(sirka / 1100, vyska / 760)));
 }
 
 export function spocitejRozvrh(
@@ -55,67 +136,117 @@ export function spocitejRozvrh(
   lahev: ProfilLahve,
   panak: ProfilPanaku,
 ): Rozvrh {
-  const dostupnaSirka = Math.max(120, sirka - 2 * OKRAJ);
-  const rozestup = dostupnaSirka / panaku;
+  const ui = meritkoUi(sirka, vyska);
+  const hornilista = HORNI_LISTA * ui;
+  const spodniLista = SPODNI_LISTA * ui;
+  const plochaY = hornilista;
+  const plochaVyska = Math.max(120, vyska - hornilista - spodniLista);
+  const plochaSirka = Math.max(120, sirka - 2 * OKRAJ * ui);
 
-  let panakSirka = Math.min(rozestup * 0.74, 64);
-  const stulY = vyska - SPODNI_LISTA;
+  // Celá scéna je násobek jedné veličiny — šířky panáku. Stačí ji tedy najít
+  // tak velkou, aby prošla všemi omezeními, a ostatní rozměry z ní plynou.
+  // Objem láhve = π · R² · H · ∫r²dy, a H = 2 · štíhlost · R.
+  const stihlostPanaku = panak.tvar.stihlost;
+  const meritkoJednotkove =
+    (Math.PI * 0.25 * stihlostPanaku * panak.objemJednotkovy) / KAPACITA_PANAKU_ML;
+  const jmenovatel = 2 * Math.PI * lahev.tvar.stihlost * lahev.objemJednotkovy;
+  const polomerPodil = Math.cbrt((kapacitaLahveMl * meritkoJednotkove) / jmenovatel);
+  const vyskaLahvePodil = 2 * lahev.tvar.stihlost * polomerPodil;
 
-  const rozmery = (sirkaPanaku: number) => {
-    const vyskaPanaku = panak.tvar.stihlost * sirkaPanaku;
-    const meritko =
-      (Math.PI * (sirkaPanaku / 2) ** 2 * vyskaPanaku * panak.objemJednotkovy) /
-      KAPACITA_PANAKU_ML;
-    // Objem láhve = π · R² · H · ∫r²dy, a H = 2 · štíhlost · R.
-    const jmenovatel = 2 * Math.PI * lahev.tvar.stihlost * lahev.objemJednotkovy;
-    return {
-      meritko,
-      vyskaPanaku,
-      polomer: Math.cbrt((kapacitaLahveMl * meritko) / jmenovatel),
-    };
-  };
-
-  let m = rozmery(panakSirka);
-  let vyskaLahve = 2 * lahev.tvar.stihlost * m.polomer;
-
-  // Dvě omezení najednou, obě kvůli tomu, že se láhev při nalévání otáčí
-  // kolem ústí a dno opíše oblouk dlouhý skoro jako celá láhev. Půllitrová
-  // láhev je přitom vedle čtyřicetimililitrového panáku čtyřikrát vyšší.
-  //
-  // Svisle: nad ústím musí zbýt místo na vyhoupnuté dno — a to nejen na osu
-  // láhve, ale i na její šířku, protože nakloněné dno je nahoře nejvyšší
-  // svým okrajem, ne středem. Odtud ten člen se štíhlostí.
-  // Vodorovně: bez stropu by láhev při nalévání do krajního panáku vyjela
-  // ze scény — a hráč ji potřebuje vidět celou.
-  const svislaRezerva =
+  // Rozmach: nad ústím musí zbýt místo na vyhoupnuté dno — a to nejen na osu
+  // láhve, ale i na její šířku, protože nakloněné dno je nahoře nejvyšší svým
+  // okrajem, ne středem. Odtud ten člen se štíhlostí.
+  const rozmach =
     1 +
     Math.abs(Math.cos(MAX_UHEL)) +
     Math.abs(Math.sin(MAX_UHEL)) / (2 * lahev.tvar.stihlost);
-  const mistoNaLahev = Math.min(
-    (stulY - m.vyskaPanaku - MEZERA_NAD_PANAKY - HORNI_LISTA) / svislaRezerva,
-    sirka * 0.5,
-  );
 
-  // Nevejde-li se, zmenší se scéna jako celek. Zmenšit jen láhev nelze —
-  // tím by přestal platit společný poměr a hra by lhala.
-  if (vyskaLahve > mistoNaLahev) {
-    panakSirka *= mistoNaLahev / vyskaLahve;
-    m = rozmery(panakSirka);
-    vyskaLahve = 2 * lahev.tvar.stihlost * m.polomer;
-  }
+  /**
+   * Kolik místa nad dnem stojící láhve scéna potřebuje: buď na ni samotnou,
+   * nebo na její rozmach zmenšený o to, o co při naklánění klesne. Spuštění
+   * ústí k panáku tak platí i za výšku scény — bez něj by nad lahví zůstal
+   * pruh prázdna vysoký jako polovina jejího rozmachu.
+   */
+  const nadDnem = (mezeraPodil: number) => {
+    const spust = Math.max(
+      0,
+      mezeraPodil +
+        vyskaLahvePodil -
+        (VYLITI_NAD_PANAKEM * stihlostPanaku + Math.abs(Math.cos(MAX_UHEL)) * polomerPodil),
+    );
+    return { spust, vyska: Math.max(vyskaLahvePodil, vyskaLahvePodil * rozmach - spust) };
+  };
+
+  const vyskaPodil = nadDnem(MEZERA_ZAKLAD).vyska + MEZERA_ZAKLAD + stihlostPanaku;
+
+  // Vodorovný dojezd: u krajního panáku se láhev naklání ke středu a dno
+  // opíše oblouk skoro přes celou svou délku. Půlka řady ten oblouk vykryje,
+  // proto se odečítá — u osmi panáků žádné omezení nezbyde, u dvou ano.
+  // Vodorovně z dna vyčnívá jen jeho průmět, tedy poloměr × |cos| náklonu;
+  // při plném náklonu leží láhev skoro naplocho a šířkou míří vzhůru.
+  const dosahPodil =
+    Math.abs(Math.sin(MAX_UHEL)) * vyskaLahvePodil +
+    Math.abs(Math.cos(MAX_UHEL)) * polomerPodil -
+    (ROZTEC * (panaku - 1)) / 2;
+
+  const vzduch = VZDUCH * ui;
+  const vyskaKVyplneni = Math.max(120, plochaVyska - (PODSTAVA + VZDUCH) * ui);
+  const meze = [
+    Math.min(vyskaKVyplneni, MAX_VYSKA_SCENY * ui) / vyskaPodil,
+    plochaSirka / (panaku * ROZTEC),
+  ];
+  if (dosahPodil > 0) meze.push(sirka / 2 / dosahPodil);
+
+  const panakSirka = Math.max(10, Math.min(...meze));
+  const panakVyska = stihlostPanaku * panakSirka;
+  const rozestup = ROZTEC * panakSirka;
+
+  // Zbylou výšku spolkne mezera nad panáky: láhev se zvedne a scéna se
+  // rozkročí, místo aby zůstal pruh prázdna nad ní i pod ní.
+  const volno = Math.max(0, vyskaKVyplneni - vyskaPodil * panakSirka);
+  const mezera =
+    MEZERA_ZAKLAD * panakSirka +
+    Math.min(volno * 0.7, (MEZERA_STROP - MEZERA_ZAKLAD) * panakSirka);
+
+  const nad = nadDnem(mezera / panakSirka);
+  const vyskaKompozice = nad.vyska * panakSirka + mezera + panakVyska;
+  const vyskaKlidu = vyskaLahvePodil * panakSirka + mezera + panakVyska;
+
+  // Kompozice se svisle centruje podle **stojící** láhve plus části jejího
+  // rozmachu. Podle rozmachu samotného ne: je vidět zlomek času a scéna by
+  // v klidu sedla u spodní hrany. Podle klidu samotného taky ne: na vysoké
+  // obrazovce by pak celé volno spadlo pod stůl. Rozmach se každopádně musí
+  // vejít — o to se stará spodní mez.
+  const stulY =
+    plochaY +
+    vzduch +
+    Math.min(
+      Math.max(
+        (vyskaKVyplneni + vyskaKlidu + 0.65 * (vyskaKompozice - vyskaKlidu)) / 2,
+        vyskaKompozice,
+      ),
+      vyskaKVyplneni,
+    );
 
   return {
     sirka,
     vyska,
+    ui,
+    hornilistaY: hornilista,
+    spodniListaY: vyska - spodniLista,
+    plochaY,
+    plochaVyska,
+    sloupec: Math.min(plochaSirka, MAX_SLOUPEC * ui),
     stulY,
     panakSirka,
-    panakVyska: m.vyskaPanaku,
+    panakVyska,
     rozestup,
-    prvniPanakX: OKRAJ,
-    lahevPolomer: m.polomer,
-    lahevVyska: vyskaLahve,
-    lahevDnoY: stulY - m.vyskaPanaku - MEZERA_NAD_PANAKY,
-    meritko: m.meritko,
+    prvniPanakX: (sirka - rozestup * panaku) / 2,
+    lahevPolomer: polomerPodil * panakSirka,
+    lahevVyska: vyskaLahvePodil * panakSirka,
+    lahevDnoY: stulY - panakVyska - mezera,
+    lahevSpust: nad.spust * panakSirka,
+    meritko: meritkoJednotkove * panakSirka ** 3,
   };
 }
 
@@ -125,19 +256,12 @@ export interface Bod {
 }
 
 /**
- * Kde je ústí hrdla po otočení láhve o `uhel` kolem dna.
- *
- * Hrdlo se dohledává v profilu tvaru (`lahev.hrdloY`), ne zadává ručně —
- * jinak by u každého nového tvaru bylo potřeba číslo doladit a proud by
- * u některé láhve vytékal ze skla.
- */
-/**
  * Bod, ze kterého vytéká rum: **spodní okraj ústí** nakloněné láhve.
  *
- * Ústí je kruh o poloměru `ustiPolomer` na vrcholu osy. Při náklonu z něj
- * rum přepadá přes nejnižší bod toho kruhu, ne přes jeho střed a rozhodně ne
- * zprostřed hrdla. Rozdíl je vidět na první pohled: proud jinak vytéká ze
- * skla kus pod okrajem.
+ * Ústí je kruh o poloměru `ustiPolomer` na vrcholu osy (`y = 1`), ne nejužší
+ * místo hrdla — u láhve s ramenem leží nejužší místo 28 % výšky pod okrajem
+ * a proud by vytékal zprostřed skla. Při náklonu z něj rum přepadá přes
+ * nejnižší bod toho kruhu, ne přes jeho střed.
  */
 export function ustiHrdla(rozvrh: Rozvrh, lahev: ProfilLahve, poloha: PolohaLahve): Bod {
   const s = Math.sin(poloha.uhel);
@@ -163,16 +287,19 @@ export interface PolohaLahve {
 /**
  * Kam posadit láhev, aby hrdlo mířilo přesně nad panák.
  *
- * Tři věci, které nejsou zřejmé:
+ * Čtyři věci, které nejsou zřejmé:
  *
- * 1. Kotvou je **střed ústí, ne dno**. Ústí drží stálou výšku nad panákem
- *    a dno kolem něj opisuje oblouk — přesně jako když někdo naklání láhev
- *    v ruce. Kdyby se otáčelo kolem dna, ústí by při plném náklonu ujelo
- *    stranou i dolů.
- * 2. Kotvou je střed ústí, ale rum přepadá přes jeho **spodní okraj**
+ * 1. Kotvou je **střed ústí, ne dno**. Ústí zůstává nad panákem a dno kolem
+ *    něj opisuje oblouk — přesně jako když někdo naklání láhev v ruce. Kdyby
+ *    se otáčelo kolem dna, ústí by při plném náklonu ujelo stranou i dolů.
+ * 2. Ústí přitom **klesá k panáku** (`lahevSpust`), protože u stojící láhve
+ *    visí celou její délku nad stolem. Bez klesání padá rum do panáku
+ *    z výšky celé láhve a scéna navíc platí za rozmach místem, které je pak
+ *    zbytek času prázdné.
+ * 3. Kotvou je střed ústí, ale rum přepadá přes jeho **spodní okraj**
  *    (`ustiHrdla`). Kotvit rovnou okraj by nešlo: u svislé láhve žádný
  *    „spodní okraj" není a láhev by při prvním stupni náklonu poskočila.
- * 3. Láhev se naklání **směrem ke středu scény**. U krajního panáku by
+ * 4. Láhev se naklání **směrem ke středu scény**. U krajního panáku by
  *    jinak dno vyjelo z obrazu. Odpovídá to i tomu, co dělá člověk u stolu:
  *    nakloní láhev dovnitř, ne přes okraj.
  */
@@ -185,8 +312,7 @@ export function polohaLahve(
   const smer = cilX < rozvrh.sirka / 2 ? -1 : 1;
   const uhel = smer * naklonPodil * MAX_UHEL;
   const H = rozvrh.lahevVyska;
-  // Střed ústí drží výšku, kterou má u rovně stojící láhve.
-  const ustiYSveta = rozvrh.lahevDnoY - H;
+  const ustiYSveta = rozvrh.lahevDnoY - H + naklonPodil * rozvrh.lahevSpust;
 
   return {
     uhel,

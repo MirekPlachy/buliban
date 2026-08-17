@@ -41,6 +41,54 @@ export function cestaNadoby(
   ctx.closePath();
 }
 
+/**
+ * Válcový stín přes šířku nádoby: u okrajů tmavší, uprostřed čistý.
+ *
+ * Bez něj je nádoba plochá skvrna s obrysem a scéna vypadá jako drátový
+ * model. Přechod jde napříč, ne shora dolů — sklo je rotační těleso a světlo
+ * z něj takhle odchází.
+ */
+function kresliValec(ctx: CanvasRenderingContext2D, polomerPx: number): void {
+  // Jen ztmavení k okrajům, žádné světlo uprostřed — světlo obstarává
+  // `kresliOdlesk`. Přechod se pokládá i přes kapalinu, protože ta je taky
+  // uvnitř kulatého skla; proto musí zůstat slabý, jinak z rumu udělá chrom.
+  const prechod = ctx.createLinearGradient(-polomerPx, 0, polomerPx, 0);
+  prechod.addColorStop(0, pruhledne('#000000', 0.3));
+  prechod.addColorStop(0.35, pruhledne('#000000', 0));
+  prechod.addColorStop(0.68, pruhledne('#000000', 0.04));
+  prechod.addColorStop(1, pruhledne('#000000', 0.32));
+  ctx.fillStyle = prechod;
+  ctx.fill();
+}
+
+/**
+ * Odlesk na skle: jedna svislá linka po levé straně nádoby.
+ *
+ * Kreslí se v místní soustavě, takže se s lahví naklání — a to je správně,
+ * odlesk je na skle, ne ve světě. Sleduje profil, aby nevylezl z obrysu.
+ */
+function kresliOdlesk(
+  ctx: CanvasRenderingContext2D,
+  polomer: (y: number) => number,
+  polomerPx: number,
+  vyskaPx: number,
+  paleta: Paleta,
+): void {
+  ctx.save();
+  ctx.beginPath();
+  for (let i = 0; i <= 24; i += 1) {
+    const y = 0.06 + (i / 24) * 0.86;
+    const x = -polomer(y) * polomerPx * 0.62;
+    if (i === 0) ctx.moveTo(x, -y * vyskaPx);
+    else ctx.lineTo(x, -y * vyskaPx);
+  }
+  ctx.strokeStyle = pruhledne(paleta.par, 0.16);
+  ctx.lineWidth = Math.max(1, polomerPx * 0.09);
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function kresliLahev(
   platno: Platno,
   r: Rozvrh,
@@ -131,6 +179,10 @@ export function kresliLahev(
   }
 
   cestaNadoby(ctx, lahev.polomer, r.lahevPolomer, r.lahevVyska);
+  kresliValec(ctx, r.lahevPolomer);
+  kresliOdlesk(ctx, lahev.polomer, r.lahevPolomer, r.lahevVyska, paleta);
+
+  cestaNadoby(ctx, lahev.polomer, r.lahevPolomer, r.lahevVyska);
   ctx.strokeStyle = pruhledne(paleta.par, 0.5);
   ctx.lineWidth = 1.5;
   ctx.stroke();
@@ -172,6 +224,12 @@ export function kresliPanak(
     return;
   }
 
+  // Stín na desce. Bez něj panák na stole nestojí, jen se ho dotýká.
+  ctx.fillStyle = pruhledne('#000000', 0.3);
+  ctx.beginPath();
+  ctx.ellipse(cx, r.stulY + 1, r.panakSirka * 0.62, r.panakSirka * 0.1, 0, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.save();
   ctx.translate(cx, r.stulY);
   cestaNadoby(ctx, panak.polomer, r.panakSirka / 2, r.panakVyska);
@@ -188,6 +246,10 @@ export function kresliPanak(
     ctx.fillRect(-r.panakSirka, -h - 2, r.panakSirka * 2, 2);
     ctx.restore();
   }
+
+  cestaNadoby(ctx, panak.polomer, r.panakSirka / 2, r.panakVyska);
+  kresliValec(ctx, r.panakSirka / 2);
+  kresliOdlesk(ctx, panak.polomer, r.panakSirka / 2, r.panakVyska, paleta);
 
   const plny = kresba.ml >= KAPACITA_PANAKU_ML - 1e-9;
   cestaNadoby(ctx, panak.polomer, r.panakSirka / 2, r.panakVyska);

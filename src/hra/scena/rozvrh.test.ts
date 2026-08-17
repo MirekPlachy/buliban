@@ -120,12 +120,18 @@ describe('geometrie nalévání', () => {
     }
   });
 
-  it('ústí drží výšku a míří nad panák v každém náklonu', () => {
+  it('ústí míří nad panák a při naklánění k němu klesá, ne od něj', () => {
+    // Ústí je vrchol láhve, takže u stojící visí celou její délku nad stolem.
+    // Při naklánění klesá k panáku — jinak by rum padal z pěti set pixelů
+    // a scéna by nad lahví držela prázdný pruh na rozmach. Klesání musí být
+    // jednosměrné: kdyby se ústí cestou vracelo nahoru, poskočila by láhev.
     for (const [sirka, vyska] of ROZLISENI) {
       for (let cislo = 1; cislo <= POSLEDNI_LEVEL; cislo += 1) {
         const { k, r } = rozvrhPro(cislo, sirka, vyska);
         for (let i = 0; i < k.panaku; i += 1) {
           const cil = stred(r, i);
+          let predchoziY = -Infinity;
+
           for (const podil of [0, 0.3, 0.7, 1]) {
             const p = polohaLahve(r, k.lahev, cil, podil);
             const stredX = p.x + r.lahevVyska * Math.sin(p.uhel);
@@ -135,9 +141,11 @@ describe('geometrie nalévání', () => {
               `${sirka}×${vyska} L${cislo} panák ${i}: ústí je vedle panáku`,
             );
             assert.ok(
-              Math.abs(stredY - (r.lahevDnoY - r.lahevVyska)) < 0.001,
-              `${sirka}×${vyska} L${cislo}: ústí se při náklonu propadlo`,
+              stredY >= predchoziY - 1e-9,
+              `${sirka}×${vyska} L${cislo}: ústí se při naklánění vrací nahoru`,
             );
+            predchoziY = stredY;
+
             const usti = ustiHrdla(r, k.lahev, p);
             assert.ok(
               usti.y < r.stulY - r.panakVyska,
@@ -148,6 +156,15 @@ describe('geometrie nalévání', () => {
               'výtok musí mířit dovnitř panáku',
             );
           }
+
+          // Nalévá se z ruky, ne z okapu: při plném náklonu smí být výtok nad
+          // panákem nejvýš o jeho vlastní výšku.
+          const usti = ustiHrdla(r, k.lahev, polohaLahve(r, k.lahev, cil, 1));
+          assert.ok(
+            r.stulY - r.panakVyska - usti.y < r.panakVyska,
+            `${sirka}×${vyska} L${cislo}: rum padá do panáku z ` +
+              `${(r.stulY - r.panakVyska - usti.y).toFixed(0)} px`,
+          );
         }
       }
     }

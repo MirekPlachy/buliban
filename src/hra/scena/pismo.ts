@@ -1,18 +1,68 @@
 /**
- * Text na plátně. Zalamování a jednotné písmo na jednom místě, ať se
- * nastavení kontextu neopakuje u každého nápisu.
+ * Text na plátně.
+ *
+ * Tři role písma, ale **jeden zdroj**: display i tělo si hra bere z téhož
+ * designového systému jako web (`--font-display`, `--font-body`), stejně jako
+ * si z něj bere barvy. Dokud tu stály natvrdo `system-ui` a `ui-monospace`,
+ * vypadala hra jako cizí kus softwaru vlepený do stránky.
+ *
+ * Číslice zůstávají monospace záměrně — objemy a odchylky mají působit jako
+ * z měřidla a hlavně nesmí poskakovat, když se mění o desetinu.
+ *
+ * Velikosti se zadávají v **návrhových pixelech** a volající je násobí
+ * `rozvrh.ui`. Fixní velikosti vypadaly na telefonu naducaně a na velkém
+ * monitoru jako drobné písmo pod obří lahví.
  */
 
-export const PISMO = 'ui-sans-serif, system-ui, sans-serif';
-/** Tabulkové číslice — objemy a odchylky mají vypadat jako z měřidla. */
-export const CISLA = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+/** Role písma, ne konkrétní rodina — tu určí designový systém. */
+export type Rez = 'nadpis' | 'text' | 'cisla';
+
+const ZALOHA: Record<Rez, string> = {
+  nadpis: "Georgia, 'Times New Roman', serif",
+  text: 'ui-sans-serif, system-ui, sans-serif',
+  cisla: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+};
+
+let rodiny: Record<Rez, string> | null = null;
+
+/** Rodiny se čtou jednou; `getComputedStyle` na každý nápis by stálo snímky. */
+function rodina(rez: Rez = 'text'): string {
+  if (!rodiny) {
+    rodiny = { ...ZALOHA };
+    if (typeof document !== 'undefined') {
+      const styl = getComputedStyle(document.documentElement);
+      for (const klic of ['nadpis', 'text'] as const) {
+        const nazev = klic === 'nadpis' ? '--font-display' : '--font-body';
+        const hodnota = styl.getPropertyValue(nazev).trim();
+        if (hodnota) rodiny[klic] = hodnota;
+      }
+    }
+  }
+  return rodiny[rez];
+}
 
 export interface Napis {
   velikost: number;
   barva: string;
   zarovnani?: CanvasTextAlign;
-  pismo?: string;
+  /** Výchozí `alphabetic`. Pro odsazení odshora se hodí `top`. */
+  svisle?: CanvasTextBaseline;
+  pismo?: Rez;
   tucne?: boolean;
+  /** Prostrkání v pixelech. Jen pro verzálkové štítky. */
+  prostrkani?: number;
+}
+
+/**
+ * Nastaví kontext podle nápisu. Odděleně od kreslení proto, že měření šířky
+ * musí použít **přesně stejné** nastavení — jinak se zalomený odstavec
+ * vejde na papíře a přeteče na obrazovce.
+ */
+function nastav(ctx: CanvasRenderingContext2D, napis: Napis): void {
+  ctx.font = `${napis.tucne ? '600 ' : ''}${napis.velikost}px ${rodina(napis.pismo)}`;
+  ctx.letterSpacing = `${napis.prostrkani ?? 0}px`;
+  ctx.textAlign = napis.zarovnani ?? 'left';
+  ctx.textBaseline = napis.svisle ?? 'alphabetic';
 }
 
 export function text(
@@ -22,11 +72,18 @@ export function text(
   y: number,
   napis: Napis,
 ): void {
-  ctx.font = `${napis.tucne ? '600 ' : ''}${napis.velikost}px ${napis.pismo ?? PISMO}`;
+  nastav(ctx, napis);
   ctx.fillStyle = napis.barva;
-  ctx.textAlign = napis.zarovnani ?? 'left';
-  ctx.textBaseline = 'alphabetic';
   ctx.fillText(obsah, x, y);
+}
+
+export function sirkaTextu(
+  ctx: CanvasRenderingContext2D,
+  obsah: string,
+  napis: Napis,
+): number {
+  nastav(ctx, napis);
+  return ctx.measureText(obsah).width;
 }
 
 /** Rozdělí text na řádky, které se vejdou do `sirka`. */
@@ -36,7 +93,7 @@ export function zalom(
   sirka: number,
   napis: Napis,
 ): string[] {
-  ctx.font = `${napis.velikost}px ${napis.pismo ?? PISMO}`;
+  nastav(ctx, napis);
   const radky: string[] = [];
   let radek = '';
 
@@ -53,7 +110,24 @@ export function zalom(
   return radky;
 }
 
-/** Vypíše zalomený odstavec a vrátí `y` pod ním. */
+/** Výška zalomeného odstavce, aniž by se cokoli nakreslilo. */
+export function vyskaOdstavce(
+  ctx: CanvasRenderingContext2D,
+  obsah: string,
+  sirka: number,
+  napis: Napis,
+  rozestup = 1.5,
+): number {
+  return zalom(ctx, obsah, sirka, napis).length * napis.velikost * rozestup;
+}
+
+/**
+ * Vypíše zalomený odstavec a vrátí `y` pod ním.
+ *
+ * `y` je **horní hrana** prvního řádku, ne účaří: skládat panely z účaří
+ * znamená u každého odstavce dopočítávat, o kolik text vystoupá nad zadaný
+ * bod, a přesně tam vznikaly nakřivo posazené karty.
+ */
 export function odstavec(
   ctx: CanvasRenderingContext2D,
   obsah: string,
@@ -61,11 +135,12 @@ export function odstavec(
   y: number,
   sirka: number,
   napis: Napis,
-  rozestup = 1.45,
+  rozestup = 1.5,
 ): number {
+  const vyskaRadku = napis.velikost * rozestup;
   const radky = zalom(ctx, obsah, sirka, napis);
   radky.forEach((radek, i) => {
-    text(ctx, radek, x, y + i * napis.velikost * rozestup, napis);
+    text(ctx, radek, x, y + i * vyskaRadku, { ...napis, svisle: 'top' });
   });
-  return y + radky.length * napis.velikost * rozestup;
+  return y + radky.length * vyskaRadku;
 }

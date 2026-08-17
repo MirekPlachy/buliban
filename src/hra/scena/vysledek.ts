@@ -8,6 +8,9 @@
  * linka přesně tam, kde v prvních dvou levelech svítí orientační ryska.
  * Jedna a tatáž linka tedy po celou hru znamená „tolik měl mít každý" —
  * napřed jako nápověda, potom jako vysvětlení.
+ *
+ * Rozpad bodů je proto **nahoře v panelu**, ne přes scénu: linka a panáky
+ * jsou to podstatné a čísla jim nesmí stát v cestě.
  */
 
 import * as texty from '../texty.ts';
@@ -16,29 +19,63 @@ import type { Vysledek } from '../jadro/skore.ts';
 import { pruhledne } from './barvy.ts';
 import type { Paleta } from './barvy.ts';
 import type { Platno } from './platno.ts';
-import { CISLA, text } from './pismo.ts';
-import { stred } from './rozvrh.ts';
+import { odstavec, sirkaTextu, text, vyskaOdstavce } from './pismo.ts';
+import { kresliLinku, kresliPanel, stitek, zaobleny } from './prvky.ts';
+import { sloupecX, stred } from './rozvrh.ts';
 import type { Rozvrh } from './rozvrh.ts';
 import { kresliPanaky, podilCile } from './stul.ts';
 
-function polozka(
-  platno: Platno,
-  r: Rozvrh,
-  paleta: Paleta,
-  y: number,
-  popis: string,
-  hodnota: string,
-  barva: string,
-): void {
-  const sirka = Math.min(r.sirka - 56, 380);
-  const x = (r.sirka - sirka) / 2;
-  text(platno.ctx, popis, x, y, { velikost: 14, barva: pruhledne(paleta.par, 0.7) });
-  text(platno.ctx, hodnota, x + sirka, y, {
-    velikost: 14,
-    barva,
-    zarovnani: 'right',
-    pismo: CISLA,
+/** Jedna řádka rozpadu bodů: popis vlevo, hodnota vpravo. */
+interface Polozka {
+  popis: string;
+  hodnota: string;
+  barva: (paleta: Paleta) => string;
+  /** Součet — silnější linka nad ním a výraznější písmo. */
+  soucet?: boolean;
+}
+
+function rozpad(v: Vysledek): Polozka[] {
+  const radky: Polozka[] = [
+    { popis: texty.vysledek.rovnomernost, hodnota: `${v.rovnomernost}`, barva: (p) => p.par },
+  ];
+  if (v.casovyBonus > 0) {
+    radky.push({ popis: texty.vysledek.cas, hodnota: `+${v.casovyBonus}`, barva: (p) => p.par });
+  }
+  if (v.pokutaPreliti > 0) {
+    radky.push({
+      popis: texty.vysledek.preliti,
+      hodnota: `−${v.pokutaPreliti}`,
+      barva: (p) => p.zhava,
+    });
+  }
+  if (v.pokutaRozlito > 0) {
+    radky.push({
+      popis: texty.vysledek.rozlito,
+      hodnota: `−${v.pokutaRozlito}`,
+      barva: (p) => p.zhava,
+    });
+  }
+  if (v.pokutaZbytek > 0) {
+    radky.push({
+      popis: `${texty.vysledek.zbytek} (${v.zbytekMl.toFixed(0)} ml)`,
+      hodnota: `−${v.pokutaZbytek}`,
+      barva: (p) => p.zhava,
+    });
+  }
+  if (v.presnaRuka) {
+    radky.push({
+      popis: texty.vysledek.presnaRuka,
+      hodnota: '+500 · ×1,2',
+      barva: (p) => p.zazeh,
+    });
+  }
+  radky.push({
+    popis: texty.vysledek.celkem,
+    hodnota: `${v.celkem}`,
+    barva: (p) => p.rumSvetlo,
+    soucet: true,
   });
+  return radky;
 }
 
 export function kresliVysledek(
@@ -49,8 +86,9 @@ export function kresliVysledek(
   v: Vysledek,
 ): void {
   const { ctx } = platno;
+  const u = r.ui;
 
-  ctx.fillStyle = pruhledne(paleta.sklo, 0.8);
+  ctx.fillStyle = pruhledne(paleta.sklo, 0.78);
   ctx.fillRect(0, 0, r.sirka, r.vyska);
 
   // Odnesené panáky se ve výsledku vrátí — hráč má vidět, co vlastně nalil.
@@ -67,75 +105,102 @@ export function kresliVysledek(
   ctx.stroke();
   ctx.shadowBlur = 0;
 
-  text(ctx, texty.vysledek.linka, 14, cilY - 9, {
-    velikost: 11,
-    barva: pruhledne(paleta.zazeh, 0.85),
-  });
+  // Popisek linky patří NAD řadu, ne k lince samotné: linka leží uvnitř
+  // panáků a na užší obrazovce sahá řada až ke kraji, takže popisek u linky
+  // přistane přes první sklo.
+  stitek(
+    ctx,
+    texty.vysledek.linka,
+    16 * u,
+    r.stulY - r.panakVyska - 22 * u,
+    r,
+    pruhledne(paleta.zazeh, 0.9),
+  );
 
+  // Odchylka se píše nad linku, když je panák přelitý, a pod ni, když
+  // chybí — poloha nese totéž co znaménko. Pod ní ale leží rum a nad ní
+  // sklo, takže obojí potřebuje vlastní podklad; bez něj se čísla ztratí
+  // přesně na těch panácích, kde na nich záleží nejvíc.
+  const velikostOdchylky = Math.min(13 * u, r.rozestup / 4.4);
   v.odchylkyMl.forEach((odchylka, i) => {
     const presne = Math.abs(odchylka) < 0.5;
-    text(
-      ctx,
-      `${odchylka >= 0 ? '+' : '−'}${Math.abs(odchylka).toFixed(1)}`,
-      stred(r, i),
-      odchylka >= 0 ? cilY - 22 : cilY + 26,
-      {
-        velikost: Math.min(13, r.rozestup / 4.2),
-        barva: presne ? paleta.zazeh : paleta.zhava,
-        zarovnani: 'center',
-        pismo: CISLA,
-      },
-    );
+    const napis = {
+      velikost: velikostOdchylky,
+      barva: presne ? paleta.zazeh : paleta.zhava,
+      zarovnani: 'center' as const,
+      svisle: 'middle' as const,
+      pismo: 'cisla' as const,
+    };
+    const obsah = `${odchylka >= 0 ? '+' : '−'}${Math.abs(odchylka).toFixed(1)}`;
+    const x = stred(r, i);
+    const y = cilY + (odchylka >= 0 ? -1 : 1) * velikostOdchylky * 1.35;
+    const sirkaChipu = sirkaTextu(ctx, obsah, napis) + 10 * u;
+    const vyskaChipu = velikostOdchylky * 1.5;
+
+    zaobleny(ctx, x - sirkaChipu / 2, y - vyskaChipu / 2, sirkaChipu, vyskaChipu, vyskaChipu / 2);
+    ctx.fillStyle = pruhledne(paleta.sklo, 0.82);
+    ctx.fill();
+    text(ctx, obsah, x, y, napis);
   });
 
-  let y = Math.max(64, r.vyska * 0.12);
+  // ----------------------------------------------------------- panel s body
+  const radky = rozpad(v);
   const nazev = v.medaile ? texty.medaile[v.medaile] : texty.bezMedaile;
-  text(ctx, nazev, r.sirka / 2, y, {
-    velikost: 26,
-    barva: v.medaile ? paleta.rumSvetlo : pruhledne(paleta.par, 0.7),
-    zarovnani: 'center',
+  const sirka = Math.min(r.sloupec, 420 * u);
+  const odsazeni = 24 * u;
+  const nadpis = {
+    velikost: 23 * u,
+    barva: v.medaile ? paleta.rumSvetlo : pruhledne(paleta.par, 0.75),
+    zarovnani: 'center' as const,
+    pismo: 'nadpis' as const,
     tucne: true,
+  };
+  const vyskaRadku = 22 * u;
+  const vyskaNadpisu = vyskaOdstavce(ctx, nazev, sirka - 2 * odsazeni, nadpis, 1.2);
+  const vyska = 20 * u + vyskaNadpisu + 16 * u + radky.length * vyskaRadku + 22 * u;
+
+  const x = (r.sirka - sirka) / 2;
+  const y = r.plochaY + 14 * u;
+  kresliPanel(ctx, paleta, r, x, y, sirka, vyska, {
+    obrys: pruhledne(v.medaile ? paleta.rum : paleta.par, 0.24),
   });
 
-  y += 34;
-  polozka(platno, r, paleta, y, texty.vysledek.rovnomernost, `${v.rovnomernost}`, paleta.par);
-  y += 21;
-  if (v.casovyBonus > 0) {
-    polozka(platno, r, paleta, y, texty.vysledek.cas, `+${v.casovyBonus}`, paleta.par);
-    y += 21;
-  }
-  if (v.pokutaPreliti > 0) {
-    polozka(platno, r, paleta, y, texty.vysledek.preliti, `−${v.pokutaPreliti}`, paleta.zhava);
-    y += 21;
-  }
-  if (v.pokutaRozlito > 0) {
-    polozka(platno, r, paleta, y, texty.vysledek.rozlito, `−${v.pokutaRozlito}`, paleta.zhava);
-    y += 21;
-  }
-  if (v.pokutaZbytek > 0) {
-    polozka(
-      platno,
-      r,
-      paleta,
-      y,
-      `${texty.vysledek.zbytek} (${v.zbytekMl.toFixed(0)} ml)`,
-      `−${v.pokutaZbytek}`,
-      paleta.zhava,
-    );
-    y += 21;
-  }
-  if (v.presnaRuka) {
-    polozka(platno, r, paleta, y, texty.vysledek.presnaRuka, '+500 · ×1,2', paleta.zazeh);
-    y += 21;
+  let kurzor = y + 20 * u;
+  text(ctx, nazev, r.sirka / 2, kurzor, { ...nadpis, svisle: 'top' });
+  kurzor += vyskaNadpisu + 14 * u;
+
+  for (const polozka of radky) {
+    if (polozka.soucet) {
+      kresliLinku(
+        ctx,
+        x + odsazeni,
+        x + sirka - odsazeni,
+        kurzor,
+        pruhledne(paleta.par, 0.14),
+      );
+      kurzor += 2 * u;
+    }
+    const velikost = (polozka.soucet ? 15 : 13.5) * u;
+    text(ctx, polozka.popis, x + odsazeni, kurzor + vyskaRadku / 2, {
+      velikost,
+      barva: pruhledne(paleta.par, polozka.soucet ? 0.9 : 0.65),
+      svisle: 'middle',
+    });
+    text(ctx, polozka.hodnota, x + sirka - odsazeni, kurzor + vyskaRadku / 2, {
+      velikost,
+      barva: polozka.barva(paleta),
+      zarovnani: 'right',
+      svisle: 'middle',
+      pismo: 'cisla',
+    });
+    kurzor += vyskaRadku;
   }
 
-  y += 6;
-  polozka(platno, r, paleta, y, texty.vysledek.celkem, `${v.celkem}`, paleta.rumSvetlo);
-
-  text(ctx, texty.vysledek.dal, r.sirka / 2, r.vyska - 18, {
-    velikost: 14,
+  text(ctx, texty.vysledek.dal, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
+    velikost: 13 * u,
     barva: pruhledne(paleta.par, 0.55),
     zarovnani: 'center',
+    svisle: 'middle',
   });
 }
 
@@ -147,43 +212,58 @@ export function kresliKonec(
   medaile: string[],
 ): void {
   const { ctx } = platno;
+  const u = r.ui;
   ctx.fillStyle = paleta.sklo;
   ctx.fillRect(0, 0, r.sirka, r.vyska);
 
-  let y = Math.max(90, r.vyska / 2 - 110);
-  text(ctx, texty.konec.nadpis, r.sirka / 2, y, {
-    velikost: 30,
+  const sirka = r.sloupec;
+  const x = sloupecX(r);
+  const titul = {
+    velikost: 30 * u,
+    barva: paleta.rumSvetlo,
+    zarovnani: 'center' as const,
+    pismo: 'nadpis' as const,
+    tucne: true,
+  };
+  // Titul se na užší obrazovce zalomí, takže výška panelu z něj musí plynout,
+  // ne být zapsaná číslem.
+  const vyskaTitulu = vyskaOdstavce(ctx, texty.titul(skore), sirka - 52 * u, titul, 1.2);
+  const vyska = vyskaTitulu + 196 * u;
+  const y = Math.max(r.plochaY, (r.vyska - vyska) / 2);
+  kresliPanel(ctx, paleta, r, x, y, sirka, vyska, { obrys: pruhledne(paleta.rum, 0.28) });
+
+  let kurzor = y + 26 * u;
+  stitek(ctx, texty.konec.nadpis, r.sirka / 2, kurzor, r, pruhledne(paleta.rum, 0.9), 'center');
+
+  kurzor += 26 * u;
+  odstavec(ctx, texty.titul(skore), r.sirka / 2, kurzor, sirka - 52 * u, titul, 1.2);
+
+  kurzor += vyskaTitulu + 16 * u;
+  text(ctx, `${skore}`, r.sirka / 2, kurzor, {
+    velikost: 34 * u,
     barva: paleta.par,
     zarovnani: 'center',
-    tucne: true,
+    svisle: 'top',
+    pismo: 'cisla',
   });
+  kurzor += 42 * u;
+  stitek(ctx, texty.konec.body, r.sirka / 2, kurzor, r, pruhledne(paleta.par, 0.45), 'center');
 
-  y += 52;
-  text(ctx, texty.titul(skore), r.sirka / 2, y, {
-    velikost: 24,
-    barva: paleta.rumSvetlo,
+  kurzor += 24 * u;
+  kresliLinku(ctx, x + 40 * u, x + sirka - 40 * u, kurzor, pruhledne(paleta.par, 0.12));
+  kurzor += 14 * u;
+  text(ctx, medaile.join('  '), r.sirka / 2, kurzor, {
+    velikost: 17 * u,
+    barva: pruhledne(paleta.par, 0.7),
     zarovnani: 'center',
+    svisle: 'top',
+    pismo: 'cisla',
   });
 
-  y += 40;
-  text(ctx, `${skore} bodů`, r.sirka / 2, y, {
-    velikost: 18,
-    barva: pruhledne(paleta.par, 0.8),
-    zarovnani: 'center',
-    pismo: CISLA,
-  });
-
-  y += 34;
-  text(ctx, medaile.join('  '), r.sirka / 2, y, {
-    velikost: 15,
+  text(ctx, texty.konec.znovu, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
+    velikost: 14 * u,
     barva: pruhledne(paleta.par, 0.6),
     zarovnani: 'center',
-    pismo: CISLA,
-  });
-
-  text(ctx, texty.konec.znovu, r.sirka / 2, r.vyska - 40, {
-    velikost: 15,
-    barva: pruhledne(paleta.par, 0.6),
-    zarovnani: 'center',
+    svisle: 'middle',
   });
 }

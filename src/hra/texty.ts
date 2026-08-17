@@ -12,6 +12,13 @@ import type { Level } from './levely.ts';
 import type { FazeRozlevani } from './jadro/rozlevani.ts';
 import type { Medaile } from './jadro/skore.ts';
 
+/** Štítky horní lišty. Stejné ve všech fázích, proto vedle nápověd. */
+export const hud = {
+  level: 'Level',
+  panak: 'Panák',
+  skore: 'Skóre',
+};
+
 export const napovedy: Record<FazeRozlevani, string> = {
   ceka: 'Drž a nalévej',
   naklani: 'Láhev se otáčí…',
@@ -117,7 +124,11 @@ export function komentarUkazky(faze: FazeRozlevani, aktivni: number, panaku: num
 
 export const ukazka = {
   znacka: 'Ukázka',
-  patka: 'Tohle si teď zkusíš sám',
+  /**
+   * Předání ovládání po ukázce. Ukazuje se místo nápovědy, dokud hráč
+   * nenalije — scéna se v tu chvíli nezmění, takže se to musí říct.
+   */
+  patka: 'Teď ty. Drž a nalévej.',
   preskocit: 'Přeskočit ukázku',
 };
 
@@ -143,6 +154,7 @@ export const vysledek = {
 
 export const konec = {
   nadpis: 'Rozlito do dna',
+  body: 'bodů celkem',
   znovu: 'Hrát znovu',
 };
 

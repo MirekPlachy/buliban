@@ -1,5 +1,5 @@
 /**
- * Stůl: řada panáků, proud z hrdla, přelití a kaluže.
+ * Stůl: deska, řada panáků, proud z hrdla, přelití a kaluže.
  *
  * Rozpočet efektů je záměrně nízký — veškerá odvaha se utrácí na dvou
  * místech, „lince rovnosti" ve výsledku a (později) na zážehu. Přelití je
@@ -22,13 +22,32 @@ export function podilCile(stav: StavRozlevani): number {
   return stav.konfig.panak.vyskaZObjemu(stav.konfig.cilMl / KAPACITA_PANAKU_ML);
 }
 
+/**
+ * Deska stolu. Jedna linka byla málo: bez desky panáky nestály na ničem
+ * a scéna se rozpadla na předměty plovoucí v prázdnu.
+ */
 export function kresliDesku(platno: Platno, r: Rozvrh, paleta: Paleta): void {
   const { ctx } = platno;
-  ctx.strokeStyle = pruhledne(paleta.par, 0.22);
+  const hloubka = Math.min(r.vyska - r.stulY, 70 * r.ui);
+  if (hloubka > 0) {
+    const prechod = ctx.createLinearGradient(0, r.stulY, 0, r.stulY + hloubka);
+    prechod.addColorStop(0, pruhledne(paleta.skloStin, 0.5));
+    prechod.addColorStop(1, pruhledne(paleta.skloStin, 0));
+    ctx.fillStyle = prechod;
+    ctx.fillRect(0, r.stulY, r.sirka, hloubka);
+  }
+
+  // Světlo na hraně desky. Nejsytější pod panáky, ke krajům se vytrácí —
+  // scéna tím dostane střed, aniž by se do ní kreslila lampa.
+  const zaostreni = ctx.createLinearGradient(0, 0, r.sirka, 0);
+  zaostreni.addColorStop(0, pruhledne(paleta.par, 0.04));
+  zaostreni.addColorStop(0.5, pruhledne(paleta.par, 0.3));
+  zaostreni.addColorStop(1, pruhledne(paleta.par, 0.04));
+  ctx.strokeStyle = zaostreni;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(0, r.stulY + 0.5);
-  ctx.lineTo(r.sirka, r.stulY + 0.5);
+  ctx.moveTo(0, Math.round(r.stulY) + 0.5);
+  ctx.lineTo(r.sirka, Math.round(r.stulY) + 0.5);
   ctx.stroke();
 }
 
