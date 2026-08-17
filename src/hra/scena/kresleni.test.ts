@@ -26,7 +26,9 @@ import * as texty from '../texty.ts';
 import type { Paleta } from './barvy.ts';
 import { vykresli } from './index.ts';
 import type { Pohled, Rezim } from './index.ts';
+import { lahevOtevirani } from './otevirani.ts';
 import type { Platno } from './platno.ts';
+import { lahevRitualu } from './ritual.ts';
 import { polohaLahve, spocitejRozvrh } from './rozvrh.ts';
 
 const paleta: Paleta = {
@@ -259,6 +261,63 @@ describe('všechny fáze rituálu se dají nakreslit', () => {
           }),
         `fáze ${f}`,
       );
+    }
+  });
+});
+
+describe('láhev se vejde do svého pásu', () => {
+  it('v rituálu nevyleze nad plochu ani přes teploměr', () => {
+    // Regrese: rozměry láhve v `Rozvrh` jsou spočítané pro kompozici
+    // rozlévání a do zbytku plochy se nevejdou. Na notebooku vylezlo ústí
+    // za horní lištu a s ním i plamen — tedy pointa celé hry.
+    for (const [sirka, vyska] of PLOCHY) {
+      for (const cisloLevelu of [1, 4, 8]) {
+        const stav = zalozStav(zalozKonfiguraci(cisloLevelu, 1));
+        const r = spocitejRozvrh(
+          sirka,
+          vyska,
+          stav.konfig.panaku,
+          stav.konfig.kapacitaLahveMl,
+          stav.konfig.lahev,
+          stav.konfig.panak,
+        );
+        const { rozvrh: rl, cy } = lahevRitualu(r);
+        const H = rl.lahevVyska;
+        const kde = `${sirka}×${vyska} L${cisloLevelu}`;
+
+        // Nastojato: od dna po ústí. Naležato: totéž, jen vodorovně.
+        assert.ok(cy - H / 2 >= r.plochaY, `${kde}: ústí vyjelo nad plochu`);
+        assert.ok(
+          cy + H / 2 <= r.plochaY + r.plochaVyska * 0.56,
+          `${kde}: dno leze přes teploměr`,
+        );
+        assert.ok(H <= r.sloupec, `${kde}: ležatá láhev je širší než sloupec`);
+        assert.ok(H > 40, `${kde}: láhev se zmenšila na nic (${H.toFixed(0)} px)`);
+      }
+    }
+  });
+
+  it('při otevírání nevyleze nad plochu ani na timing lištu', () => {
+    for (const [sirka, vyska] of PLOCHY) {
+      const stav = zalozStav(zalozKonfiguraci(3, 1));
+      const r = spocitejRozvrh(
+        sirka,
+        vyska,
+        stav.konfig.panaku,
+        stav.konfig.kapacitaLahveMl,
+        stav.konfig.lahev,
+        stav.konfig.panak,
+      );
+      const { rozvrh: rl, cy } = lahevOtevirani(r);
+      const H = rl.lahevVyska;
+      const kde = `${sirka}×${vyska}`;
+
+      assert.ok(cy - H / 2 >= r.plochaY, `${kde}: ústí vyjelo nad plochu`);
+      assert.ok(
+        cy + H / 2 <= r.plochaY + r.plochaVyska * 0.82,
+        `${kde}: dno leze na timing lištu`,
+      );
+      assert.ok(H > 40, `${kde}: láhev se zmenšila na nic`);
     }
   });
 });

@@ -22,15 +22,19 @@ import { pruhledne } from './barvy.ts';
 import type { Paleta } from './barvy.ts';
 import { kresliLahev } from './nadoby.ts';
 import type { Platno } from './platno.ts';
-import { text } from './pismo.ts';
+import { odstavec, text } from './pismo.ts';
 import { kresliPanel, stitek, zaobleny } from './prvky.ts';
+import { vlozLahev } from './rozvrh.ts';
 import type { PolohaLahve, Rozvrh } from './rozvrh.ts';
 
 /** Svislé rozdělení plochy: láhev, teploměr, dlaždice. */
-const LAHEV_DO = 0.5;
 const TEPLOMER_Y = 0.56;
 const DLAZDICE_OD = 0.66;
 const DLAZDICE_DO = 0.98;
+
+/** Volný pruh nad lahví a mezi lahví a štítkem teploměru, v návrhových px. */
+const OKRAJ_LAHVE = 16;
+const NAD_TEPLOMEREM = 26;
 
 const TEPLOMER_VYSKA = 18;
 const SLOUPCU = 2;
@@ -74,15 +78,31 @@ export function dlazdicePod(r: Rozvrh, pocet: number, x: number, y: number): num
 }
 
 /**
+ * Pás plochy, ve kterém stojí láhev: od horní hrany po štítek teploměru.
+ * Exportované, protože se to testuje — láhev z něj nesmí vylézt na žádné
+ * obrazovce ani na žádném levelu.
+ */
+export function lahevRitualu(r: Rozvrh): ReturnType<typeof vlozLahev> {
+  return vlozLahev(
+    r,
+    r.plochaY + OKRAJ_LAHVE * r.ui,
+    r.plochaY + r.plochaVyska * TEPLOMER_Y - NAD_TEPLOMEREM * r.ui,
+  );
+}
+
+/**
  * Kam posadit láhev. Nastojato stojí na dně, naležato míří hrdlem doprava.
  *
  * Otáčí se kolem dna, stejně jako při rozlévání — jen tady je úhel daný
- * volbou hráče, ne náklonem k panáku.
+ * volbou hráče, ne náklonem k panáku. Obě polohy se centrují na týž bod,
+ * takže se láhev při volbě jen otočí a nepodskočí.
  */
-function polohaProRitual(r: Rozvrh, stav: StavRitualu): PolohaLahve {
-  const cx = r.sirka / 2;
-  const cy = r.plochaY + r.plochaVyska * LAHEV_DO * 0.62;
-  const H = r.lahevVyska;
+function polohaProRitual(
+  vsazena: ReturnType<typeof vlozLahev>,
+  stav: StavRitualu,
+): PolohaLahve {
+  const { cx, cy } = vsazena;
+  const H = vsazena.rozvrh.lahevVyska;
 
   if (stav.poloha === 'horizontalni') {
     return { x: cx - H / 2, y: cy, uhel: Math.PI / 2 };
@@ -239,7 +259,13 @@ function kresliDlazdice(
   });
 }
 
-/** Hláška po zážehu, tichu nebo prasknutí. Přes střed, krátce. */
+/**
+ * Hláška po zážehu, tichu nebo prasknutí.
+ *
+ * Sedí **v pásu dlaždic**, ne na teploměru: teploměr je v tu chvíli pořád
+ * vidět a hráč z něj čte, jak moc minul. Napsat hlášku přes něj by schovalo
+ * přesně to, co ji vysvětluje. Dlaždice tam v těchhle fázích žádné nejsou.
+ */
 function kresliHlasku(
   platno: Platno,
   r: Rozvrh,
@@ -258,14 +284,21 @@ function kresliHlasku(
   const barva =
     stav.faze === 'zazeh' ? paleta.zazeh : stav.faze === 'prasklo' ? paleta.zhava : paleta.par;
 
-  text(platno.ctx, obsah, r.sirka / 2, r.plochaY + r.plochaVyska * TEPLOMER_Y, {
-    velikost: 21 * r.ui,
-    barva,
-    zarovnani: 'center',
-    svisle: 'middle',
-    pismo: 'nadpis',
-    tucne: true,
-  });
+  odstavec(
+    platno.ctx,
+    obsah,
+    r.sirka / 2,
+    r.plochaY + r.plochaVyska * DLAZDICE_OD,
+    r.sloupec,
+    {
+      velikost: 21 * r.ui,
+      barva,
+      zarovnani: 'center',
+      pismo: 'nadpis',
+      tucne: true,
+    },
+    1.3,
+  );
 }
 
 export function kresliRitual(
@@ -275,22 +308,26 @@ export function kresliRitual(
   rozlevani: StavRozlevani,
   stav: StavRitualu,
 ): void {
-  const poloha = polohaProRitual(r, stav);
-  kresliLahev(platno, r, paleta, rozlevani, poloha);
+  // Láhev se vsadí nad teploměr a zmenší, aby se tam vešla. Bez toho jí na
+  // notebooku vylezlo ústí za horní lištu — a s ním i plamen.
+  const vsazena = lahevRitualu(r);
+  const rl = vsazena.rozvrh;
+  const poloha = polohaProRitual(vsazena, stav);
+  kresliLahev(platno, rl, paleta, rozlevani, poloha);
 
   // Ústí: u stojící láhve nahoře, u ležící vpravo. Plamen i směr z toho plyne.
-  const H = r.lahevVyska;
+  const H = rl.lahevVyska;
   const ustiX = poloha.x + H * Math.sin(poloha.uhel);
   const ustiY = poloha.y - H * Math.cos(poloha.uhel);
 
   const horiPlamen = stav.faze === 'ceka' || stav.faze === 'kresa';
   if (horiPlamen) {
-    kresliPlamen(platno, r, paleta, ustiX, ustiY, poloha.uhel, 0.18, stav.casS);
+    kresliPlamen(platno, rl, paleta, ustiX, ustiY, poloha.uhel, 0.18, stav.casS);
   }
   if (stav.faze === 'zazeh') {
     // Zážeh vychází Z láhve, ne z ruky — proto stejný bod, ale mnohem větší
     // plamen řízený kvalitou zásahu.
-    kresliPlamen(platno, r, paleta, ustiX, ustiY, poloha.uhel, stav.kvalita, stav.casS);
+    kresliPlamen(platno, rl, paleta, ustiX, ustiY, poloha.uhel, stav.kvalita, stav.casS);
   }
 
   if (stav.faze !== 'poloha') kresliTeplomer(platno, r, paleta, stav);

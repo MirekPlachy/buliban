@@ -19,12 +19,31 @@ import { kresliLahev } from './nadoby.ts';
 import type { Platno } from './platno.ts';
 import { text } from './pismo.ts';
 import { zaobleny } from './prvky.ts';
-import { polohaLahve, ustiHrdla } from './rozvrh.ts';
-import type { Rozvrh } from './rozvrh.ts';
+import { ustiHrdla, vlozLahev } from './rozvrh.ts';
+import type { PolohaLahve, Rozvrh } from './rozvrh.ts';
 
 /** Kde leží timing lišta. Podíl výšky plochy od jejího horního okraje. */
 const LISTA_Y = 0.82;
 const LISTA_VYSKA = 16;
+
+/** Volný pruh nad lahví a mezi lahví a lištou, v návrhových pixelech. */
+const OKRAJ_LAHVE = 16;
+const NAD_LISTOU = 40;
+
+/**
+ * Pás plochy, ve kterém stojí láhev: od horní hrany po timing lištu.
+ *
+ * Bez tohohle sedí láhev tam, kde při rozlévání — tedy nad řadou panáků,
+ * která tu ale žádná není. Nechávala pod sebou pruh prázdna a na velké
+ * obrazovce sahala až k liště.
+ */
+export function lahevOtevirani(r: Rozvrh): ReturnType<typeof vlozLahev> {
+  return vlozLahev(
+    r,
+    r.plochaY + OKRAJ_LAHVE * r.ui,
+    r.plochaY + r.plochaVyska * LISTA_Y - NAD_LISTOU * r.ui,
+  );
+}
 
 /**
  * Pečeť kolem hrdla. Ubývá zdola nahoru, jak ji hráč sedírá — tedy tak, jak
@@ -173,15 +192,21 @@ export function kresliOtevirani(
   stav: StavOtevirani,
 ): void {
   // Láhev stojí rovně uprostřed — stejná kresba jako při rozlévání, jen bez
-  // náklonu. Rum v ní už je, protože rozlévat se bude z ní.
-  const poloha = polohaLahve(r, rozlevani.konfig.lahev, r.sirka / 2, 0);
-  kresliLahev(platno, r, paleta, rozlevani, poloha);
+  // náklonu a vsazená nad lištu. Rum v ní už je, protože rozlévat se bude z ní.
+  const vsazena = lahevOtevirani(r);
+  const rl = vsazena.rozvrh;
+  const poloha: PolohaLahve = {
+    x: vsazena.cx,
+    y: vsazena.cy + rl.lahevVyska / 2,
+    uhel: 0,
+  };
+  kresliLahev(platno, rl, paleta, rozlevani, poloha);
 
-  const usti = ustiHrdla(r, rozlevani.konfig.lahev, poloha);
-  const polomerHrdla = rozlevani.konfig.lahev.ustiPolomer * r.lahevPolomer;
+  const usti = ustiHrdla(rl, rozlevani.konfig.lahev, poloha);
+  const polomerHrdla = rozlevani.konfig.lahev.ustiPolomer * rl.lahevPolomer;
 
-  kresliKorek(platno, r, paleta, stav, usti.x, usti.y, polomerHrdla);
-  kresliPecet(platno, r, paleta, stav, usti.x, usti.y, polomerHrdla);
+  kresliKorek(platno, rl, paleta, stav, usti.x, usti.y, polomerHrdla);
+  kresliPecet(platno, rl, paleta, stav, usti.x, usti.y, polomerHrdla);
 
   if (stav.faze === 'korek' || stav.faze === 'zasek') {
     kresliListu(platno, r, paleta, stav);

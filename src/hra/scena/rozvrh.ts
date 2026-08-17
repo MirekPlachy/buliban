@@ -250,6 +250,41 @@ export function spocitejRozvrh(
   };
 }
 
+/**
+ * Vsadí láhev do zadaného pásu plochy a vrátí rozvrh s **přeškálovanou**
+ * lahví plus střed, kolem kterého se má posadit.
+ *
+ * Proč to existuje: rozměry láhve v `Rozvrh` jsou spočítané pro kompozici
+ * rozlévání, kde láhev stojí nad řadou panáků a smí být přes celou plochu.
+ * Fáze 1 a 3 mají pod lahví ještě timing lištu, teploměr a dlaždice — a do
+ * zbylého pásu se láhev v původní velikosti nevejde. Na notebooku jí ústí
+ * vylezlo nad horní lištu a tělo leželo přes teploměr, takže **nebyl vidět
+ * plamen**, což je pointa celé hry.
+ *
+ * Zmenšuje se podle **výšky i šířky**, protože v rituálu může láhev ležet
+ * na boku — a tehdy je její délka vodorovná. Bere se přísnější z obou, ať
+ * láhev při volbě polohy nezmění velikost.
+ */
+export function vlozLahev(
+  rozvrh: Rozvrh,
+  horni: number,
+  dolni: number,
+): { rozvrh: Rozvrh; cx: number; cy: number } {
+  const vyska = Math.max(40, dolni - horni);
+  const sirka = Math.max(40, rozvrh.sloupec);
+  const meritko = Math.min(1, vyska / rozvrh.lahevVyska, sirka / rozvrh.lahevVyska);
+
+  return {
+    rozvrh: {
+      ...rozvrh,
+      lahevVyska: rozvrh.lahevVyska * meritko,
+      lahevPolomer: rozvrh.lahevPolomer * meritko,
+    },
+    cx: rozvrh.sirka / 2,
+    cy: (horni + dolni) / 2,
+  };
+}
+
 export interface Bod {
   x: number;
   y: number;
