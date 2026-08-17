@@ -1,85 +1,60 @@
 /**
- * Fáze 3 — zahřátí a vypuštění Bulibana (kap. 5).
+ * Fáze 3 — zahřátí třením a vypuštění Bulibana (kap. 5).
  *
- * Dvě věci, které musí sedět, jinak se rituál rozpadne na klikačku:
- * **setrvačnost** (pásmo se přestřeluje po puštění) a **chladnutí**, které
- * běží i během uzávěru a zápalky. Bez druhého by nebyl žádný časový stres.
+ * Dvě věci, které musí sedět, jinak fáze ztratí smysl: **tření hřeje jen
+ * tehdy, když se opravdu jezdí po láhvi**, a **chladnutí běží pořád** — jinak
+ * by šlo natřít láhev do pásma a dát si načas, čímž by zmizel časový stres.
  */
 
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  CHLADNUTI,
   KROK_S,
   PASMO_MIN_SIRKA,
-  PRASKNE_NAD,
   TEPLOTA_PO_NEUSPECHU,
-  UZAVER_S,
-  ZAPALKA_BONUS,
+  ZAPALKA_HORI_S,
   ZAZEH_POKUSU,
 } from '../ladeni.ts';
 import { POSLEDNI_LEVEL } from '../levely.ts';
-import { metoda, metodyProLevel, vsechnyMetody } from './metody.ts';
-import { idealniPlan, prehrajRitual } from './prehravac.ts';
+import { TRENI_SVIZNE, dobaTreniS, idealniPlan, prehrajRitual } from './prehravac.ts';
 import {
+  ZADNY_VSTUP,
   krokRitualu,
   kvalitaZasahu,
-  nasobitelMetody,
-  nasobitelPolohy,
   pasmoProLevel,
-  volbyRitualu,
+  vPasmu,
   vypusteno,
   zalozRitual,
 } from './ritual.ts';
-import type { FazeRitualu, StavRitualu, VstupRitualu } from './ritual.ts';
+import type { FazeRitualu, StavRitualu } from './ritual.ts';
 
-const nic: VstupRitualu = { drzi: false, stisk: false, volba: null };
-const drz: VstupRitualu = { drzi: true, stisk: false, volba: null };
+/** Tření o dané rychlosti (výšek láhve za sekundu) na jeden krok. */
+const tri = (zaS = TRENI_SVIZNE) => ({
+  treni: zaS * KROK_S,
+  drziZapalku: false,
+  uHrdla: false,
+});
 
-/** Vybere polohu i metodu a nechá stav na zahřívání. */
-function pripravZahrivani(
-  cisloLevelu = 1,
-  seed = 1,
-  metodaId: 'dlane' | 'odev' | 'voda' | 'plamen' = 'dlane',
-): StavRitualu {
-  const stav = zalozRitual(cisloLevelu, seed);
-  krokRitualu(stav, { ...nic, volba: { druh: 'poloha', poloha: 'horizontalni' } });
-  krokRitualu(stav, { ...nic, volba: { druh: 'metoda', metoda: metodaId } });
-  return stav;
-}
-
-function drzS(stav: StavRitualu, sekund: number): void {
+function triS(stav: StavRitualu, sekund: number, zaS = TRENI_SVIZNE): void {
   const kroku = Math.round(sekund / KROK_S);
-  for (let i = 0; i < kroku; i += 1) krokRitualu(stav, drz);
+  for (let i = 0; i < kroku; i += 1) krokRitualu(stav, tri(zaS));
 }
 
 describe('cílové pásmo', () => {
-  it('vertikální poloha je užší, ale platí se za ni násobitelem', () => {
-    const svisle = pasmoProLevel(1, 'vertikalni');
-    const lezmo = pasmoProLevel(1, 'horizontalni');
-
-    assert.ok(svisle.sirka < lezmo.sirka, 'svislá láhev má mít užší pásmo');
-    assert.equal(lezmo.sirka - svisle.sirka, 12, '±6 jednotek z kap. 5.1');
-    assert.ok(nasobitelPolohy('vertikalni') > nasobitelPolohy('horizontalni'));
-    assert.equal(nasobitelPolohy('vertikalni'), 1.3);
-  });
-
   it('zužuje se s levelem, ale nespadne pod podlahu', () => {
     for (let l = 1; l <= POSLEDNI_LEVEL; l += 1) {
-      for (const poloha of ['vertikalni', 'horizontalni'] as const) {
-        const p = pasmoProLevel(l, poloha);
-        assert.ok(p.sirka >= PASMO_MIN_SIRKA, `L${l} ${poloha}: ${p.sirka}`);
-      }
+      assert.ok(pasmoProLevel(l).sirka >= PASMO_MIN_SIRKA, `L${l}`);
     }
     assert.ok(
-      pasmoProLevel(POSLEDNI_LEVEL, 'horizontalni').sirka <
-        pasmoProLevel(1, 'horizontalni').sirka,
+      pasmoProLevel(POSLEDNI_LEVEL).sirka < pasmoProLevel(1).sirka,
       'rituál musí být na konci hry těžší než na začátku',
     );
   });
 
   it('Q je jedna uprostřed, nula na okraji a nula mimo', () => {
-    const p = pasmoProLevel(1, 'horizontalni');
+    const p = pasmoProLevel(1);
     assert.equal(kvalitaZasahu(p.stred, p), 1);
     assert.ok(Math.abs(kvalitaZasahu(p.stred + p.sirka / 2, p)) < 1e-9);
     assert.equal(kvalitaZasahu(p.stred + p.sirka, p), 0);
@@ -87,120 +62,136 @@ describe('cílové pásmo', () => {
   });
 });
 
-describe('zahřívání', () => {
-  it('bez vybrané metody se nehřeje', () => {
+describe('zahřívání třením', () => {
+  it('bez tření se láhev nezahřeje', () => {
     const stav = zalozRitual(1, 1);
-    krokRitualu(stav, { ...nic, volba: { druh: 'poloha', poloha: 'horizontalni' } });
-    drzS(stav, 2);
-    assert.equal(stav.teplota, 0, 'napřed se musí vybrat metoda');
+    for (let i = 0; i < 600; i += 1) krokRitualu(stav, ZADNY_VSTUP);
+    assert.equal(stav.teplota, 0, 'mimo sklo se nesmí zahřát nic');
   });
 
-  it('přes oděv se nedá dohřát nad strop', () => {
-    const stav = pripravZahrivani(1, 1, 'odev');
-    drzS(stav, 120);
-    assert.ok(stav.teplota <= metoda('odev').strop!, `dohřálo na ${stav.teplota}`);
-    assert.ok(stav.teplota >= metoda('odev').strop! - 1e-6, 'ke stropu se dostat musí');
-  });
-
-  it('setrvačnost se přičte při puštění, ne průběžně', () => {
-    const stav = pripravZahrivani(1, 1, 'voda');
-    drzS(stav, 2);
-    const pred = stav.teplota;
-
-    krokRitualu(stav, nic);
-    const poPusteni = stav.teplota;
-    assert.ok(poPusteni > pred, 'po puštění má teplota povyskočit');
-
-    // A dál už jen chladne — setrvačnost je jednorázová.
-    krokRitualu(stav, nic);
-    assert.ok(stav.teplota < poPusteni, 'druhý krok už musí chladnout');
-  });
-
-  it('teplota klesá i během uzávěru a volby ohně — to je časový stres', () => {
-    const stav = pripravZahrivani(1, 1, 'dlane');
-    drzS(stav, 6);
-    krokRitualu(stav, { ...nic, volba: { druh: 'uzaver' } });
-    const priUzaveru = stav.teplota;
-
-    for (let i = 0; i < Math.ceil(UZAVER_S / KROK_S) + 2; i += 1) krokRitualu(stav, nic);
-    assert.equal(stav.faze, 'ohen');
-    assert.ok(stav.teplota < priUzaveru, 'během sundávání uzávěru musí láhev chladnout');
-
-    const priOhni = stav.teplota;
-    for (let i = 0; i < 60; i += 1) krokRitualu(stav, nic);
-    assert.ok(stav.teplota < priOhni, 'a při volbě ohně taky');
-  });
-
-  it('uzávěr nejde sundat, dokud se nezačalo hřát', () => {
-    const stav = pripravZahrivani(1, 1, 'dlane');
-    krokRitualu(stav, { ...nic, volba: { druh: 'uzaver' } });
-    assert.equal(stav.faze, 'zahrivani', 'fázi nejde proklikat na nulu');
-  });
-
-  it('nad plamenem praskne sklo a zážeh je za nula', () => {
-    // 20 j/s, takže 95 jednotek padne kolem páté sekundy. Držet dýl nemá
-    // smysl — po prasknutí už jen doznívá hláška.
-    const stav = pripravZahrivani(5, 1, 'plamen');
-    drzS(stav, 6);
-    assert.ok(stav.teplota > PRASKNE_NAD, `teplota ${stav.teplota.toFixed(1)}`);
-    assert.equal(stav.faze, 'prasklo');
-    assert.equal(stav.body, 0);
-
-    // Fáze se čte z návratové hodnoty: překladač nevidí, že ji `krokRitualu`
-    // uvnitř mění, a `stav.faze` by si zúžil na hodnotu před prvním voláním.
-    let faze: FazeRitualu = stav.faze;
-    let pojistka = 0;
-    while (faze !== 'hotovo' && pojistka < 600) {
-      faze = krokRitualu(stav, nic);
-      pojistka += 1;
+  it('svižné tření zahřeje láhev za 4–5 sekund', () => {
+    // Tohle je zadaná délka fáze. Kdyby se sáhlo na ZAHRATI_ZA_DRAHU nebo
+    // CHLADNUTI, tenhle test to zachytí dřív než hráč.
+    for (let l = 1; l <= POSLEDNI_LEVEL; l += 1) {
+      const doba = dobaTreniS(l, 1, TRENI_SVIZNE);
+      assert.ok(doba >= 3.5 && doba <= 5.5, `L${l}: zahřátí trvá ${doba.toFixed(1)} s`);
     }
-    assert.equal(vypusteno(stav), false);
   });
 
-  it('násobitel je vážený průměr metod podle dodaného tepla', () => {
-    const stav = pripravZahrivani(5, 1, 'dlane');
-    drzS(stav, 5);
-    assert.ok(Math.abs(nasobitelMetody(stav) - metoda('dlane').nasobitel) < 1e-9);
+  it('pomalé tření trvá výrazně dýl — chladnutí ukusuje pořád stejně', () => {
+    assert.ok(dobaTreniS(1, 1, 1) > dobaTreniS(1, 1, 2) * 1.8);
+  });
 
-    // Dohřát rychlou a levnou metodou musí násobitel stáhnout dolů.
-    krokRitualu(stav, { ...nic, volba: { druh: 'metoda', metoda: 'voda' } });
-    drzS(stav, 3);
-    const smiseny = nasobitelMetody(stav);
-    assert.ok(smiseny < metoda('dlane').nasobitel);
-    assert.ok(smiseny > metoda('voda').nasobitel);
+  it('chladne i během tření, takže se nedá dohřát nekonečně pomalu', () => {
+    const stav = zalozRitual(1, 1);
+    triS(stav, 2);
+    const horke = stav.teplota;
+
+    for (let i = 0; i < 60; i += 1) krokRitualu(stav, ZADNY_VSTUP);
+    assert.ok(stav.teplota < horke, 'po sekundě bez tření musí být chladnější');
+    assert.ok(
+      Math.abs(horke - stav.teplota - CHLADNUTI) < 0.2,
+      'za sekundu má ubýt zhruba CHLADNUTI jednotek',
+    );
+  });
+
+  it('`vPasmu` se rozsvítí, teprve když je dost horko', () => {
+    const stav = zalozRitual(1, 1);
+    assert.equal(vPasmu(stav), false);
+
+    let kroku = 0;
+    while (!vPasmu(stav) && kroku < 1200) {
+      krokRitualu(stav, tri());
+      kroku += 1;
+    }
+    assert.ok(vPasmu(stav), 'třením se do pásma dostat musí');
+    assert.ok(kroku * KROK_S < 5.5, 'a nemá to trvat věčnost');
+  });
+
+  it('přetřít pásmo není konec — chladnutí ho vrátí zpátky dolů', () => {
+    // Tohle dělá fázi odpustitelnou: kdo přetře, jen počká, až láhev
+    // vychladne zpátky do pásma. Trestá se teprve nepozornost v obou směrech.
+    const stav = zalozRitual(1, 1);
+    triS(stav, 8);
+    assert.ok(stav.teplota > stav.pasmo.stred + stav.pasmo.sirka / 2, 'má být přetřeno');
+
+    let kroku = 0;
+    while (!vPasmu(stav) && kroku < 1200) {
+      krokRitualu(stav, ZADNY_VSTUP);
+      kroku += 1;
+    }
+    assert.ok(vPasmu(stav), 'vychladnutím se do pásma vrátit musí');
   });
 });
 
-describe('odemykání metod', () => {
-  it('level 1 nabízí tři metody, další levely přidávají', () => {
-    assert.deepEqual(
-      metodyProLevel(1).map((m) => m.id),
-      ['dlane', 'odev', 'voda'],
-    );
-    for (let l = 2; l <= POSLEDNI_LEVEL; l += 1) {
-      assert.ok(
-        metodyProLevel(l).length >= metodyProLevel(l - 1).length,
-        `L${l}: nabídka se nesmí zmenšit`,
-      );
+describe('zápalka', () => {
+  /** Natře láhev do pásma a vezme zápalku. */
+  function sZapalkou(cisloLevelu = 1, seed = 1): StavRitualu {
+    const stav = zalozRitual(cisloLevelu, seed);
+    triS(stav, 5);
+    krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
+    return stav;
+  }
+
+  it('vzetí zápalky přepne fázi a zápalka začne hořet', () => {
+    const stav = sZapalkou();
+    assert.equal(stav.faze, 'zapalka');
+    assert.ok(stav.zapalkaZbyvaS > 0);
+  });
+
+  it('mimo hrdlo se nic neodpočítává', () => {
+    const stav = sZapalkou();
+    const zbyvalo = stav.zazehZaS;
+    for (let i = 0; i < 60; i += 1) {
+      krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
     }
-    assert.equal(metodyProLevel(POSLEDNI_LEVEL).length, vsechnyMetody().length);
+    assert.equal(stav.zazehZaS, zbyvalo, 'držet zápalku stranou nesmí nic dělat');
+    assert.equal(stav.faze, 'zapalka');
   });
 
-  it('dlaždice zahřívání nabízejí metody levelu plus uzávěr', () => {
-    const stav = zalozRitual(1, 1);
-    krokRitualu(stav, { ...nic, volba: { druh: 'poloha', poloha: 'horizontalni' } });
-    const volby = volbyRitualu(stav);
-    assert.equal(volby.length, metodyProLevel(1).length + 1);
-    assert.equal(volby[volby.length - 1].druh, 'uzaver');
+  it('puštění zápalky je ucuknutí — bezpečné, bez ztráty pokusu', () => {
+    const stav = sZapalkou();
+    const pokus = stav.pokus;
+    krokRitualu(stav, ZADNY_VSTUP);
+
+    assert.equal(stav.faze, 'zahrivani', 'zápalka zhasne a jde se zpátky třít');
+    assert.equal(stav.pokus, pokus, 'ucuknutí nesmí stát pokus');
   });
 
-  it('metodu z vyššího levelu nejde na levelu 1 vybrat', () => {
-    const stav = zalozRitual(1, 1);
-    krokRitualu(stav, { ...nic, volba: { druh: 'poloha', poloha: 'horizontalni' } });
-    const dostupne = volbyRitualu(stav)
-      .filter((v) => v.druh === 'metoda')
-      .map((v) => (v.druh === 'metoda' ? v.metoda : ''));
-    assert.ok(!dostupne.includes('plamen'), 'plamen se odemyká až na L5');
+  it('dohořelá zápalka stojí pokus, ale láhev zůstane teplá', () => {
+    const stav = sZapalkou();
+    const teplaPred = stav.teplota;
+    const kroku = Math.ceil(ZAPALKA_HORI_S / KROK_S) + 2;
+    for (let i = 0; i < kroku; i += 1) {
+      krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
+    }
+
+    assert.equal(stav.faze, 'zahrivani');
+    assert.equal(stav.pokus, 2, 'dohoření je ztracený pokus');
+    assert.ok(stav.teplota > 0 && stav.teplota < teplaPred);
+  });
+
+  it('ohořelou zápalku je nutné napřed zahodit', () => {
+    // Bez tohohle si hráč, který po dohoření nepustil tlačítko, vzal
+    // v témže kroku novou — a tři pokusy mu proletěly mezi prsty.
+    const stav = sZapalkou();
+    const kroku = Math.ceil(ZAPALKA_HORI_S / KROK_S) + 2;
+    for (let i = 0; i < kroku; i += 1) {
+      krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
+    }
+    assert.equal(stav.pokus, 2);
+
+    // Držení pokračuje — a nesmí samo sáhnout po další zápalce.
+    for (let i = 0; i < 120; i += 1) {
+      krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
+    }
+    assert.equal(stav.faze, 'zahrivani', 'nová zápalka až po puštění');
+    assert.equal(stav.pokus, 2, 'a rozhodně ne další ztracený pokus');
+
+    // Po puštění se vzít dá.
+    krokRitualu(stav, ZADNY_VSTUP);
+    krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
+    assert.equal(stav.faze, 'zapalka');
   });
 });
 
@@ -215,51 +206,29 @@ describe('vypuštění', () => {
     }
   });
 
-  it('zápalka dává víc bodů než zapalovač při stejné teplotě', () => {
-    const seed = 4242;
-    const sZapalkou = prehrajRitual(3, seed, {
-      poloha: 'horizontalni',
-      metodaId: 'dlane',
-      ohen: 'zapalka',
-      pustitPri: 0,
-    });
-    const sZapalovacem = prehrajRitual(3, seed, {
-      poloha: 'horizontalni',
-      metodaId: 'dlane',
-      ohen: 'zapalovac',
-      pustitPri: 0,
-    });
-    // Oba plány jsou stejně (ne)zahřáté, takže rozdíl může být jen v bonusu.
-    if (sZapalkou.body > 0 && sZapalovacem.body > 0) {
-      assert.ok(sZapalkou.body > sZapalovacem.body);
-      assert.ok(Math.abs(sZapalkou.body / sZapalovacem.body - ZAPALKA_BONUS) < 0.02);
-    }
-  });
-
   it('studená láhev znamená ticho po pěšině, ne konec hry', () => {
-    const stav = prehrajRitual(1, 9, {
-      poloha: 'horizontalni',
-      metodaId: 'dlane',
-      ohen: 'zapalovac',
-      pustitPri: 1,
-    });
+    const stav = prehrajRitual(1, 9, { treniZaS: TRENI_SVIZNE, vzitPri: 1 });
     assert.equal(stav.faze, 'hotovo');
     assert.equal(vypusteno(stav), false);
     assert.equal(stav.pokus, ZAZEH_POKUSU, 'všechny pokusy se mají vyčerpat');
   });
 
+  it('přehřátá láhev taky nechytne — pásmo má dva okraje', () => {
+    const stav = prehrajRitual(1, 9, { treniZaS: TRENI_SVIZNE, vzitPri: 99 });
+    assert.equal(vypusteno(stav), false, 'nad pásmem se nesmí nic stát');
+  });
+
   it('po neúspěchu si láhev drží část tepla', () => {
-    const stav = pripravZahrivani(1, 5, 'dlane');
-    drzS(stav, 4);
-    krokRitualu(stav, nic);
+    const stav = zalozRitual(1, 5);
+    triS(stav, 3);
     const teplaPred = stav.teplota;
 
-    // Ručně do „ticha" — chování po neúspěšném zážehu je to, co se testuje.
+    // Ručně do „ticha" — testuje se chování po nepovedeném zážehu.
     stav.faze = 'ticho';
     stav.casovacS = 0;
-    krokRitualu(stav, nic);
+    krokRitualu(stav, ZADNY_VSTUP);
 
-    assert.equal(stav.faze, 'zahrivani', 'po neúspěchu se jde zpátky hřát');
+    assert.equal(stav.faze, 'zahrivani');
     assert.equal(stav.pokus, 2);
     assert.ok(
       Math.abs(stav.teplota - teplaPred * TEPLOTA_PO_NEUSPECHU) < 0.5,
@@ -267,41 +236,32 @@ describe('vypuštění', () => {
     );
   });
 
-  it('ucuknutí nestojí pokus — jen se přestane odpočítávat', () => {
-    const seed = 31;
-    const stav = pripravZahrivani(1, seed, 'dlane');
-    drzS(stav, 6);
-    krokRitualu(stav, { ...nic, volba: { druh: 'uzaver' } });
+  it('pozdější pokusy dávají míň bodů', () => {
+    const prvni = prehrajRitual(3, 11, idealniPlan(3, 11));
+    assert.ok(prvni.body > 0);
 
+    // Týž zážeh na třetí pokus musí být levnější.
+    const stav = zalozRitual(3, 11);
+    stav.pokus = 3;
+    stav.teplota = stav.pasmo.stred;
+    stav.faze = 'zapalka';
+    stav.zapalkaZbyvaS = ZAPALKA_HORI_S;
+    stav.zazehZaS = 0.01;
+
+    let faze: FazeRitualu = stav.faze;
     let pojistka = 0;
-    while (stav.faze !== 'ceka' && pojistka < 2000) {
-      krokRitualu(
-        stav,
-        stav.faze === 'ohen'
-          ? { ...nic, volba: { druh: 'ohen', ohen: 'zapalovac' } }
-          : nic,
-      );
+    while (faze === 'zapalka' && pojistka < 60) {
+      faze = krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: true });
       pojistka += 1;
     }
-    assert.equal(stav.faze, 'ceka');
-
-    const pokusPred = stav.pokus;
-    const zbyvaloPred = stav.zazehZaS;
-    for (let i = 0; i < 20; i += 1) krokRitualu(stav, nic);
-
-    assert.equal(stav.pokus, pokusPred, 'ucuknutí je bezpečné');
-    assert.equal(stav.zazehZaS, zbyvaloPred, 'odpočet se má zastavit, ne resetovat');
+    assert.equal(faze, 'zazeh');
+    assert.ok(stav.body < prvni.body, 'třetí pokus se má krátit');
   });
 });
 
 describe('determinismus', () => {
   it('stejný seed a plán dají identický výsledek', () => {
-    const plan = {
-      poloha: 'vertikalni' as const,
-      metodaId: 'dlane' as const,
-      ohen: 'zapalka' as const,
-      pustitPri: 60,
-    };
+    const plan = { treniZaS: TRENI_SVIZNE, vzitPri: 60 };
     const a = prehrajRitual(4, 12345, plan);
     const b = prehrajRitual(4, 12345, plan);
     assert.equal(a.body, b.body);

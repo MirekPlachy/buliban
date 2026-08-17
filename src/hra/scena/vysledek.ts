@@ -35,22 +35,14 @@ interface Polozka {
 }
 
 /**
- * Rozpad bodů za celý level. Fáze jdou v pořadí, ve kterém se hrály —
- * otevření, rozlévání, zážeh — aby se dal přečíst jako záznam, ne jako
- * tabulka. Nulové položky se vynechávají; prázdný řádek „Zážeh 0" by jen
- * opakoval to, co hráč před chvílí viděl na scéně.
+ * Rozpad bodů za celý level. Položky jdou v pořadí, ve kterém se hrály —
+ * rozlévání, pak zážeh — aby se to dalo přečíst jako záznam, ne jako tabulka.
+ * Nulové položky se vynechávají; prázdný řádek „Zážeh 0" by jen opakoval to,
+ * co hráč před chvílí viděl na scéně.
  */
 function rozpad(vl: VysledekLevelu): Polozka[] {
   const v = vl.rozlevani;
   const radky: Polozka[] = [];
-
-  if (vl.otevirani > 0) {
-    radky.push({
-      popis: texty.vysledek.otevirani,
-      hodnota: `${vl.otevirani}`,
-      barva: (p) => p.par,
-    });
-  }
 
   radky.push({
     popis: texty.vysledek.rovnomernost,

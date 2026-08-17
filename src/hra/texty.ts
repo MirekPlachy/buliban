@@ -9,19 +9,15 @@
  */
 
 import type { Level } from './levely.ts';
-import { metoda, noveMetody } from './jadro/metody.ts';
-import type { FazeOtevirani } from './jadro/otevirani.ts';
-import type { FazeRitualu, StavRitualu, VolbaRitualu } from './jadro/ritual.ts';
+import type { FazeRitualu, StavRitualu } from './jadro/ritual.ts';
 import type { FazeRozlevani } from './jadro/rozlevani.ts';
 import type { Medaile } from './jadro/skore.ts';
 
-/** Štítky horní lišty. Stejné ve všech fázích, proto vedle nápověd. */
+/** Štítky horní lišty. Stejné v obou fázích, proto vedle nápověd. */
 export const hud = {
   level: 'Level',
   panak: 'Panák',
   skore: 'Skóre',
-  /** Název právě běžící fáze — v liště místo počtu panáků, kde se nelije. */
-  otevirani: 'Otevírání',
   ritual: 'Rituál',
   teplota: 'Zahřátí',
   pokus: 'Pokus',
@@ -39,73 +35,23 @@ export const napovedy: Record<FazeRozlevani, string> = {
 
 export const napovedaPosledni = 'Poslední panák — v láhvi nesmí nic zůstat';
 
-export const napovedyOtevirani: Record<FazeOtevirani, string> = {
-  pecet: 'Ťukej — sedři pečeť',
-  pecetHotova: 'Pečeť dole',
-  korek: 'Zmáčkni, když je ukazatel uprostřed',
-  zasek: 'Zaseklo se. Znovu.',
+export const napovedyRitualu: Record<FazeRitualu, string> = {
+  zahrivani: 'Třením po láhvi ji zahřej — nahoru a dolů',
+  zapalka: 'Přilož zápalku k hrdlu a drž',
+  zazeh: '',
+  ticho: '',
   hotovo: '',
 };
 
-export const napovedyRitualu: Record<FazeRitualu, string> = {
-  poloha: 'Jak bude láhev ležet?',
-  zahrivani: 'Drž a hřej. Po puštění láhev chladne a zapalování chvíli trvá.',
-  uzaver: 'Sundává se uzávěr…',
-  ohen: 'Čím to zapálíš?',
-  skrtani: 'Škrtni — zmáčkni uprostřed',
-  kresa: 'Nechytlo. Ještě jednou…',
-  ceka: 'Drž plamen u hrdla a čekej',
-  zazeh: '',
-  ticho: '',
-  prasklo: '',
-  hotovo: '',
-};
+/** Nápověda, když je láhev horká dost. Vystřídá tu o tření. */
+export const napovedaVezmiZapalku = 'Dost horké — vezmi zápalku vedle láhve';
 
 /** Hlášky po zážehu. Tón podle kap. 8: věcně, bez moralizování. */
 export const zazeh = {
   uspech: 'Buliban vypuštěn.',
   ticho: 'Ticho po pěšině. Láhev byla vlažná.',
-  prasklo: 'Prasklo sklo. Nad plamenem to chce míru.',
   konecPokusu: 'Tři pokusy pryč. Láhev zůstala studená.',
-  ucuknuti: 'Můžeš ucuknout — bezpečně, ale bez bodů.',
 };
-
-export const polohy = {
-  vertikalni: { nazev: 'Vertikálně', detail: 'Dnem dolů. Užší pásmo, ale ×1,3.' },
-  horizontalni: { nazev: 'Horizontálně', detail: 'Na boku. Širší pásmo, bez bonusu.' },
-};
-
-export const ohne = {
-  zapalka: { nazev: 'Zápalka', detail: 'Škrtnout, hoří 4 s, může ji sfouknout. +15 %.' },
-  zapalovac: { nazev: 'Zapalovač', detail: 'Hoří, dokud chceš. Bez bonusu.' },
-};
-
-export const uzaver = { nazev: 'Sundat uzávěr', detail: 'Dost bylo hřátí — jde se zapalovat.' };
-
-/**
- * Popisek dlaždice. Scéna kreslí, jádro rozhoduje — proto se překlad z volby
- * na text děje tady, a ne v `ritual.ts`, které nesmí vědět nic o češtině
- * mimo názvy z katalogu metod.
- */
-export function popisVolby(volba: VolbaRitualu): { nazev: string; detail: string } {
-  switch (volba.druh) {
-    case 'poloha':
-      return polohy[volba.poloha];
-    case 'ohen':
-      return ohne[volba.ohen];
-    case 'uzaver':
-      return uzaver;
-    case 'metoda': {
-      const m = metoda(volba.metoda);
-      const zvlastnost = m.strop
-        ? `strop ${m.strop} j`
-        : m.praskneNad
-          ? `nad ${m.praskneNad} j praskne`
-          : `${m.rychlost} j/s`;
-      return { nazev: m.nazev, detail: `${zvlastnost} · ×${m.nasobitel.toFixed(2)}` };
-    }
-  }
-}
 
 /**
  * Karta před levelem. Vysvětluje **jen to, co je nové** — opakovat pokaždé
@@ -118,12 +64,12 @@ export interface Karta {
 
 export const karty: Record<number, Karta> = {
   1: {
-    nadpis: 'Celý rituál od začátku',
+    nadpis: 'Rozlít a zapálit',
     radky: [
-      'Level má tři části: otevřít láhev, rozlít ji mezi panáky a z prázdné láhve vypustit Bulibana.',
+      'Level má dvě části: rozlít láhev mezi panáky a z prázdné láhve vypustit Bulibana.',
       'Rozlévání je jádro — obsah má skončit ve všech panácích stejně a dolít se nedá.',
-      'Zahřátá prázdná láhev se pak zapaluje. Bez vypuštění se dál nepostupuje.',
-      'Každou část ti nejdřív předvedu. Body zatím nehrajou roli.',
+      'Prázdnou láhev pak zahřeješ třením a zapálíš. Bez vypuštění se dál nepostupuje.',
+      'Obojí ti nejdřív předvedu. Body zatím nehrajou roli.',
     ],
   },
   2: {
@@ -175,60 +121,22 @@ export const karty: Record<number, Karta> = {
   },
 };
 
-/**
- * Řádek o odemčených metodách. Doplňuje se ke kartě levelu, protože jinak by
- * se nová metoda objevila mezi dlaždicemi a nikdo by si jí nevšiml.
- */
-export function odemceneMetody(cisloLevelu: number): string | null {
-  const nove = noveMetody(cisloLevelu);
-  if (nove.length === 0) return null;
-  const jmena = nove.map((m) => m.nazev.toLowerCase()).join(' a ');
-  return nove.length === 1
-    ? `Nová metoda zahřívání: ${jmena}.`
-    : `Nové metody zahřívání: ${jmena}.`;
-}
-
-/** Komentář k ukázce otevírání. Váže se na fázi, ne na stopky. */
-export function komentarOtevirani(faze: FazeOtevirani): string {
-  switch (faze) {
-    case 'pecet':
-      return 'Kolem hrdla je staniolová pečeť. Sedře se opakovaným ťukáním.';
-    case 'pecetHotova':
-      return 'Pečeť dole. Teď korek.';
-    case 'korek':
-      return 'Ukazatel kmitá. Zmáčknout se má uprostřed — čím přesněji, tím víc korek povyjede.';
-    case 'zasek':
-      return 'Mimo pásmo se korek zasekne. Nestojí to body, jen čas.';
-    default:
-      return 'Korek venku. Za rychlé otevření je bonus.';
-  }
-}
-
-/** Komentář k ukázce rituálu. Bere celý stav — fází je tu víc než u ostatních. */
+/** Komentář k ukázce rituálu. Váže se na stav, ne na stopky. */
 export function komentarRitualu(stav: StavRitualu): string {
   switch (stav.faze) {
-    case 'poloha':
-      return 'Láhev je prázdná a začíná rituál. Napřed poloha: nastojato je pásmo užší, ale platí líp.';
     case 'zahrivani':
-      return stav.metodaId
-        ? 'Hřeje se přes pásmo. Než přijde zážeh, láhev kus tepla ztratí — a s tím se počítá.'
-        : 'Nejdřív metoda. Pomalé a tradiční berou vyšší násobitel.';
-    case 'uzaver':
-      return 'Uzávěr dolů. Od téhle chvíle láhev jen chladne.';
-    case 'ohen':
-      return 'Zápalka dává víc bodů, ale hoří jen chvíli. Zapalovač počká.';
-    case 'skrtani':
-      return 'Zápalka se musí škrtnout. Zase uprostřed.';
-    case 'kresa':
-      return 'Nechytlo napoprvé. Stojí to jen vteřinu — a v ní láhev chladne.';
-    case 'ceka':
-      return 'A teď držet plamen u hrdla a čekat. Chytne to samo, jen ne hned.';
+      if (stav.teplota < 3) {
+        return 'Láhev je prázdná a začíná rituál. Zahřeje se třením — prstem nahoru a dolů po skle.';
+      }
+      return stav.teplota > stav.pasmo.stred - stav.pasmo.sirka / 2
+        ? 'Teploměr je v pásmu. Teď rychle, protože láhev pořád chladne.'
+        : 'Platí jen pohyb po láhvi. Vedle skla se nezahřeje nic.';
+    case 'zapalka':
+      return 'Zápalka leží vedle láhve. Vzít ji a přiložit k hrdlu — chytne to samo, jen ne hned.';
     case 'zazeh':
       return 'Buliban vypuštěn. Přesně uprostřed pásma.';
     case 'ticho':
       return 'Mimo pásmo se nestane nic. Láhev byla vlažná.';
-    case 'prasklo':
-      return 'Nad plamenem to praskne. Proto má nejnižší násobitel.';
     default:
       return 'Hotovo. Takhle to má vypadat.';
   }
@@ -276,7 +184,6 @@ export const vysledek = {
   rozlito: 'Rozlito vedle',
   zbytek: 'Zůstalo v láhvi',
   presnaRuka: 'Přesná ruka',
-  otevirani: 'Otevření láhve',
   zazehBody: 'Zážeh',
   rozlevaniBody: 'Rozlévání',
   celkem: 'Celkem',

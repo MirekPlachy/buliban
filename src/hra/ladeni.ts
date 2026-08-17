@@ -163,52 +163,6 @@ export const MEDAILE_ZLATO = 0.777; // odchylka ≤ 0,222 × tolerance
 export const MEDAILE_STRIBRO = 0.611; // odchylka ≤ 0,389 × tolerance
 export const MEDAILE_BRONZ = 0.444; // odchylka ≤ 0,556 × tolerance
 
-// ----------------------------------------------------- fáze 1 · otevření láhve
-
-/**
- * Kolik stisků sedře pečeť. Při svižném ťukání vyjde ~1,2 s z kap. 3.1.
- *
- * Dokument nabízí krouživý tah myší **nebo** opakovaný stisk. Hra dělá jen to
- * druhé — na obou platformách stejně. Kap. 4.3 staví na tom, že gesto je na
- * mobilu i desktopu identické, a krouživý tah by k držení přidal druhý vstupní
- * kanál, který se navíc nedá přehrát v headless testu.
- */
-export const PECET_STISKU = 8;
-
-/** Prodleva po sedřené pečeti, ať je vidět, že je hrdlo volné. */
-export const PECET_DOZNENI_S = 0.35;
-
-/**
- * O kolik korek povyjede za zásah. Tři zelené (3 × ⅓) nebo dva perfektní
- * zásahy korek vytáhnou — proto se sčítá do jedné, ne počítají zásahy.
- */
-export const KOREK_PERFEKTNI = 0.5;
-export const KOREK_ZELENY = 1 / 3;
-
-export const BODY_PERFEKTNI = 60;
-export const BODY_ZELENY = 40;
-
-/** Zásek po minutí: prodleva, žádná ztráta bodů. Fáze 1 se nedá prohrát. */
-export const KOREK_ZASEK_S = 0.5;
-
-/** Kolik sekund trvá cesta ukazatele tam a zpět na levelu 1. */
-export const UKAZATEL_RYCHLOST_L1 = 1;
-export const UKAZATEL_ZRYCHLENI = 0.12;
-
-/** Šířka zeleného pásma; klesá s levelem, ale ne pod `PASMO_MIN`. */
-export const PASMO_SIRKA_L1 = 0.26;
-export const PASMO_UBYTEK = 0.015;
-export const PASMO_MIN = 0.14;
-
-/**
- * Jak velká část zeleného pásma je perfektní jádro. Dokument jádro zmiňuje,
- * ale šířku neuvádí — tohle je doplněk, ne citace.
- */
-export const PERFEKTNI_PODIL = 0.3;
-
-/** Bonus za svižnost: `(REZERVA − t) × ZA_S`, do ~100 bodů. */
-export const SVIZNOST_REZERVA_S = 4;
-export const SVIZNOST_ZA_S = 25;
 
 // ------------------------------------------- fáze 3 · zahřátí a vypuštění
 
@@ -216,47 +170,52 @@ export const SVIZNOST_ZA_S = 25;
 export const TEPLOTA_MAX = 100;
 
 /**
- * Střed cílového pásma. Dokument udává jen jeho **změnu** podle polohy
- * (±6 jednotek), samotný střed ani základní šířku ne — obojí je doplněk.
+ * Střed cílového pásma a jeho šířka na levelu 1.
  *
- * Střed je schválně vysoko: kdyby ležel v polovině škály, „nad plamenem"
- * (20 j/s, praskne nad 95) by nebyla riskantní metoda, ale prostě rychlá.
+ * Dokument udává jen **změnu** podle polohy láhve (±6 jednotek), samotný střed
+ * ani základní šířku ne — obojí je doplněk. Volba polohy z hry vypadla spolu
+ * s nabídkou metod, takže pásmo má jen jednu šířku a střed rozhoduje o tom,
+ * jak dlouho se musí třít.
  */
 export const PASMO_STRED = 72;
-export const PASMO_ZAKLAD_SIRKA = 24;
-export const PASMO_VERTIKALNI = -6;
-export const PASMO_HORIZONTALNI = 6;
+export const PASMO_ZAKLAD_SIRKA = 26;
 
 /**
  * O kolik se pásmo zúží za level. Dokument pro fázi 3 žádné škálování nemá —
- * progresi staví jen na odemykání metod. Bez tohohle je ale rituál na L8
- * stejně těžký jako na L1, což si odporuje s „složitost levelu se stále
- * zvyšuje" z kap. 4.2.
+ * progresi stavěl na odemykání metod, které ale odpadlo. Bez tohohle je rituál
+ * na L8 stejně těžký jako na L1.
  */
-export const PASMO_UBYTEK_ZA_LEVEL = 1;
-export const PASMO_MIN_SIRKA = 10;
+export const PASMO_UBYTEK_ZA_LEVEL = 1.4;
+export const PASMO_MIN_SIRKA = 12;
 
-export const NASOBEK_VERTIKALNI = 1.3;
-export const NASOBEK_HORIZONTALNI = 1;
+/**
+ * Zahřátí za jednu **výšku láhve** projetou třením.
+ *
+ * Dráha se měří v podílech výšky láhve, ne v pixelech: tentýž pohyb prstem
+ * musí na telefonu i na monitoru zahřát stejně. V pixelech by byla hra na
+ * velké obrazovce několikrát rychlejší, protože láhev je tam větší.
+ *
+ * Hodnota je **doladěná měřením**, ne odhadnutá. Cíl je „4–5 sekund svižného
+ * tření"; svižné je zhruba jeden tah nahoru a dolů za sekundu, tedy dvě výšky
+ * láhve za sekundu. Při té rychlosti vyjde zahřátí na 4,4 s. Pomalé tření
+ * (jedna výška za sekundu) trvá přes deset sekund — a to je správně, protože
+ * chladnutí ukusuje pořád stejně a fáze má odměňovat svižnou ruku.
+ *
+ * Ověřuje se harnessem: `npm run hra -- --faze`.
+ */
+export const ZAHRATI_ZA_DRAHU = 10;
 
-/** Nad touhle teplotou praskne sklo při zahřívání nad plamenem. */
-export const PRASKNE_NAD = 95;
+/**
+ * Úbytek zahřátí za sekundu. Běží **pořád** — i když se tře, i když se drží
+ * zápalka. Bez toho by šlo natřít láhev do pásma a pak si dát načas, čímž by
+ * z fáze zmizel časový stres, který je jejím smyslem (kap. 5).
+ */
+export const CHLADNUTI = 3;
 
-/** Sundání uzávěru — jeden klik a animace. */
-export const UZAVER_S = 0.4;
-
+/** Jak dlouho hoří zápalka, než ji musí hráč zahodit a vzít novou. */
 export const ZAPALKA_HORI_S = 4;
-export const ZAPALKA_PRUVAN = 0.12;
-/** Zápalka dává +15 % za tradici; zapalovač nic. */
-export const ZAPALKA_BONUS = 1.15;
-export const ZAPALOVAC_SELHANI = 0.15;
-export const ZAPALOVAC_PRODLEVA_S = 0.6;
 
-/** Škrtnutí zápalky je timing klik — proto vlastní, svižnější ukazatel. */
-export const SKRTNUTI_RYCHLOST = 1.6;
-export const SKRTNUTI_PASMO = 0.3;
-
-/** Jak dlouho se drží plamen u hrdla, než to chytne. Tohle napětí je pointa. */
+/** Jak dlouho se drží zápalka u hrdla, než to chytne. Tohle napětí je pointa. */
 export const ZAZEH_PRODLEVA_MIN_S = 0.5;
 export const ZAZEH_PRODLEVA_MAX_S = 2;
 

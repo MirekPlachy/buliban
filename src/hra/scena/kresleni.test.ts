@@ -7,17 +7,18 @@
  *
  * Přesně tahle chyba je totiž nejdražší: spadne až v prohlížeči, uprostřed
  * levelu, a v terminálu po ní nezůstane nic. Typová kontrola ji nechytí,
- * protože `otevirani` i `ritual` jsou v pohledu schválně `| null`.
+ * protože `ritual` je v pohledu schválně `| null`.
  *
- * Plátno je náhražka — `Proxy`, který spolkne každé volání. Nic nekreslí,
- * jen dovolí kód projet pod holým Node.
+ * Druhá věc, kterou soubor hlídá, je **geometrie rituálu**: láhev se musí
+ * vejít nad teploměr i s prostorem na plamen a zápalka musí ležet tak, aby
+ * na ni šlo sáhnout. Obojí se dá spočítat bez plátna.
+ *
+ * Plátno je náhražka — `Proxy`, který spolkne každé volání.
  */
 
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { zalozOtevirani, krokOtevirani } from '../jadro/otevirani.ts';
-import type { StavOtevirani } from '../jadro/otevirani.ts';
 import { krokRitualu, zalozRitual } from '../jadro/ritual.ts';
 import type { FazeRitualu, StavRitualu } from '../jadro/ritual.ts';
 import { zalozKonfiguraci, zalozStav } from '../jadro/rozlevani.ts';
@@ -26,10 +27,10 @@ import * as texty from '../texty.ts';
 import type { Paleta } from './barvy.ts';
 import { vykresli } from './index.ts';
 import type { Pohled, Rezim } from './index.ts';
-import { lahevOtevirani } from './otevirani.ts';
 import type { Platno } from './platno.ts';
-import { lahevRitualu } from './ritual.ts';
+import { geometrieRitualu, naLahvi, naZapalce, uHrdla } from './ritual.ts';
 import { polohaLahve, spocitejRozvrh } from './rozvrh.ts';
+import type { Rozvrh } from './rozvrh.ts';
 
 const paleta: Paleta = {
   sklo: '#0d1f1a',
@@ -53,7 +54,6 @@ function falesnyKontext(): CanvasRenderingContext2D {
   return new Proxy(cil, {
     get(_t, klic) {
       if (klic in cil) return cil[klic as string];
-      // Vlastnosti (fillStyle, font, …) se čtou i zapisují; metody se volají.
       return typeof klic === 'string' && klic.startsWith('create')
         ? () => prechod
         : () => {};
@@ -66,63 +66,38 @@ function falesnePlatno(sirka: number, vyska: number): Platno {
   return { ctx: falesnyKontext(), sirka, vyska, svet: () => {}, znic: () => {} };
 }
 
-/** Rituál dohnaný do konkrétní fáze, ať se dá vykreslit každá. */
-function ritualVeFazi(cil: FazeRitualu): StavRitualu {
-  const stav = zalozRitual(5, 3);
-  const nic = { drzi: false, stisk: false, volba: null };
+/** Rozvrh pro daný level a plochu. */
+function rozvrhPro(sirka: number, vyska: number, cisloLevelu = 3): Rozvrh {
+  const stav = zalozStav(zalozKonfiguraci(cisloLevelu, 1));
+  return spocitejRozvrh(
+    sirka,
+    vyska,
+    stav.konfig.panaku,
+    stav.konfig.kapacitaLahveMl,
+    stav.konfig.lahev,
+    stav.konfig.panak,
+  );
+}
 
-  krokRitualu(stav, { ...nic, volba: { druh: 'poloha', poloha: 'horizontalni' } });
-  if (cil === 'zahrivani') return stav;
-
-  krokRitualu(stav, { ...nic, volba: { druh: 'metoda', metoda: 'dlane' } });
-  for (let i = 0; i < 400; i += 1) krokRitualu(stav, { ...nic, drzi: true });
-  krokRitualu(stav, { ...nic, volba: { druh: 'uzaver' } });
-  if (cil === 'uzaver') return stav;
-
-  let faze: FazeRitualu = stav.faze;
-  let pojistka = 0;
-  while (faze !== 'ohen' && pojistka < 400) {
-    faze = krokRitualu(stav, nic);
-    pojistka += 1;
+/** Rituál natřený do pásma a se zápalkou v ruce. */
+function ritualSeZapalkou(): StavRitualu {
+  const stav = zalozRitual(3, 3);
+  for (let i = 0; i < 400; i += 1) {
+    krokRitualu(stav, { treni: 2 / 60, drziZapalku: false, uHrdla: false });
   }
-  if (cil === 'ohen') return stav;
-
-  krokRitualu(stav, {
-    ...nic,
-    volba: { druh: 'ohen', ohen: cil === 'skrtani' ? 'zapalka' : 'zapalovac' },
-  });
-  if (cil === 'skrtani') return stav;
-
-  pojistka = 0;
-  while (stav.faze !== cil && pojistka < 4000) {
-    krokRitualu(stav, { ...nic, drzi: true });
-    pojistka += 1;
-  }
+  krokRitualu(stav, { treni: 0, drziZapalku: true, uHrdla: false });
   return stav;
 }
 
-function otevraniVeFazi(cil: 'pecet' | 'korek'): StavOtevirani {
-  const stav = zalozOtevirani(3);
-  if (cil === 'pecet') return stav;
-  let pojistka = 0;
-  while (stav.faze !== 'korek' && pojistka < 2000) {
-    krokOtevirani(stav, stav.faze === 'pecet');
-    pojistka += 1;
-  }
-  return stav;
-}
-
-function pohledPro(rezim: Rezim, r: ReturnType<typeof spocitejRozvrh>): Pohled {
+function pohledPro(rezim: Rezim, r: Rozvrh): Pohled {
   const stav = zalozStav(zalozKonfiguraci(3, 1));
-  const rozlevani = vyhodnot(stav);
-
   return {
     rezim,
     stav,
-    otevirani: otevraniVeFazi('korek'),
-    ritual: ritualVeFazi('zahrivani'),
-    vysledek: slozLevel(180, rozlevani, 640, true),
+    ritual: ritualSeZapalkou(),
+    vysledek: slozLevel(vyhodnot(stav), 640, true),
     poloha: polohaLahve(r, stav.konfig.lahev, r.sirka / 2, 0),
+    ukazatel: { x: r.sirka / 2, y: r.plochaY + r.plochaVyska / 2 },
     skore: 4321,
     karta: texty.karty[1] ?? null,
     patkaKarty: texty.vysledek.dal,
@@ -135,8 +110,6 @@ function pohledPro(rezim: Rezim, r: ReturnType<typeof spocitejRozvrh>): Pohled {
 
 const REZIMY: Rezim[] = [
   'karta',
-  'ukazkaOtevirani',
-  'otevirani',
   'ukazkaRozlevani',
   'rozlevani',
   'ukazkaRitual',
@@ -156,16 +129,7 @@ const PLOCHY: [number, number][] = [
 describe('vykreslení nespadne', () => {
   it('v žádném režimu a na žádné obrazovce', () => {
     for (const [sirka, vyska] of PLOCHY) {
-      const stav = zalozStav(zalozKonfiguraci(3, 1));
-      const r = spocitejRozvrh(
-        sirka,
-        vyska,
-        stav.konfig.panaku,
-        stav.konfig.kapacitaLahveMl,
-        stav.konfig.lahev,
-        stav.konfig.panak,
-      );
-
+      const r = rozvrhPro(sirka, vyska);
       for (const rezim of REZIMY) {
         assert.doesNotThrow(
           () => vykresli(falesnePlatno(sirka, vyska), r, paleta, pohledPro(rezim, r)),
@@ -176,15 +140,7 @@ describe('vykreslení nespadne', () => {
   });
 
   it('i s ladicím panelem', () => {
-    const stav = zalozStav(zalozKonfiguraci(3, 1));
-    const r = spocitejRozvrh(
-      1024,
-      768,
-      stav.konfig.panaku,
-      stav.konfig.kapacitaLahveMl,
-      stav.konfig.lahev,
-      stav.konfig.panak,
-    );
+    const r = rozvrhPro(1024, 768);
     for (const rezim of REZIMY) {
       assert.doesNotThrow(() =>
         vykresli(falesnePlatno(1024, 768), r, paleta, {
@@ -196,63 +152,30 @@ describe('vykreslení nespadne', () => {
   });
 
   it('když stav fáze ještě neexistuje — režim se přepíná dřív než stav', () => {
-    // Přesně tohle nastane mezi kartou a první fází: `rezim` už je jinde,
-    // ale `otevirani` i `ritual` jsou pořád `null`.
-    const stav = zalozStav(zalozKonfiguraci(1, 1));
-    const r = spocitejRozvrh(
-      1024,
-      768,
-      stav.konfig.panaku,
-      stav.konfig.kapacitaLahveMl,
-      stav.konfig.lahev,
-      stav.konfig.panak,
-    );
-
+    const r = rozvrhPro(1024, 768);
     for (const rezim of REZIMY) {
       assert.doesNotThrow(
         () =>
           vykresli(falesnePlatno(1024, 768), r, paleta, {
             ...pohledPro(rezim, r),
-            otevirani: null,
             ritual: null,
             vysledek: null,
             karta: null,
+            ukazatel: null,
           }),
         `${rezim} bez stavu fáze`,
       );
     }
   });
-});
 
-describe('všechny fáze rituálu se dají nakreslit', () => {
-  it('od volby polohy po prasklé sklo', () => {
-    const stav = zalozStav(zalozKonfiguraci(5, 3));
-    const r = spocitejRozvrh(
-      1024,
-      768,
-      stav.konfig.panaku,
-      stav.konfig.kapacitaLahveMl,
-      stav.konfig.lahev,
-      stav.konfig.panak,
-    );
-
-    const faze: FazeRitualu[] = [
-      'poloha',
-      'zahrivani',
-      'uzaver',
-      'ohen',
-      'skrtani',
-      'ceka',
-      'zazeh',
-      'ticho',
-      'prasklo',
-    ];
+  it('ve všech fázích rituálu', () => {
+    const r = rozvrhPro(1024, 768, 5);
+    const faze: FazeRitualu[] = ['zahrivani', 'zapalka', 'zazeh', 'ticho'];
 
     for (const f of faze) {
-      const ritual = ritualVeFazi(f);
-      // `ritualVeFazi` se do některých fází dostat nemusí (zážeh závisí na
-      // losu) — kreslí se tedy to, co vyšlo, plus ručně nastavená fáze.
+      const ritual = ritualSeZapalkou();
       ritual.faze = f;
+      ritual.kvalita = 0.8;
       assert.doesNotThrow(
         () =>
           vykresli(falesnePlatno(1024, 768), r, paleta, {
@@ -265,85 +188,64 @@ describe('všechny fáze rituálu se dají nakreslit', () => {
   });
 });
 
-describe('láhev se vejde do svého pásu', () => {
-  it('v rituálu nevyleze nad plochu ani přes teploměr', () => {
+describe('geometrie rituálu', () => {
+  it('láhev se vejde nad teploměr i s prostorem na plamen', () => {
     // Regrese: rozměry láhve v `Rozvrh` jsou spočítané pro kompozici
     // rozlévání a do zbytku plochy se nevejdou. Na notebooku vylezlo ústí
     // za horní lištu a s ním i plamen — tedy pointa celé hry.
     for (const [sirka, vyska] of PLOCHY) {
       for (const cisloLevelu of [1, 4, 8]) {
-        const stav = zalozStav(zalozKonfiguraci(cisloLevelu, 1));
-        const r = spocitejRozvrh(
-          sirka,
-          vyska,
-          stav.konfig.panaku,
-          stav.konfig.kapacitaLahveMl,
-          stav.konfig.lahev,
-          stav.konfig.panak,
-        );
-        const { rozvrh: rl, cy } = lahevRitualu(r);
-        const H = rl.lahevVyska;
+        const r = rozvrhPro(sirka, vyska, cisloLevelu);
+        const g = geometrieRitualu(r);
         const kde = `${sirka}×${vyska} L${cisloLevelu}`;
 
-        // Nastojato: od dna po ústí. Naležato: totéž, jen vodorovně.
-        assert.ok(cy - H / 2 >= r.plochaY, `${kde}: ústí vyjelo nad plochu`);
+        assert.ok(g.usti.y > r.plochaY, `${kde}: ústí vyjelo nad plochu`);
         assert.ok(
-          cy + H / 2 <= r.plochaY + r.plochaVyska * 0.56,
-          `${kde}: dno leze přes teploměr`,
+          g.poloha.y <= r.plochaY + r.plochaVyska * 0.86,
+          `${kde}: dno leze na teploměr`,
         );
-        assert.ok(H <= r.sloupec, `${kde}: ležatá láhev je širší než sloupec`);
-        assert.ok(H > 40, `${kde}: láhev se zmenšila na nic (${H.toFixed(0)} px)`);
+        assert.ok(g.vyska > 40, `${kde}: láhev se zmenšila na nic`);
+
+        // Nad hrdlem musí zbýt na plamen — jinak nebude vidět zážeh.
+        assert.ok(
+          g.usti.y - r.plochaY >= g.polomer * 3,
+          `${kde}: nad hrdlem není místo na plamen`,
+        );
       }
     }
   });
 
-  it('při otevírání nevyleze nad plochu ani na timing lištu', () => {
+  it('na hrdlo i na zápalku se dá sáhnout a nepletou se', () => {
     for (const [sirka, vyska] of PLOCHY) {
-      const stav = zalozStav(zalozKonfiguraci(3, 1));
-      const r = spocitejRozvrh(
-        sirka,
-        vyska,
-        stav.konfig.panaku,
-        stav.konfig.kapacitaLahveMl,
-        stav.konfig.lahev,
-        stav.konfig.panak,
-      );
-      const { rozvrh: rl, cy } = lahevOtevirani(r);
-      const H = rl.lahevVyska;
+      const g = geometrieRitualu(rozvrhPro(sirka, vyska));
       const kde = `${sirka}×${vyska}`;
 
-      assert.ok(cy - H / 2 >= r.plochaY, `${kde}: ústí vyjelo nad plochu`);
+      assert.ok(uHrdla(g, g.usti.x, g.usti.y), `${kde}: hrdlo nejde trefit`);
+      assert.ok(naZapalce(g, g.zapalkaDoma.x, g.zapalkaDoma.y), `${kde}: zápalka nejde vzít`);
       assert.ok(
-        cy + H / 2 <= r.plochaY + r.plochaVyska * 0.82,
-        `${kde}: dno leze na timing lištu`,
+        !uHrdla(g, g.zapalkaDoma.x, g.zapalkaDoma.y),
+        `${kde}: zápalka leží rovnou v hrdle, tím by se fáze přeskočila`,
       );
-      assert.ok(H > 40, `${kde}: láhev se zmenšila na nic`);
     }
   });
-});
 
-describe('všechny fáze otevírání se dají nakreslit', () => {
-  it('od pečeti po vytažený korek', () => {
-    const stav = zalozStav(zalozKonfiguraci(3, 1));
-    const r = spocitejRozvrh(
-      1024,
-      768,
-      stav.konfig.panaku,
-      stav.konfig.kapacitaLahveMl,
-      stav.konfig.lahev,
-      stav.konfig.panak,
-    );
+  it('tře se jen po skle, ne vedle láhve', () => {
+    const g = geometrieRitualu(rozvrhPro(1024, 768));
+    const stred = g.poloha.y - g.vyska / 2;
 
-    for (const f of ['pecet', 'pecetHotova', 'korek', 'zasek', 'hotovo'] as const) {
-      const otevirani = otevraniVeFazi(f === 'pecet' ? 'pecet' : 'korek');
-      otevirani.faze = f;
-      assert.doesNotThrow(
-        () =>
-          vykresli(falesnePlatno(1024, 768), r, paleta, {
-            ...pohledPro('otevirani', r),
-            otevirani,
-          }),
-        `fáze ${f}`,
+    assert.ok(naLahvi(g, g.poloha.x, stred), 'střed láhve musí platit');
+    assert.ok(naLahvi(g, g.poloha.x, g.poloha.y - g.vyska * 0.95), 'i horní část');
+    assert.ok(!naLahvi(g, g.poloha.x + g.polomer * 4, stred), 'vedle láhve ne');
+    assert.ok(!naLahvi(g, g.poloha.x, g.poloha.y + 60), 'pod dnem ne');
+    assert.ok(!naLahvi(g, g.poloha.x, g.usti.y - 60), 'nad hrdlem ne');
+  });
+
+  it('zápalka leží stranou od láhve, aby ji tření nezvedalo', () => {
+    for (const [sirka, vyska] of PLOCHY) {
+      const g = geometrieRitualu(rozvrhPro(sirka, vyska));
+      assert.ok(
+        !naLahvi(g, g.zapalkaDoma.x, g.zapalkaDoma.y),
+        `${sirka}×${vyska}: zápalka leží na skle — sáhnutí po ní by hřálo`,
       );
     }
   });

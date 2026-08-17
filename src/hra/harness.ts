@@ -7,7 +7,7 @@
  * node src/hra/harness.ts --level=7 --seed=42 --ideal
  * node src/hra/harness.ts --prehled --seedu=200
  * node src/hra/harness.ts --hraci
- * node src/hra/harness.ts --faze          # otevření a rituál napříč levely
+ * node src/hra/harness.ts --faze          # rituál napříč levely
  * ```
  *
  * Tohle je hlavní způsob, jak se doostřují konstanty v `ladeni.ts`. Ověřovat
@@ -16,20 +16,18 @@
 
 import { KAPACITA_PANAKU_ML } from './ladeni.ts';
 import { levely } from './levely.ts';
-import { metodyProLevel } from './jadro/metody.ts';
 import { nahoda } from './jadro/nahoda.ts';
-import { bodyZaOtevirani } from './jadro/otevirani.ts';
 import {
+  TRENI_SVIZNE,
+  dobaTreniS,
   idealniDrzeni,
   idealniPlan,
-  idealniPustitPri,
   lidskeDrzeni,
   prehraj,
-  prehrajOtevirani,
   prehrajRitual,
 } from './jadro/prehravac.ts';
 import type { Hrac } from './jadro/prehravac.ts';
-import { vypusteno } from './jadro/ritual.ts';
+import { pasmoProLevel, vypusteno } from './jadro/ritual.ts';
 import { odchylkaOdCile, prumer } from './jadro/skore.ts';
 
 function argument(jmeno: string): string | undefined {
@@ -177,79 +175,53 @@ function hraci(seedu: number): void {
 }
 
 /**
- * Fáze 1 a 3 napříč levely.
+ * Rituál napříč levely.
  *
- * Odpovídá na dvě otázky, které se z rozlévání vyčíst nedají: **kolik korek
- * a zážeh vlastně přisypou** (kap. 2 chce 10 a 40 %, jádro hry 50) a **o kolik
- * se musí přehřát**, aby láhev do zážehu nevychladla pod pásmo. To druhé je
- * číslo, které hráč nikde nevidí a musí ho vycítit — takže když vyjde větší
- * než půlka pásma, je level nehratelný a nepozná se to jinak než odsud.
+ * Odpovídá na to, co se z rozlévání vyčíst nedá: **jak dlouho se tře**, než
+ * je láhev dost horká, a **o kolik se musí přetřít**, aby nevychladla pod
+ * pásmo, než zápalka doputuje k hrdlu. To druhé je číslo, které hráč nikde
+ * nevidí a musí ho vycítit — takže když vyjde větší než půl pásma, je level
+ * nehratelný a jinak než odsud se to nepozná.
  */
 function faze(seedu: number): void {
   console.log(`\nDokonalá hra, ${seedu} seedů na level.\n`);
-  console.log(
-    '   L   metod   otevření   ⌀ rozlévání   zážeh   přehřát o   Q      vypuštěno',
-  );
-  console.log(
-    '  ─────────────────────────────────────────────────────────────────────────',
-  );
+  console.log('   L   ⌀ rozlévání   zážeh     pásmo   tření   vzít při   přetřít o   vypuštěno');
+  console.log('  ──────────────────────────────────────────────────────────────────────────────');
 
   for (const l of levely) {
-    const otevirani = bodyZaOtevirani(prehrajOtevirani(l.cislo));
-
     let rozlevani = 0;
     let zazeh = 0;
-    let kvalita = 0;
-    let prehrati = 0;
+    let vzitPri = 0;
     let vypustenych = 0;
 
     for (let seed2 = 1; seed2 <= seedu; seed2 += 1) {
       rozlevani += prehraj(l.cislo, seed2, idealniDrzeni(l.cislo, seed2)).vysledek.celkem;
-
       const plan = idealniPlan(l.cislo, seed2);
       const stav = prehrajRitual(l.cislo, seed2, plan);
       zazeh += stav.body;
-      kvalita += stav.kvalita;
-      prehrati += plan.pustitPri - stav.pasmo.stred;
+      vzitPri += plan.vzitPri;
       if (vypusteno(stav)) vypustenych += 1;
     }
 
+    const p = pasmoProLevel(l.cislo);
     const d = (x: number) => x / seedu;
     console.log(
-      `  ${String(l.cislo).padStart(2)}   ${String(metodyProLevel(l.cislo).length).padStart(5)}   ` +
-        `${String(otevirani).padStart(8)}   ${d(rozlevani).toFixed(0).padStart(11)}   ` +
-        `${d(zazeh).toFixed(0).padStart(5)}   ${d(prehrati).toFixed(1).padStart(9)}   ` +
-        `${d(kvalita).toFixed(2)}   ${String(Math.round((vypustenych / seedu) * 100)).padStart(6)} %`,
+      `  ${String(l.cislo).padStart(2)}   ${d(rozlevani).toFixed(0).padStart(11)}   ` +
+        `${d(zazeh).toFixed(0).padStart(5)}   ${`${p.stred}±${(p.sirka / 2).toFixed(1)}`.padStart(9)}   ` +
+        `${dobaTreniS(l.cislo, 1).toFixed(1).padStart(4)} s   ${d(vzitPri).toFixed(1).padStart(7)}   ` +
+        `${(d(vzitPri) - p.stred).toFixed(1).padStart(9)}   ` +
+        `${String(Math.round((vypustenych / seedu) * 100)).padStart(6)} %`,
     );
   }
 
-  // Přehřátí je vlastnost METODY, ne levelu — pomalá metoda s rychlým
-  // chladnutím potřebuje jiný nadhoz než fén. Hráč se to učí u každé zvlášť.
-  console.log(`\nPřehřátí podle metody (level ${levely.length}, seed 1):\n`);
-  for (const m of metodyProLevel(levely.length)) {
-    const pustitPri = idealniPustitPri(levely.length, 1, 'horizontalni', m.id, 'zapalka');
-    const stav = prehrajRitual(levely.length, 1, {
-      poloha: 'horizontalni',
-      metodaId: m.id,
-      ohen: 'zapalka',
-      pustitPri,
-    });
-    // Metoda se stropem se do pásma sama nedostane — a je to záměr, ne chyba
-    // ladění. Půlení intervalu na ni vrátí prostě strop.
-    const nedosahne = m.strop !== undefined && m.strop < stav.pasmo.stred;
-    // Doba držení je to, co rozhoduje o tom, jestli je metoda hratelná.
-    // Násobitel odměňuje pomalé metody, ale nikde se neplatí za čas — takže
-    // když vyjde přes deset vteřin, je to jen nuda a ne rozhodnutí.
-    const drzeniS = pustitPri / m.rychlost;
-    const zaver = nedosahne
-      ? `strop ${m.strop} j — SAMA NEDOHŘEJE, musí se kombinovat`
-      : `pustit při ${pustitPri.toFixed(1)} (o ${(pustitPri - stav.pasmo.stred).toFixed(1)} nad pásmem) ` +
-        `· držet ${drzeniS.toFixed(1)} s`;
-
+  // Jak dlouho se tře podle toho, jak svižně hráč jezdí. Zadání je 4–5 s
+  // při svižném tření; pomalé smí trvat dýl, ale ne donekonečna.
+  console.log('\nDoba zahřátí podle rychlosti tření (level 1):\n');
+  for (const rychlost of [0.75, 1, 1.5, 2, 3, 4]) {
+    const doba = dobaTreniS(1, 1, rychlost);
     console.log(
-      `  ${m.nazev.padEnd(16)} ${m.rychlost.toFixed(1).padStart(5)} j/s  ` +
-        `×${m.nasobitel.toFixed(2)}  ` +
-        `setrvačnost +${String(m.setrvacnost).padEnd(3)} chladnutí ${String(m.chladnuti).padEnd(4)} →  ${zaver}`,
+      `  ${rychlost.toFixed(2).padStart(4)} výšek láhve/s  →  ${doba.toFixed(1).padStart(5)} s` +
+        `${rychlost === TRENI_SVIZNE ? '   ← svižné tření, cíl 4–5 s' : ''}`,
     );
   }
   console.log('');

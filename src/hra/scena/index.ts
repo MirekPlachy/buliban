@@ -13,7 +13,7 @@
  */
 
 import { KAPACITA_PANAKU_ML } from '../ladeni.ts';
-import type { StavOtevirani } from '../jadro/otevirani.ts';
+import { vPasmu } from '../jadro/ritual.ts';
 import type { StavRitualu } from '../jadro/ritual.ts';
 import type { StavRozlevani } from '../jadro/rozlevani.ts';
 import type { VysledekLevelu } from '../jadro/skore.ts';
@@ -32,12 +32,11 @@ import {
 } from './hud.ts';
 import type { StredListy } from './hud.ts';
 import { kresliLahev } from './nadoby.ts';
-import { kresliOtevirani } from './otevirani.ts';
 import type { Platno } from './platno.ts';
 import { text } from './pismo.ts';
 import { kresliPanel } from './prvky.ts';
 import { kresliRitual, popisPokusu } from './ritual.ts';
-import type { PolohaLahve, Rozvrh } from './rozvrh.ts';
+import type { Bod, PolohaLahve, Rozvrh } from './rozvrh.ts';
 import { kresliDesku, kresliPanaky, kresliProud, kresliRysku } from './stul.ts';
 import { kresliKonec, kresliVysledek } from './vysledek.ts';
 
@@ -48,8 +47,6 @@ import { kresliKonec, kresliVysledek } from './vysledek.ts';
  */
 export type Rezim =
   | 'karta'
-  | 'ukazkaOtevirani'
-  | 'otevirani'
   | 'ukazkaRozlevani'
   | 'rozlevani'
   | 'ukazkaRitual'
@@ -63,19 +60,18 @@ function jeRozlevani(rezim: Rezim): boolean {
 }
 
 function jeUkazka(rezim: Rezim): boolean {
-  return (
-    rezim === 'ukazkaOtevirani' || rezim === 'ukazkaRozlevani' || rezim === 'ukazkaRitual'
-  );
+  return rezim === 'ukazkaRozlevani' || rezim === 'ukazkaRitual';
 }
 
 export interface Pohled {
   rezim: Rezim;
   stav: StavRozlevani;
-  otevirani: StavOtevirani | null;
   ritual: StavRitualu | null;
   vysledek: VysledekLevelu | null;
   /** Dno láhve a její náklon při rozlévání. Hrdlo z toho plyne. */
   poloha: PolohaLahve;
+  /** Kde je prst nebo myš při rituálu. `null`, když se nedrží. */
+  ukazatel: Bod | null;
   skore: number;
   karta: Karta | null;
   patkaKarty: string;
@@ -115,9 +111,6 @@ function kresliPozadi(platno: Platno, r: Rozvrh, paleta: Paleta): void {
 function stredListy(pohled: Pohled): StredListy {
   const { stav } = pohled;
 
-  if (pohled.rezim === 'otevirani' || pohled.rezim === 'ukazkaOtevirani') {
-    return { popis: texty.hud.otevirani, hodnota: pohled.otevirani?.faze === 'pecet' ? '1 / 2' : '2 / 2' };
-  }
   if (pohled.rezim === 'ritual' || pohled.rezim === 'ukazkaRitual') {
     return {
       popis: texty.hud.pokus,
@@ -135,24 +128,21 @@ function stredListy(pohled: Pohled): StredListy {
 /** Nápověda pro spodní pás a jestli je to povel, nebo jen popis děje. */
 function napoveda(pohled: Pohled): { obsah: string; povel: boolean } {
   switch (pohled.rezim) {
-    case 'otevirani': {
-      const faze = pohled.otevirani?.faze ?? 'hotovo';
-      return {
-        obsah: texty.napovedyOtevirani[faze],
-        povel: faze === 'pecet' || faze === 'korek',
-      };
-    }
     case 'rozlevani':
       return {
         obsah: napovedaRozlevani(pohled.stav, pohled.poUkazce),
         povel: pohled.stav.faze === 'ceka',
       };
     case 'ritual': {
-      const faze = pohled.ritual?.faze ?? 'hotovo';
-      return {
-        obsah: texty.napovedyRitualu[faze],
-        povel: faze === 'poloha' || faze === 'zahrivani' || faze === 'ohen' || faze === 'ceka',
-      };
+      const r = pohled.ritual;
+      if (!r) return { obsah: '', povel: false };
+      // Jakmile je láhev dost horká, nápověda se přepne z „třít" na „vzít
+      // zápalku". Je to jediné místo, kde se hráč dozví, že už má přestat.
+      const obsah =
+        r.faze === 'zahrivani' && vPasmu(r)
+          ? texty.napovedaVezmiZapalku
+          : texty.napovedyRitualu[r.faze];
+      return { obsah, povel: r.faze === 'zahrivani' || r.faze === 'zapalka' };
     }
     default:
       return { obsah: '', povel: false };
@@ -162,8 +152,6 @@ function napoveda(pohled: Pohled): { obsah: string; povel: boolean } {
 /** Komentář běžící ukázky. Váže se na stav fáze, ne na stopky. */
 function komentar(pohled: Pohled): string {
   switch (pohled.rezim) {
-    case 'ukazkaOtevirani':
-      return texty.komentarOtevirani(pohled.otevirani?.faze ?? 'hotovo');
     case 'ukazkaRitual':
       return pohled.ritual ? texty.komentarRitualu(pohled.ritual) : '';
     default:
@@ -185,11 +173,10 @@ function kresliDebug(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohled):
     `fáze ${stav.faze}   náklon ${stav.naklonPodil.toFixed(2)}   průtok ${stav.prutokMlS.toFixed(1)} ml/s`,
     `panáky ${stav.panaky.map((v) => v.toFixed(1)).join(' · ')}`,
     `rozlito ${stav.rozlitoMl.toFixed(1)} ml   přelití ${stav.prelitiPocet}×   tolerance ${konfig.level.tolerance}`,
-    pohled.otevirani
-      ? `otevírání ${pohled.otevirani.faze}   korek ${pohled.otevirani.korekPodil.toFixed(2)}   body ${pohled.otevirani.body}`
-      : 'otevírání –',
     pohled.ritual
-      ? `rituál ${pohled.ritual.faze}   teplota ${pohled.ritual.teplota.toFixed(1)}   pásmo ${pohled.ritual.pasmo.stred}±${(pohled.ritual.pasmo.sirka / 2).toFixed(1)}   pokus ${pohled.ritual.pokus}`
+      ? `rituál ${pohled.ritual.faze}   teplota ${pohled.ritual.teplota.toFixed(1)}   ` +
+        `pásmo ${pohled.ritual.pasmo.stred}±${(pohled.ritual.pasmo.sirka / 2).toFixed(1)}   ` +
+        `tření ${pohled.ritual.treniTed.toFixed(3)}   pokus ${pohled.ritual.pokus}`
       : 'rituál –',
     `scéna ${r.sirka}×${r.vyska}   ui ${r.ui.toFixed(2)}   panák ${r.panakSirka.toFixed(0)} px`,
     '[ ] level   R seed   N šum   S zpomalení   D panel',
@@ -236,10 +223,8 @@ export function vykresli(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohl
     if (pohled.rezim === 'vysledek' && pohled.vysledek) {
       kresliVysledek(platno, r, paleta, stav, pohled.vysledek);
     }
-  } else if (pohled.otevirani && (pohled.rezim === 'otevirani' || pohled.rezim === 'ukazkaOtevirani')) {
-    kresliOtevirani(platno, r, paleta, stav, pohled.otevirani);
   } else if (pohled.ritual) {
-    kresliRitual(platno, r, paleta, stav, pohled.ritual);
+    kresliRitual(platno, r, paleta, stav, pohled.ritual, pohled.ukazatel);
   }
 
   // Lišty až nad scénu: vyhoupnuté dno láhve i překryv výsledku by jim jinak
