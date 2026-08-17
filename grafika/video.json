@@ -6,6 +6,16 @@
   "_smer": "Obě smyčky ukazují plamen UVNITŘ láhve a liší se jen tím, kudy se šíří. Vertikální: od hrdla ke dnu. Horizontální: ode dna k hrdlu. Přesně tak to popisují texty v kapitole čtvrté, takže se to nesmí prohodit.",
   "smycky": [
     {
+      "id": "nauka",
+      "popis": "Smyčka ke kapitole Co je to Buliban — rozhýbaná statická ukázka, zpomalený zážeh uvnitř láhve.",
+      "zdroj": "src/assets/generovane/nauka.webp",
+      "_prompt": "Zpomalený zážeh podle skutečných videí z kroniky: láhev i kamera se nesmí hnout, hýbe se jen oheň uvnitř skla. Slovesa neutrální kvůli content checkeru fal.ai (viz _prompt u vertikální). První verze měla plamen, který hořel nepřetržitě a šlehal před sklem — zadavatel vrátil. Oprava stojí na dvou věcech: „trapped inside … behind the glass“ (stejné sloveso, které oheň drží za sklem u obrázků) a průběh jednoho zážehu do úplného zhasnutí. Klip končí tmavou klidnou lahví, a protože první snímek je zdrojový obrázek s plamenem, skok smyčky zpátky na začátek funguje jako nový zážeh. Druhá verze měla průběh správně, ale po dohasnutí si model dosvítil pozadí do teplé hnědi — stejná past jako u obrázků (viz _vecne u nauky v zadani.json): oheň musí být popsaný jako jediné světlo scény, jinak bliká pozadí na skoku smyčky.",
+      "prompt": "Slow motion: the blue fire trapped inside the empty glass body of the standing bottle rises gently once, then calms, sinks lower and slowly fades out, leaving the bottle dark and still for a short quiet moment at the end. This fire is the only light in the scene: as it fades, the whole picture goes darker with it and the background stays pure black from start to end. The fire stays behind the glass at all times and never appears outside the bottle. The bottle and the camera stay perfectly still.",
+      "delka": 5,
+      "cil": "public/video/nauka",
+      "zamceno": true
+    },
+    {
       "id": "vertikalni",
       "popis": "Smyčka ke kartě Vertikální.",
       "zdroj": "src/assets/generovane/vertikalni.webp",

@@ -13,7 +13,6 @@ const [nauka, historie, zahrivani, poloha, vypusteni, opakovani, dnes] =
 
 // Grafika z `npm run obrazky`. Zadání ke každému souboru je v grafika/zadani.json,
 // takže je dohledatelné, proč obrázek vypadá, jak vypadá.
-import obrNauka from '../assets/generovane/nauka.webp';
 import obrJakVypustit from '../assets/generovane/jak-vypustit.webp';
 import obrOpakovane from '../assets/generovane/opakovane.webp';
 import obrDnes from '../assets/generovane/dnes.webp';
@@ -346,11 +345,13 @@ const tipy = [
         </div>
 
         <div class="reveal">
-          <Image
-            src={obrNauka}
-            alt="Láhev rumu na černém pozadí, uvnitř skla hoří modrý plamen zážehu."
-            class="aspect-[3/4] w-full rounded-3xl object-cover"
-          />
+          <div class="aspect-[3/4] w-full overflow-hidden rounded-3xl">
+            <Video
+              src="/video/nauka"
+              poster="/video/nauka-plakat.jpg"
+              popis="Láhev rumu na černém pozadí, uvnitř skla se zpomaleně převaluje modrý plamen zážehu."
+            />
+          </div>
         </div>
       </div>
 
