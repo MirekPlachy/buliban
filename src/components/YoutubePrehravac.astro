@@ -1,0 +1,134 @@
+---
+/**
+ * YouTube video, které se přehraje až po kliknutí (façade vzor) —
+ * a to zvětšené přes celou obrazovku (lightbox).
+ *
+ * Web záměrně nemá cookie lištu, takže do kliknutí návštěvníka nesmí jít
+ * na Google žádný požadavek. Náhled dodá volající slotem (servíruje se
+ * z vlastní domény). Teprve klik na play otevře přes stránku tmavé okno
+ * s velkým iframem z `www.youtube-nocookie.com` — karty v mřížce jsou na
+ * přehrávání malé a lišty YouTube by u krátkých klipů zakrývaly půlku
+ * obrazu. Zavření (křížek, Esc, klik mimo video) iframe odstraní, takže
+ * zvuk nehraje dál na pozadí.
+ */
+interface Props {
+  /** ID videa na YouTube (11 znaků z adresy). */
+  videoId: string;
+  /** Poměr stran videa; shorts jsou '9:16'. */
+  pomer?: '16:9' | '4:3' | '9:16';
+  /** Popis videa pro čtečky — nese ho tlačítko, okno i iframe. */
+  popis: string;
+}
+
+const { videoId, pomer = '16:9', popis } = Astro.props;
+---
+
+<div
+  class="relative h-full w-full"
+  data-youtube-prehravac
+  data-video={videoId}
+  data-pomer={pomer}
+  data-popis={popis}
+>
+  {/* Náhled přes celou kartu; hover-scale žije jen tady. */}
+  <slot />
+
+  <button
+    type="button"
+    data-prehrat
+    class="group/play absolute inset-0 z-10 flex cursor-pointer items-center justify-center focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+    aria-label={`Přehrát video: ${popis}`}
+  >
+    <span
+      class="flex h-16 w-16 items-center justify-center rounded-full bg-noc-950/70 text-white backdrop-blur transition group-hover/play:bg-plamen-500 group-hover/play:text-noc-950"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="ml-1 h-7 w-7"
+        aria-hidden="true"
+      >
+        <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l11.02-6.86a1.03 1.03 0 0 0 0-1.76L9.56 4.26A1.03 1.03 0 0 0 8 5.14Z"></path>
+      </svg>
+    </span>
+  </button>
+</div>
+
+<script>
+  // Teprve klik na play vloží iframe z youtube-nocookie.com — do té doby
+  // nejde na Google žádný požadavek. `autoplay=1` je i s omezením pohybu
+  // v pořádku, jde o výslovnou akci uživatele.
+
+  // Velikost jeviště: video se roztáhne na 92 % kratšího rozměru okna
+  // a poměr stran drží `aspect-ratio`. Šířkový limit v `svh` je poměrem
+  // přepočtená výška, aby se vysoké video vešlo i na nízkou obrazovku.
+  const rozmery = {
+    '16:9': { pomer: '16 / 9', sirka: 'min(92vw, 163.5svh)' },
+    '4:3': { pomer: '4 / 3', sirka: 'min(92vw, 122.6svh)' },
+    '9:16': { pomer: '9 / 16', sirka: 'min(92vw, 51.7svh)' },
+  };
+
+  function otevrit(prehravac: HTMLElement, tlacitko: HTMLButtonElement) {
+    const { video, popis } = prehravac.dataset;
+    const rozmer =
+      rozmery[prehravac.dataset.pomer as keyof typeof rozmery] ??
+      rozmery['16:9'];
+
+    const okno = document.createElement('div');
+    okno.className =
+      'fixed inset-0 z-50 flex items-center justify-center bg-noc-950/90 backdrop-blur-xl';
+    okno.setAttribute('role', 'dialog');
+    okno.setAttribute('aria-modal', 'true');
+    okno.setAttribute('aria-label', popis ?? '');
+
+    const jeviste = document.createElement('div');
+    jeviste.className = 'overflow-hidden rounded-2xl bg-black shadow-2xl';
+    jeviste.style.width = rozmer.sirka;
+    jeviste.style.aspectRatio = rozmer.pomer;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${video}?autoplay=1&rel=0`;
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    iframe.title = popis ?? '';
+    iframe.className = 'h-full w-full';
+
+    const zavrit = document.createElement('button');
+    zavrit.type = 'button';
+    zavrit.className =
+      'absolute top-4 right-4 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-2xl leading-none text-white transition hover:bg-plamen-500 hover:text-noc-950 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none';
+    zavrit.setAttribute('aria-label', 'Zavřít video');
+    zavrit.textContent = '×';
+
+    function uklidit() {
+      okno.remove();
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', naKlavesu);
+      tlacitko.focus();
+    }
+    function naKlavesu(udalost: KeyboardEvent) {
+      if (udalost.key === 'Escape') uklidit();
+    }
+
+    zavrit.addEventListener('click', uklidit);
+    // Klik do tmy okolo videa okno zavře; klik do videa ne.
+    okno.addEventListener('click', (udalost) => {
+      if (udalost.target === okno) uklidit();
+    });
+    document.addEventListener('keydown', naKlavesu);
+
+    jeviste.append(iframe);
+    okno.append(jeviste, zavrit);
+    document.body.append(okno);
+    document.body.style.overflow = 'hidden';
+    iframe.focus();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>('[data-youtube-prehravac]')
+    .forEach((prehravac) => {
+      const tlacitko =
+        prehravac.querySelector<HTMLButtonElement>('[data-prehrat]');
+      if (!tlacitko) return;
+      tlacitko.addEventListener('click', () => otevrit(prehravac, tlacitko));
+    });
+</script>

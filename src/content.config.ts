@@ -24,6 +24,13 @@ const zazehy = defineCollection({
        * Očekává dvojici `.webm` + `.mp4` v `public/`.
        */
       video: z.string().optional(),
+      /** ID videa na YouTube (11 znaků z adresy). Přehrává se až po kliknutí. */
+      youtube: z
+        .string()
+        .regex(/^[\w-]{11}$/)
+        .optional(),
+      /** Poměr stran videa; shorts jsou '9:16'. */
+      youtubePomer: z.enum(['16:9', '4:3', '9:16']).default('16:9'),
       /** Vlastní pořadí v kronice; když chybí, řadí se podle data. */
       poradi: z.number().optional(),
     }),

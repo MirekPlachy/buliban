@@ -18,6 +18,10 @@ export default defineConfig({
 
   integrations: [sitemap()],
 
+  // Náhledy YouTube videí v kronice: Astro je při buildu stáhne z i.ytimg.com,
+  // zoptimalizuje a servíruje z vlastní domény. Návštěvník na Google nesáhne.
+  image: { domains: ['i.ytimg.com'] },
+
   vite: {
     plugins: [tailwindcss()],
   },
