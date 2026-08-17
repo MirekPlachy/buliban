@@ -73,8 +73,8 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
    *
    * Sled obrazovek levelu je **karta → (ukázka) → hra → výsledek**, tedy
    * jedno odehrání levelu, a před ním nejvýš jedna ukázka. Ukázku má podle
-   * `levely.ts` jen level 1 — hlídá to invariant „ryska svítí jen v prvních
-   * dvou levelech a ukázka jen v prvním" v `rozlevani.test.ts`.
+   * `levely.ts` jen level 1 — hlídá to invariant „ryska svítí jen v prvním
+   * levelu a ukázka taky jen v něm" v `rozlevani.test.ts`.
    */
   function zalozLevel(): void {
     stav = novyStav();

@@ -93,7 +93,7 @@ npm run check                                     # typy
 **Tolerance v `levely.ts` neměň bez `--hraci` před a po.** Ideální držení je
 lepší než kdokoli živý, takže se podle něj obtížnost nastavit nedá. Cíl
 z kap. 4.7: nováček ≤ 10 % zlatých, zkušený hráč 40–60 % napříč hrou.
-Aktuální stav: nováček 8 %, pokročilý 20 %, zkušený 49 %.
+Aktuální stav: nováček 9 %, pokročilý 21 %, zkušený 52 %.
 
 Druhá věc, kterou `--hraci` neuvidí: **rozptyl podle vylosovaného cíle.**
 Hlídá ho test „stejný hráč dopadne u malého i velkého cíle stejně"
@@ -112,14 +112,14 @@ Všechno je okomentované i na místě; tady jen ať se to nehledá.
   (`jadro/rozlevani.ts`, `zahajDokap`). Náhodný los se nedá naučit
   předvídat, což je přesně to, co po něm dokument chce.
 - **Medaile se měří na `E`, ne na bodech** (`ladeni.ts`, `MEDAILE_*`). Prahy
-  90/75/55 % proti `base × E^1,5` by od L7 výš vyšly pod kvantováním kroku
+  90/75/55 % proti `base × E^1,5` by od L6 výš vyšly pod kvantováním kroku
   simulace, tedy nedosažitelně.
-- **Devět levelů se stropem osm panáků**, tři úvodní po dvou panácích
+- **Osm levelů se stropem osm panáků**, dva úvodní po dvou panácích
   (`levely.ts`). Nekonečný režim odpadl.
 - **Tolerance se přepočítává na vylosovaný cíl** (`skore.ts`, `tolerancePro`).
   Chyba hráče má poměrnou složku (odhad hladiny) i absolutní (nepřesné
   puštění při stále stejném průtoku). Čistě poměrná tolerance tu druhou
-  ignoruje a u malého cíle z ní udělá obrovské procento — na L7 to dělalo
+  ignoruje a u malého cíle z ní udělá obrovské procento — na L6 to dělalo
   16násobný rozdíl v šanci na zlato podle losu, který hráč nevidí.
 - **Cíl je nejvýš 30 ml, ne 40** (`ladeni.ts`, `CIL_MAX_ML`). Dokument uvádí
   40 s odůvodněním „aby se vešel i s chybou", jenže 40 ml je celý panák po
@@ -130,7 +130,7 @@ Všechno je okomentované i na místě; tady jen ať se to nehledá.
   i u osmi; obrazovka rozhoduje jen o velikosti skla. Řada se pak centruje.
 - **Slepé finále má čiré hrdlo** (`lahev.ts`, `neprusvitneDo`). Dokument
   počítá jen se sluchovými vodítky; tohle je jejich vizuální obdoba. Nad
-  hranicí neprůhlednosti jsou 4 % objemu láhve, zatímco na L9 je v ní
+  hranicí neprůhlednosti jsou 4 % objemu láhve, zatímco na L8 je v ní
   16–64 % — hladina se tam tedy ve stojící láhvi nikdy nedostane a hrdlo
   prozradí jen to, že a jak silně teče.
 

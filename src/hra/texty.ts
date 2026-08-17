@@ -51,52 +51,45 @@ export const karty: Record<number, Karta> = {
     ],
   },
   2: {
-    nadpis: 'Teď ty',
-    radky: [
-      'Ryska na panáku ukazuje, kam až nalít.',
-      'Pozor na dokapávání — po puštění ještě chvíli teče.',
-    ],
-  },
-  3: {
     nadpis: 'Ryska zhasla',
     radky: [
       'Odteď musíš odhadnout sám, kolik je v láhvi, a vydělit to počtem panáků.',
       'Co zůstane v láhvi, se počítá jako chyba.',
     ],
   },
-  4: {
+  3: {
     nadpis: 'Tři panáky a láhev s ramenem',
     radky: [
       'Tahle láhev se nahoře zužuje: poslední třetina výšky pojme sotva desetinu obsahu.',
       'Výška hladiny už neodpovídá množství.',
     ],
   },
-  5: {
+  4: {
     nadpis: 'Kónický panák',
     radky: [
       'Panák se rozšiřuje vzhůru. Do poloviny výšky se vejde míň než polovina.',
       'Láhev se zužuje taky — nahoře je jí míň, než to vypadá.',
     ],
   },
-  6: {
+  5: {
     nadpis: 'Všechno je břichaté',
     radky: [
       'Láhev i panák jsou nejširší uprostřed. Přesně opačná past než minule.',
       'Hladina v půlce výšky je nad polovinou obsahu.',
     ],
   },
-  7: {
+  6: {
     nadpis: 'Hosté si panáky odnášejí',
     radky: [
       'Nalitý panák zmizí ze stolu. Porovnávat nebude s čím — zbývá paměť a hladina v láhvi.',
       'Karafa má dvě vypoukliny a každá tvrdí něco jiného.',
     ],
   },
-  8: {
+  7: {
     nadpis: 'Etiketa přes hladinu',
     radky: ['Kus láhve není vidět. Odhadnout to jde, ale bude to bolet.'],
   },
-  9: {
+  8: {
     nadpis: 'Naslepo',
     radky: [
       'Neprůhledná láhev. Kolik je v těle, se nedozvíš.',

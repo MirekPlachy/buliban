@@ -64,7 +64,7 @@ export function kresliListu(
   ctx.fillRect(0, 0, r.sirka, r.hornilistaY);
   kresliLinku(ctx, 0, r.sirka, r.hornilistaY, pruhledne(paleta.par, 0.12));
 
-  // Postup hrou jako vlásek na spodní hraně lišty. Devět levelů je krátká
+  // Postup hrou jako vlásek na spodní hraně lišty. Osm levelů je krátká
   // hra a hráč má vidět, že se blíží konec — ne až na závěrečné obrazovce.
   ctx.fillStyle = pruhledne(paleta.rum, 0.75);
   ctx.fillRect(0, r.hornilistaY - 2, (r.sirka * konfig.level.cislo) / POSLEDNI_LEVEL, 2);

@@ -7,7 +7,7 @@
  * i na stranu, kam hráč lije.
  *
  * Tvary se zavádějí uprostřed hry, kde jsou tvary lahví (C, D, E) ještě
- * naučitelné. Na L8 a L9, kde je celá obtížnost v neviditelné hladině,
+ * naučitelné. Na L7 a L8, kde je celá obtížnost v neviditelné hladině,
  * zůstává válec — dvě nové zrady naráz by z levelu udělaly loterii.
  */
 

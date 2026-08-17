@@ -45,20 +45,20 @@ describe('konfigurace levelu', () => {
     }
   });
 
-  it('devět levelů, strop osm panáků, žádný nekonečný režim', () => {
-    assert.equal(POSLEDNI_LEVEL, 9);
+  it('osm levelů, strop osm panáků, žádný nekonečný režim', () => {
+    assert.equal(POSLEDNI_LEVEL, 8);
     assert.equal(level(1).panaku, 2);
     assert.equal(level(2).panaku, 2);
-    assert.equal(level(3).panaku, 2);
-    assert.equal(level(9).panaku, STROP_PANAKU);
-    assert.equal(level(50).cislo, 9, 'za posledním levelem se hra nepokračuje');
+    assert.equal(level(3).panaku, 3);
+    assert.equal(level(8).panaku, STROP_PANAKU);
+    assert.equal(level(50).cislo, 8, 'za posledním levelem se hra nepokračuje');
     for (const l of levely) assert.ok(l.panaku <= STROP_PANAKU, `L${l.cislo} má ${l.panaku} panáků`);
   });
 
-  it('ryska svítí jen v prvních dvou levelech a ukázka jen v prvním', () => {
+  it('ryska svítí jen v prvním levelu a ukázka taky jen v něm', () => {
     assert.deepEqual(
       levely.filter((l) => l.ryska).map((l) => l.cislo),
-      [1, 2],
+      [1],
     );
     assert.deepEqual(
       levely.filter((l) => l.ukazka).map((l) => l.cislo),

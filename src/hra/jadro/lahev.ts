@@ -46,7 +46,7 @@ const tvary: Record<TvarId, Tvar> = {
     viditelnost: 'plna',
     stihlost: 3.1,
     // Jediný tvar, kde výška opravdu odpovídá objemu. Referenční bod, proti
-    // kterému hráč všechny ostatní levely poměřuje. Drží první tři levely.
+    // kterému hráč všechny ostatní levely poměřuje. Drží první dva levely.
     polomer: (y) => hrdlo(y, 1, 0.34, 0.84, 0.9),
   },
   B: {
