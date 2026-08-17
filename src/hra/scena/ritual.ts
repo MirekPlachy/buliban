@@ -69,12 +69,10 @@ export function geometrieRitualu(r: Rozvrh): GeometrieRitualu {
   const horni = r.plochaY + OKRAJ * r.ui;
   const dolni = r.plochaY + r.plochaVyska * TEPLOMER_Y - NAD_TEPLOMEREM * r.ui;
 
-  // Napřed se zjistí, jak velká láhev se do pásu vejde i s prostorem na
-  // plamen. Prostor je v poloměrech láhve, takže se zmenšuje s ní — proto
-  // se počítá ze zmenšených rozměrů, ne z původních.
-  const hrube = vlozLahev(r, horni, dolni);
-  const rezerva = PROSTOR_PLAMENE * hrube.rozvrh.lahevPolomer;
-  const vsazena = vlozLahev(r, horni + rezerva, dolni);
+  // Prostor na plamen je v poloměrech láhve a zmenšuje se spolu s ní —
+  // řeší ho `vlozLahev` v jedné rovnici. Násobek 1,15 kryje kmitání plamene:
+  // ve špičce je o kus delší než `PROSTOR_PLAMENE` (viz `kresliPlamen`).
+  const vsazena = vlozLahev(r, horni, dolni, PROSTOR_PLAMENE * 1.15);
 
   const rl = vsazena.rozvrh;
   const H = rl.lahevVyska;
@@ -279,7 +277,10 @@ function kresliVoditko(
   }
 }
 
-/** Hláška po zážehu nebo tichu. V pásu pod lahví, ne přes teploměr. */
+/**
+ * Hláška po zážehu nebo tichu. Ve výkladovém pruhu — nápověda je v těch
+ * fázích prázdná, takže je pruh volný a hláška nepřekáží plameni nad hrdlem.
+ */
 function kresliHlasku(
   platno: Platno,
   r: Rozvrh,
@@ -293,14 +294,15 @@ function kresliHlasku(
       ? texty.zazeh.konecPokusu
       : texty.zazeh.ticho;
 
+  const velikost = 22 * r.ui;
   odstavec(
     platno.ctx,
     obsah,
     r.sirka / 2,
-    r.plochaY + r.plochaVyska * 0.06,
+    (r.hornilistaY + r.plochaY) / 2 - velikost * 0.65,
     r.sloupec,
     {
-      velikost: 22 * r.ui,
+      velikost,
       barva: uspech ? paleta.zazeh : paleta.par,
       zarovnani: 'center',
       pismo: 'nadpis',

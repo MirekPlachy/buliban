@@ -26,7 +26,6 @@ import {
   kresliKomentarUkazky,
   kresliListu,
   kresliNapovedu,
-  kresliPreskoceni,
   kresliRam,
   napovedaRozlevani,
 } from './hud.ts';
@@ -183,7 +182,7 @@ function kresliDebug(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohled):
   ];
 
   const vyska = radky.length * 15 + 16;
-  const y = r.spodniListaY - vyska - 8;
+  const y = r.vyska - vyska - 8;
   kresliPanel(platno.ctx, paleta, r, 8, y, 520, vyska, { kryti: 0.9 });
   radky.forEach((radek, i) => {
     text(platno.ctx, radek, 20, y + 8 + i * 15, {
@@ -232,7 +231,6 @@ export function vykresli(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohl
   kresliListu(platno, r, paleta, stav.konfig.level.cislo, stredListy(pohled), pohled.skore);
 
   if (jeUkazka(pohled.rezim)) {
-    kresliPreskoceni(platno, r, paleta);
     kresliKomentarUkazky(platno, r, paleta, komentar(pohled));
   } else if (pohled.rezim !== 'vysledek' && pohled.rezim !== 'karta') {
     const { obsah, povel } = napoveda(pohled);

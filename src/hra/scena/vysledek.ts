@@ -176,10 +176,12 @@ export function kresliVysledek(
   };
   const vyskaRadku = 22 * u;
   const vyskaNadpisu = vyskaOdstavce(ctx, nazev, sirka - 2 * odsazeni, nadpis, 1.2);
-  const vyska = 20 * u + vyskaNadpisu + 16 * u + radky.length * vyskaRadku + 22 * u;
+  const vyska = 20 * u + vyskaNadpisu + 16 * u + radky.length * vyskaRadku + 12 * u + 36 * u;
 
+  // Panel začíná už ve výkladovém pruhu — nápověda se ve výsledku nekreslí,
+  // takže je pruh volný a panel díky němu míň leze přes scénu.
   const x = (r.sirka - sirka) / 2;
-  const y = r.plochaY + 14 * u;
+  const y = r.hornilistaY + 10 * u;
   kresliPanel(ctx, paleta, r, x, y, sirka, vyska, {
     obrys: pruhledne(v.medaile ? paleta.rum : paleta.par, 0.24),
   });
@@ -215,7 +217,11 @@ export function kresliVysledek(
     kurzor += vyskaRadku;
   }
 
-  text(ctx, texty.vysledek.dal, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
+  // Pobídka „dál" je patka panelu, stejně jako u karty levelu — spodní pás
+  // už není a k rozpadu bodů patří i to, jak se jde dál.
+  const patkaY = y + vyska - 36 * u;
+  kresliLinku(ctx, x + odsazeni, x + sirka - odsazeni, patkaY, pruhledne(paleta.par, 0.1));
+  text(ctx, texty.vysledek.dal, r.sirka / 2, patkaY + 18 * u, {
     velikost: 13 * u,
     barva: pruhledne(paleta.par, 0.55),
     zarovnani: 'center',
@@ -247,8 +253,10 @@ export function kresliKonec(
   // Titul se na užší obrazovce zalomí, takže výška panelu z něj musí plynout,
   // ne být zapsaná číslem.
   const vyskaTitulu = vyskaOdstavce(ctx, texty.titul(skore), sirka - 52 * u, titul, 1.2);
-  const vyska = vyskaTitulu + 196 * u;
-  const y = Math.max(r.plochaY, (r.vyska - vyska) / 2);
+  const vyska = vyskaTitulu + 232 * u;
+  // Optický střed, stejně jako karta levelu: přesné vycentrování na tmavé
+  // ploše vypadá utopeně, panel se proto zvedá kus nad geometrický střed.
+  const y = Math.max(r.plochaY, (r.vyska - vyska) * 0.42);
   kresliPanel(ctx, paleta, r, x, y, sirka, vyska, { obrys: pruhledne(paleta.rum, 0.28) });
 
   let kurzor = y + 26 * u;
@@ -279,7 +287,11 @@ export function kresliKonec(
     pismo: 'cisla',
   });
 
-  text(ctx, texty.konec.znovu, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
+  // „Hrát znovu" je patka panelu — spodní pás už není a pobídka patří
+  // k závěrečné kartě, ne na volnou plochu pod ní.
+  const patkaY = y + vyska - 38 * u;
+  kresliLinku(ctx, x + 40 * u, x + sirka - 40 * u, patkaY, pruhledne(paleta.par, 0.1));
+  text(ctx, texty.konec.znovu, r.sirka / 2, patkaY + 19 * u, {
     velikost: 14 * u,
     barva: pruhledne(paleta.par, 0.6),
     zarovnani: 'center',

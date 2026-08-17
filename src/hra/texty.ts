@@ -56,6 +56,10 @@ export const zazeh = {
 /**
  * Karta před levelem. Vysvětluje **jen to, co je nové** — opakovat pokaždé
  * všechna pravidla by hráče naučilo kartu přeskakovat.
+ *
+ * Jeden řádek = jedna věta. Karta je centrovaná a věty se kreslí jako
+ * samostatné řádky pod sebou — dvě věty v jednom řádku by se slily do
+ * odstavce a přesně tak vznikala nepřehledná cihla textu.
  */
 export interface Karta {
   nadpis: string;
@@ -68,8 +72,9 @@ export const karty: Record<number, Karta> = {
     radky: [
       'Level má dvě části: rozlít láhev mezi panáky a z prázdné láhve vypustit Bulibana.',
       'Rozlévání je jádro — obsah má skončit ve všech panácích stejně a dolít se nedá.',
-      'Prázdnou láhev pak zahřeješ třením a zapálíš. Bez vypuštění se dál nepostupuje.',
-      'Obojí ti nejdřív předvedu. Body zatím nehrajou roli.',
+      'Prázdnou láhev pak zahřeješ třením a zapálíš.',
+      'Bez vypuštění se dál nepostupuje.',
+      'Obojí ti nejdřív předvedu — body zatím nehrajou roli.',
     ],
   },
   2: {
@@ -103,20 +108,25 @@ export const karty: Record<number, Karta> = {
   6: {
     nadpis: 'Hosté si panáky odnášejí',
     radky: [
-      'Nalitý panák zmizí ze stolu. Porovnávat nebude s čím — zbývá paměť a hladina v láhvi.',
+      'Nalitý panák zmizí ze stolu.',
+      'Porovnávat nebude s čím — zbývá paměť a hladina v láhvi.',
       'Karafa má dvě vypoukliny a každá tvrdí něco jiného.',
     ],
   },
   7: {
     nadpis: 'Etiketa přes hladinu',
-    radky: ['Kus láhve není vidět. Odhadnout to jde, ale bude to bolet.'],
+    radky: [
+      'Kus láhve není vidět.',
+      'Odhadnout to jde, ale bude to bolet.',
+    ],
   },
   8: {
     nadpis: 'Naslepo',
     radky: [
-      'Neprůhledná láhev. Kolik je v těle, se nedozvíš.',
+      'Neprůhledná láhev — kolik je v těle, se nedozvíš.',
       'Čiré zůstalo jen hrdlo — uvidíš, že teče a jak silně, ale ne kolik zbývá.',
-      'Tolerance je tu mnohem volnější. Ber to jako historku, ne jako zkoušku.',
+      'Tolerance je tu mnohem volnější.',
+      'Ber to jako historku, ne jako zkoušku.',
     ],
   },
 };

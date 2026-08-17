@@ -18,7 +18,7 @@
  * rychlejší, protože láhev je tam větší.
  */
 
-import { KROK_S, MAX_KROKU_ZA_SNIMEK } from './ladeni.ts';
+import { KROK_S, MAX_KROKU_ZA_SNIMEK, UKAZKA_ZPOMALENI } from './ladeni.ts';
 import { POSLEDNI_LEVEL, level } from './levely.ts';
 import { ZADNY_VSTUP, krokRitualu, vypusteno, zalozRitual } from './jadro/ritual.ts';
 import type { StavRitualu, VstupRitualu } from './jadro/ritual.ts';
@@ -378,7 +378,10 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
 
     const dt = Math.min((t - posledni) / 1000, 0.25);
     posledni = t;
-    dluh += dt * casovyNasobek;
+    // Ukázka běží zpomaleně, ať se komentáře dají dočíst. Je to násobek
+    // času, ne jiná simulace — na výsledek ukázky nemá vliv.
+    const ukazkaBezi = rezim === 'ukazkaRozlevani' || rezim === 'ukazkaRitual';
+    dluh += dt * casovyNasobek * (ukazkaBezi ? UKAZKA_ZPOMALENI : 1);
     odkrokuj();
 
     const r = spocitejRozvrh(

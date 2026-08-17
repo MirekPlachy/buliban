@@ -113,9 +113,16 @@ export function kresliListu(
   );
 }
 
+/** Svislý střed výkladového pruhu mezi lištou a plochou. */
+function stredVykladu(r: Rozvrh): number {
+  return (r.hornilistaY + r.plochaY) / 2;
+}
+
 /**
- * Spodní pás s nápovědou. Jedna věta, vždy na témže místě — hráč se na ni
- * naučí dívat právě proto, že se nestěhuje.
+ * Nápověda ve výkladovém pruhu. Jedna věta, vždy na témže místě — hráč se
+ * na ni naučí dívat právě proto, že se nestěhuje. Bývala ve spodním pásu,
+ * ale to nutilo těkat očima mezi lištou nahoře a nápovědou dole; teď je
+ * všechen průvodní text pod lištou.
  *
  * `povel` odlišuje „teď máš něco udělat" od „tohle se právě děje". Zvýrazněná
  * nápověda je pobídka, matná je popis; bez toho rozdílu hráč nepozná, kdy je
@@ -130,9 +137,9 @@ export function kresliNapovedu(
 ): void {
   if (!obsah) return;
 
-  text(platno.ctx, obsah, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
+  text(platno.ctx, obsah, r.sirka / 2, stredVykladu(r), {
     velikost: 14 * r.ui,
-    barva: pruhledne(povel ? paleta.rumSvetlo : paleta.par, povel ? 0.95 : 0.5),
+    barva: pruhledne(povel ? paleta.rumSvetlo : paleta.par, povel ? 0.95 : 0.55),
     zarovnani: 'center',
     svisle: 'middle',
   });
@@ -147,12 +154,17 @@ export function napovedaRozlevani(stav: StavRozlevani, poUkazce: boolean): strin
 }
 
 /**
- * Komentář běžící při ukázce.
+ * Komentář běžící při ukázce, s pobídkou k přeskočení v patce.
  *
- * Sedí **nahoře v ploše**, ne dole u nápovědy: dole stojí panáky a hladina
+ * Sedí **ve výkladovém pruhu mezi lištou a plochou** (`rozvrh.ts`, `VYKLAD`),
+ * ne dole u nápovědy a ne volně přes scénu. Dole stojí panáky a hladina
  * v nich je to hlavní, co má ukázka předvést — panel přes ně schová přesně
- * to, na co se hráč má koukat. Nahoře nejvýš na chvíli překryje kus láhve.
- * Je to tedy stejné místo, kde pak vysvětluje výsledek levelu.
+ * to, na co se hráč má koukat. A volně na ploše ho zase podlezla láhev:
+ * na výšku omezené obrazovce přeřízl hrdlo, kam ukázka míří proudem
+ * i zápalkou. Proto má text vlastní pruh a scéna začíná až pod ním.
+ *
+ * „Přeskočit ukázku" je součást panelu, ne vlastní nápis: patří ke komentáři
+ * a jinde v pruhu by se s ním tlouklo o místo.
  */
 export function kresliKomentarUkazky(
   platno: Platno,
@@ -170,8 +182,10 @@ export function kresliKomentarUkazky(
   const x = sloupecX(r);
   const odsazeni = 18 * r.ui;
   const vyskaTextu = vyskaOdstavce(ctx, obsah, sirka - 2 * odsazeni, napis, 1.4);
-  const vyska = vyskaTextu + 42 * r.ui;
-  const y = r.plochaY + 14 * r.ui;
+  const vyska = vyskaTextu + 64 * r.ui;
+  // Vycentrovat v pruhu; kdyby byl těsný, panel se opře o lištu a smí
+  // kouskem přesáhnout do plochy — pod ním je ještě `VZDUCH`.
+  const y = r.hornilistaY + Math.max(6 * r.ui, (r.plochaY - r.hornilistaY - vyska) / 2);
 
   kresliPanel(ctx, paleta, r, x, y, sirka, vyska, {
     kryti: 0.94,
@@ -189,22 +203,13 @@ export function kresliKomentarUkazky(
     'center',
   );
   odstavec(ctx, obsah, r.sirka / 2, y + 30 * r.ui, sirka - 2 * odsazeni, napis, 1.4);
-}
 
-/** Pobídka „Přeskočit ukázku" ve spodní liště — tam, kde jinak bývá nápověda. */
-export function kresliPreskoceni(platno: Platno, r: Rozvrh, paleta: Paleta): void {
-  text(
-    platno.ctx,
-    textyUkazky.preskocit,
-    r.sirka / 2,
-    r.spodniListaY + (r.vyska - r.spodniListaY) / 2,
-    {
-      velikost: 12.5 * r.ui,
-      barva: pruhledne(paleta.par, 0.45),
-      zarovnani: 'center',
-      svisle: 'middle',
-    },
-  );
+  text(ctx, textyUkazky.preskocit, r.sirka / 2, y + vyska - 15 * r.ui, {
+    velikost: 11.5 * r.ui,
+    barva: pruhledne(paleta.par, 0.45),
+    zarovnani: 'center',
+    svisle: 'middle',
+  });
 }
 
 /**
@@ -214,6 +219,14 @@ export function kresliPreskoceni(platno: Platno, r: Rozvrh, paleta: Paleta): voi
  * Panel se napřed **změří a pak posadí**. Dřív začínal na pevném `y` a rostl
  * dolů, takže karta o jednom odstavci visela vysoko a karta o čtyřech lezla
  * do spodní lišty.
+ *
+ * Sedí v **optickém středu** — kus nad geometrickým. Přesně vycentrovaný
+ * blok textu na velké tmavé ploše vypadá, jako by klesal, a karta působila
+ * utopeně; posunout ji nahoru je stará sazečská korekce, ne odhad.
+ *
+ * Text je **centrovaný**, každý řádek karty je jedna věta (viz `texty.ts`).
+ * Levé zarovnání v centrovaném panelu dělalo z krátkých vět roztřepený blok
+ * s prázdnem napravo.
  */
 export function kresliKartu(
   platno: Platno,
@@ -236,10 +249,14 @@ export function kresliKartu(
     pismo: 'nadpis' as const,
     tucne: true,
   };
-  const telo = { velikost: 15.5 * u, barva: pruhledne(paleta.par, 0.86) };
+  const telo = {
+    velikost: 15.5 * u,
+    barva: pruhledne(paleta.par, 0.86),
+    zarovnani: 'center' as const,
+  };
 
   const vyskaNadpisu = vyskaOdstavce(ctx, karta.nadpis, textSirka, nadpis, 1.2);
-  const mezera = 12 * u;
+  const mezera = 10 * u;
   const vyskaRadku = karta.radky.map((radek) => vyskaOdstavce(ctx, radek, textSirka, telo));
   const vyskaObsahu =
     22 * u + vyskaNadpisu + 22 * u + vyskaRadku.reduce((a, b) => a + b + mezera, -mezera);
@@ -249,7 +266,7 @@ export function kresliKartu(
   ctx.fillRect(0, 0, r.sirka, r.vyska);
 
   const x = sloupecX(r);
-  const y = Math.max(r.plochaY, (r.vyska - vyska) / 2);
+  const y = Math.max(r.plochaY, (r.vyska - vyska) * 0.42);
   kresliPanel(ctx, paleta, r, x, y, sirka, vyska, { obrys: pruhledne(paleta.rum, 0.28) });
 
   let kurzor = y + 20 * u;
@@ -271,7 +288,7 @@ export function kresliKartu(
   kurzor += 11 * u;
 
   for (const radek of karta.radky) {
-    kurzor = odstavec(ctx, radek, x + odsazeni, kurzor, textSirka, telo) + mezera;
+    kurzor = odstavec(ctx, radek, r.sirka / 2, kurzor, textSirka, telo) + mezera;
   }
 
   // Patka sedí na spodní hraně panelu, ne pod obrazovkou: karta je jedna věc,

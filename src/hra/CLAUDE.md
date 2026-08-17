@@ -63,12 +63,17 @@ udělalo hru o snímkové frekvenci.
 
 ## Rám obrazovky
 
-Scéna je **horní lišta / herní plocha / spodní pás**, spočítané v `rozvrh.ts`
-(`hornilistaY`, `plochaY`, `plochaVyska`, `spodniListaY`, `sloupec`). Všechny
-obě fáze kreslí do téhož rámu a liší se jen obsahem plochy — jsou to `rezim`y
-v `scena/index.ts`, ne vlastní obrazovky vedle hry. Lišta i spodní pás proto
-nezávisí na tom, co je zrovna v ploše: prostřední skupina lišty dostává
-`StredListy` (panák k/N, nebo pokus k/3), nápověda dostává hotový text.
+Scéna je **horní lišta / výkladový pruh / herní plocha**, spočítané
+v `rozvrh.ts` (`hornilistaY`, `plochaY`, `plochaVyska`, `sloupec`). Spodní
+pás byl zrušen — **všechen průvodní text** (nápověda, komentář ukázky,
+pobídky „dál", hláška po zážehu) žije v pruhu pod lištou, aby hráč netěkal
+očima mezi horním a dolním okrajem a aby text nikdy nepřekrýval láhev.
+Obě fáze kreslí do téhož rámu a liší se jen obsahem plochy — jsou to
+`rezim`y v `scena/index.ts`, ne vlastní obrazovky vedle hry. Lišta i pruh
+proto nezávisí na tom, co je zrovna v ploše: prostřední skupina lišty
+dostává `StredListy` (panák k/N, nebo pokus k/3), nápověda dostává hotový
+text. Kompozice se navíc zmenšuje konstantou `ZMENSENI` — sklo má na stole
+stát, ne zabírat obrazovku od lišty k liště.
 
 **Láhev se do plochy vsazuje, ne kreslí v původní velikosti** (`vlozLahev()`
 v `rozvrh.ts`). Rozměry v `Rozvrh` jsou spočítané pro kompozici rozlévání,

@@ -22,6 +22,14 @@ export const KROK_S = 1 / 60;
 /** Kolik kroků simulace smí jeden snímek dohnat, než se zbytek zahodí. */
 export const MAX_KROKU_ZA_SNIMEK = 5;
 
+/**
+ * Zpomalení ukázky proti skutečné hře. Ukázka běží týmž krokem simulace,
+ * jen jich za vteřinu odsype míň — hráč čte komentáře, ne hraje, a v plném
+ * tempu se věty střídaly rychleji, než se daly dočíst. Na výsledek ukázky
+ * to nemá vliv: počet kroků je stejný, jen wall-clock čas je delší.
+ */
+export const UKAZKA_ZPOMALENI = 0.6;
+
 // ------------------------------------------------------------------ nádoby
 
 /** Každý panák pojme přesně tolik, ať má jakýkoli tvar. */

@@ -69,6 +69,22 @@ describe('měřítko scény', () => {
     }
   });
 
+  it('láhev začíná až pod výkladovým pruhem a nepodleze text', () => {
+    // Nad plochou je pruh na nápovědu a komentář ukázky. Kdyby se do něj
+    // scéna roztáhla, text přeřízne hrdlo — přesně to místo, kam ukázka
+    // míří proudem i zápalkou.
+    for (const [sirka, vyska] of ROZLISENI) {
+      for (let cislo = 1; cislo <= POSLEDNI_LEVEL; cislo += 1) {
+        const { r } = rozvrhPro(cislo, sirka, vyska);
+        assert.ok(r.plochaY > r.hornilistaY + 1, `${sirka}×${vyska} L${cislo}: pruh chybí`);
+        assert.ok(
+          r.lahevDnoY - r.lahevVyska >= r.plochaY - 1e-6,
+          `${sirka}×${vyska} L${cislo}: láhev leze do výkladového pruhu`,
+        );
+      }
+    }
+  });
+
   it('scéna se vejde na obrazovku i na nejmenším telefonu', () => {
     for (const [sirka, vyska] of ROZLISENI) {
       for (let cislo = 1; cislo <= POSLEDNI_LEVEL; cislo += 1) {

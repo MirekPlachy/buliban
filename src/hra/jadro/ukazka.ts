@@ -18,8 +18,12 @@ import { idealniDrzeni, idealniVzitPri, TRENI_SVIZNE } from './prehravac.ts';
 import type { StavRitualu, VstupRitualu } from './ritual.ts';
 import type { StavRozlevani } from './rozlevani.ts';
 
-/** Pauza před každým nalitím, ať je komentář čitelný. */
-const PAUZA_S = 1.6;
+/**
+ * Pauza před každým nalitím, ať je komentář čitelný. V simulovaných
+ * vteřinách — skutečná délka je ještě ÷ `UKAZKA_ZPOMALENI` (ladeni.ts),
+ * protože celá ukázka běží zpomaleně.
+ */
+const PAUZA_S = 2.2;
 
 export interface Ukazka {
   /** Vstup místo hráče: má se v tuhle chvíli držet? */

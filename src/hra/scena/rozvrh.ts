@@ -26,9 +26,22 @@ import type { ProfilPanaku } from '../jadro/panak.ts';
 /** Náklon plně otočené láhve. Za svislicí, aby opravdu tekla. */
 export const MAX_UHEL = 1.92;
 
-/** Výška horní lišty a spodního pásu v návrhových pixelech (× `ui`). */
+/** Výška horní lišty v návrhových pixelech (× `ui`). */
 const HORNI_LISTA = 58;
-const SPODNI_LISTA = 54;
+
+/**
+ * Výkladový pruh pod horní lištou, v návrhových pixelech (× `ui`).
+ *
+ * Jediné místo pro **všechen průvodní text**: nápovědu, komentář ukázky,
+ * pobídku „dál" i hlášku po zážehu. Herní plocha začíná až pod ním.
+ *
+ * Dva důvody. Panel položený volně na plochu podlezla láhev: kompozice smí
+ * plochu vyplnit celou, takže na výšku omezené obrazovce panel přeřízl
+ * hrdlo, tedy přesně to místo, kam ukázka míří proudem i zápalkou. A spodní
+ * pás s nápovědou nutil hráče těkat očima mezi horní lištou a dolním okrajem
+ * — teď se všechno čte na jednom místě a spodní pás odpadl úplně.
+ */
+const VYKLAD = 104;
 
 /** Boční okraj scény v návrhových pixelech. */
 const OKRAJ = 24;
@@ -78,6 +91,16 @@ const VYLITI_NAD_PANAKEM = 0.9;
 /** Strop výšky kompozice. Nad ním scéna neroste, jen se vycentruje. */
 const MAX_VYSKA_SCENY = 760;
 
+/**
+ * Zmenšení celé kompozice proti tomu, co by se na plochu vešlo.
+ *
+ * Láhev a panáky přes celou plochu působily obrovsky — sklo má na stole
+ * stát, ne zabírat obrazovku od lišty k liště. Vzduch okolo si rozebere
+ * roztažená mezera nad panáky, takže se zmenšením neroste pruh prázdna
+ * dole, ale odstup láhve od hrdla panáků.
+ */
+const ZMENSENI = 0.85;
+
 /** Šířka obsahového sloupce (karty, panely, odstavce). */
 const MAX_SLOUPEC = 560;
 
@@ -92,9 +115,7 @@ export interface Rozvrh {
   ui: number;
   /** Horní lišta se stavem: pás 0…`hornilistaY`. */
   hornilistaY: number;
-  /** Spodní pás s nápovědou: od `spodniListaY` k dolní hraně. */
-  spodniListaY: number;
-  /** Herní plocha mezi lištami. Sem kreslí i fáze 1 a 3. */
+  /** Herní plocha od výkladového pruhu k dolní hraně. Sem kreslí obě fáze. */
   plochaY: number;
   plochaVyska: number;
   /** Šířka vycentrovaného obsahového sloupce pro panely a odstavce. */
@@ -138,9 +159,8 @@ export function spocitejRozvrh(
 ): Rozvrh {
   const ui = meritkoUi(sirka, vyska);
   const hornilista = HORNI_LISTA * ui;
-  const spodniLista = SPODNI_LISTA * ui;
-  const plochaY = hornilista;
-  const plochaVyska = Math.max(120, vyska - hornilista - spodniLista);
+  const plochaY = hornilista + VYKLAD * ui;
+  const plochaVyska = Math.max(120, vyska - plochaY);
   const plochaSirka = Math.max(120, sirka - 2 * OKRAJ * ui);
 
   // Celá scéna je násobek jedné veličiny — šířky panáku. Stačí ji tedy najít
@@ -197,7 +217,7 @@ export function spocitejRozvrh(
   ];
   if (dosahPodil > 0) meze.push(sirka / 2 / dosahPodil);
 
-  const panakSirka = Math.max(10, Math.min(...meze));
+  const panakSirka = Math.max(10, Math.min(...meze) * ZMENSENI);
   const panakVyska = stihlostPanaku * panakSirka;
   const rozestup = ROZTEC * panakSirka;
 
@@ -233,7 +253,6 @@ export function spocitejRozvrh(
     vyska,
     ui,
     hornilistaY: hornilista,
-    spodniListaY: vyska - spodniLista,
     plochaY,
     plochaVyska,
     sloupec: Math.min(plochaSirka, MAX_SLOUPEC * ui),
@@ -261,18 +280,30 @@ export function spocitejRozvrh(
  * vylezlo nad horní lištu a tělo leželo přes teploměr, takže **nebyl vidět
  * plamen**, což je pointa celé hry.
  *
- * Zmenšuje se podle **výšky i šířky**, protože v rituálu může láhev ležet
- * na boku — a tehdy je její délka vodorovná. Bere se přísnější z obou, ať
- * láhev při volbě polohy nezmění velikost.
+ * Zmenšuje se podle výšky pásu a šířky sloupce proti **stojící** láhvi.
+ * Dřív se šířka poměřovala s výškou láhve kvůli poloze „na boku" — ta ale
+ * z rituálu vypadla, a strop podle ní dělal z láhve na výšku orientované
+ * obrazovce trpaslíka: nalévalo se z láhve přes půl plochy a zahřívala se
+ * poloviční. Velikost má mezi fázemi držet, je to táž láhev.
+ *
+ * `rezervaNad` je místo nad hrdlem v **poloměrech láhve** (na plamen).
+ * Je součástí téže rovnice, ne krok po vsazení: rezerva se zmenšuje spolu
+ * s lahví, takže `m·(H + rezerva·R) = pás`. Počítat ji z nezmenšené láhve
+ * znamenalo srazit láhev víc, než kolik plamen doopravdy potřebuje.
  */
 export function vlozLahev(
   rozvrh: Rozvrh,
   horni: number,
   dolni: number,
+  rezervaNad = 0,
 ): { rozvrh: Rozvrh; cx: number; cy: number } {
   const vyska = Math.max(40, dolni - horni);
   const sirka = Math.max(40, rozvrh.sloupec);
-  const meritko = Math.min(1, vyska / rozvrh.lahevVyska, sirka / rozvrh.lahevVyska);
+  const meritko = Math.min(
+    1,
+    vyska / (rozvrh.lahevVyska + rezervaNad * rozvrh.lahevPolomer),
+    sirka / (2 * rozvrh.lahevPolomer),
+  );
 
   return {
     rozvrh: {
