@@ -162,3 +162,114 @@ export const PRESNA_RUKA_NASOBEK = 1.2;
 export const MEDAILE_ZLATO = 0.777; // odchylka ≤ 0,222 × tolerance
 export const MEDAILE_STRIBRO = 0.611; // odchylka ≤ 0,389 × tolerance
 export const MEDAILE_BRONZ = 0.444; // odchylka ≤ 0,556 × tolerance
+
+// ----------------------------------------------------- fáze 1 · otevření láhve
+
+/**
+ * Kolik stisků sedře pečeť. Při svižném ťukání vyjde ~1,2 s z kap. 3.1.
+ *
+ * Dokument nabízí krouživý tah myší **nebo** opakovaný stisk. Hra dělá jen to
+ * druhé — na obou platformách stejně. Kap. 4.3 staví na tom, že gesto je na
+ * mobilu i desktopu identické, a krouživý tah by k držení přidal druhý vstupní
+ * kanál, který se navíc nedá přehrát v headless testu.
+ */
+export const PECET_STISKU = 8;
+
+/** Prodleva po sedřené pečeti, ať je vidět, že je hrdlo volné. */
+export const PECET_DOZNENI_S = 0.35;
+
+/**
+ * O kolik korek povyjede za zásah. Tři zelené (3 × ⅓) nebo dva perfektní
+ * zásahy korek vytáhnou — proto se sčítá do jedné, ne počítají zásahy.
+ */
+export const KOREK_PERFEKTNI = 0.5;
+export const KOREK_ZELENY = 1 / 3;
+
+export const BODY_PERFEKTNI = 60;
+export const BODY_ZELENY = 40;
+
+/** Zásek po minutí: prodleva, žádná ztráta bodů. Fáze 1 se nedá prohrát. */
+export const KOREK_ZASEK_S = 0.5;
+
+/** Kolik sekund trvá cesta ukazatele tam a zpět na levelu 1. */
+export const UKAZATEL_RYCHLOST_L1 = 1;
+export const UKAZATEL_ZRYCHLENI = 0.12;
+
+/** Šířka zeleného pásma; klesá s levelem, ale ne pod `PASMO_MIN`. */
+export const PASMO_SIRKA_L1 = 0.26;
+export const PASMO_UBYTEK = 0.015;
+export const PASMO_MIN = 0.14;
+
+/**
+ * Jak velká část zeleného pásma je perfektní jádro. Dokument jádro zmiňuje,
+ * ale šířku neuvádí — tohle je doplněk, ne citace.
+ */
+export const PERFEKTNI_PODIL = 0.3;
+
+/** Bonus za svižnost: `(REZERVA − t) × ZA_S`, do ~100 bodů. */
+export const SVIZNOST_REZERVA_S = 4;
+export const SVIZNOST_ZA_S = 25;
+
+// ------------------------------------------- fáze 3 · zahřátí a vypuštění
+
+/** Stylizovaná škála zahřátí. Kap. 11: žádné °C, nikde a nikdy. */
+export const TEPLOTA_MAX = 100;
+
+/**
+ * Střed cílového pásma. Dokument udává jen jeho **změnu** podle polohy
+ * (±6 jednotek), samotný střed ani základní šířku ne — obojí je doplněk.
+ *
+ * Střed je schválně vysoko: kdyby ležel v polovině škály, „nad plamenem"
+ * (20 j/s, praskne nad 95) by nebyla riskantní metoda, ale prostě rychlá.
+ */
+export const PASMO_STRED = 72;
+export const PASMO_ZAKLAD_SIRKA = 24;
+export const PASMO_VERTIKALNI = -6;
+export const PASMO_HORIZONTALNI = 6;
+
+/**
+ * O kolik se pásmo zúží za level. Dokument pro fázi 3 žádné škálování nemá —
+ * progresi staví jen na odemykání metod. Bez tohohle je ale rituál na L8
+ * stejně těžký jako na L1, což si odporuje s „složitost levelu se stále
+ * zvyšuje" z kap. 4.2.
+ */
+export const PASMO_UBYTEK_ZA_LEVEL = 1;
+export const PASMO_MIN_SIRKA = 10;
+
+export const NASOBEK_VERTIKALNI = 1.3;
+export const NASOBEK_HORIZONTALNI = 1;
+
+/** Nad touhle teplotou praskne sklo při zahřívání nad plamenem. */
+export const PRASKNE_NAD = 95;
+
+/** Sundání uzávěru — jeden klik a animace. */
+export const UZAVER_S = 0.4;
+
+export const ZAPALKA_HORI_S = 4;
+export const ZAPALKA_PRUVAN = 0.12;
+/** Zápalka dává +15 % za tradici; zapalovač nic. */
+export const ZAPALKA_BONUS = 1.15;
+export const ZAPALOVAC_SELHANI = 0.15;
+export const ZAPALOVAC_PRODLEVA_S = 0.6;
+
+/** Škrtnutí zápalky je timing klik — proto vlastní, svižnější ukazatel. */
+export const SKRTNUTI_RYCHLOST = 1.6;
+export const SKRTNUTI_PASMO = 0.3;
+
+/** Jak dlouho se drží plamen u hrdla, než to chytne. Tohle napětí je pointa. */
+export const ZAZEH_PRODLEVA_MIN_S = 0.5;
+export const ZAZEH_PRODLEVA_MAX_S = 2;
+
+export const ZAZEH_ZAKLAD_BODU = 700;
+export const ZAZEH_POKUSU = 3;
+/** Srážka za každý další pokus: `1 − 0,25 × (pokus − 1)`. */
+export const ZAZEH_SRAZKA_ZA_POKUS = 0.25;
+
+/**
+ * Kolik tepla si láhev nechá po nepovedeném zážehu. Odpovídá „opakovanému
+ * zapálení" z webu — láhev je pořád vlažná, jen ne dost.
+ */
+export const TEPLOTA_PO_NEUSPECHU = 0.6;
+
+/** Jak dlouho se ukazuje hláška po zážehu i po „tichu po pěšině". */
+export const ZAZEH_DOZNENI_S = 1.8;

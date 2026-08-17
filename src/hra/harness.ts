@@ -7,6 +7,7 @@
  * node src/hra/harness.ts --level=7 --seed=42 --ideal
  * node src/hra/harness.ts --prehled --seedu=200
  * node src/hra/harness.ts --hraci
+ * node src/hra/harness.ts --faze          # otevření a rituál napříč levely
  * ```
  *
  * Tohle je hlavní způsob, jak se doostřují konstanty v `ladeni.ts`. Ověřovat
@@ -15,9 +16,20 @@
 
 import { KAPACITA_PANAKU_ML } from './ladeni.ts';
 import { levely } from './levely.ts';
+import { metodyProLevel } from './jadro/metody.ts';
 import { nahoda } from './jadro/nahoda.ts';
-import { idealniDrzeni, lidskeDrzeni, prehraj } from './jadro/prehravac.ts';
+import { bodyZaOtevirani } from './jadro/otevirani.ts';
+import {
+  idealniDrzeni,
+  idealniPlan,
+  idealniPustitPri,
+  lidskeDrzeni,
+  prehraj,
+  prehrajOtevirani,
+  prehrajRitual,
+} from './jadro/prehravac.ts';
 import type { Hrac } from './jadro/prehravac.ts';
+import { vypusteno } from './jadro/ritual.ts';
 import { odchylkaOdCile, prumer } from './jadro/skore.ts';
 
 function argument(jmeno: string): string | undefined {
@@ -164,11 +176,92 @@ function hraci(seedu: number): void {
   console.log('');
 }
 
+/**
+ * Fáze 1 a 3 napříč levely.
+ *
+ * Odpovídá na dvě otázky, které se z rozlévání vyčíst nedají: **kolik korek
+ * a zážeh vlastně přisypou** (kap. 2 chce 10 a 40 %, jádro hry 50) a **o kolik
+ * se musí přehřát**, aby láhev do zážehu nevychladla pod pásmo. To druhé je
+ * číslo, které hráč nikde nevidí a musí ho vycítit — takže když vyjde větší
+ * než půlka pásma, je level nehratelný a nepozná se to jinak než odsud.
+ */
+function faze(seedu: number): void {
+  console.log(`\nDokonalá hra, ${seedu} seedů na level.\n`);
+  console.log(
+    '   L   metod   otevření   ⌀ rozlévání   zážeh   přehřát o   Q      vypuštěno',
+  );
+  console.log(
+    '  ─────────────────────────────────────────────────────────────────────────',
+  );
+
+  for (const l of levely) {
+    const otevirani = bodyZaOtevirani(prehrajOtevirani(l.cislo));
+
+    let rozlevani = 0;
+    let zazeh = 0;
+    let kvalita = 0;
+    let prehrati = 0;
+    let vypustenych = 0;
+
+    for (let seed2 = 1; seed2 <= seedu; seed2 += 1) {
+      rozlevani += prehraj(l.cislo, seed2, idealniDrzeni(l.cislo, seed2)).vysledek.celkem;
+
+      const plan = idealniPlan(l.cislo, seed2);
+      const stav = prehrajRitual(l.cislo, seed2, plan);
+      zazeh += stav.body;
+      kvalita += stav.kvalita;
+      prehrati += plan.pustitPri - stav.pasmo.stred;
+      if (vypusteno(stav)) vypustenych += 1;
+    }
+
+    const d = (x: number) => x / seedu;
+    console.log(
+      `  ${String(l.cislo).padStart(2)}   ${String(metodyProLevel(l.cislo).length).padStart(5)}   ` +
+        `${String(otevirani).padStart(8)}   ${d(rozlevani).toFixed(0).padStart(11)}   ` +
+        `${d(zazeh).toFixed(0).padStart(5)}   ${d(prehrati).toFixed(1).padStart(9)}   ` +
+        `${d(kvalita).toFixed(2)}   ${String(Math.round((vypustenych / seedu) * 100)).padStart(6)} %`,
+    );
+  }
+
+  // Přehřátí je vlastnost METODY, ne levelu — pomalá metoda s rychlým
+  // chladnutím potřebuje jiný nadhoz než fén. Hráč se to učí u každé zvlášť.
+  console.log(`\nPřehřátí podle metody (level ${levely.length}, seed 1):\n`);
+  for (const m of metodyProLevel(levely.length)) {
+    const pustitPri = idealniPustitPri(levely.length, 1, 'horizontalni', m.id, 'zapalka');
+    const stav = prehrajRitual(levely.length, 1, {
+      poloha: 'horizontalni',
+      metodaId: m.id,
+      ohen: 'zapalka',
+      pustitPri,
+    });
+    // Metoda se stropem se do pásma sama nedostane — a je to záměr, ne chyba
+    // ladění. Půlení intervalu na ni vrátí prostě strop.
+    const nedosahne = m.strop !== undefined && m.strop < stav.pasmo.stred;
+    // Doba držení je to, co rozhoduje o tom, jestli je metoda hratelná.
+    // Násobitel odměňuje pomalé metody, ale nikde se neplatí za čas — takže
+    // když vyjde přes deset vteřin, je to jen nuda a ne rozhodnutí.
+    const drzeniS = pustitPri / m.rychlost;
+    const zaver = nedosahne
+      ? `strop ${m.strop} j — SAMA NEDOHŘEJE, musí se kombinovat`
+      : `pustit při ${pustitPri.toFixed(1)} (o ${(pustitPri - stav.pasmo.stred).toFixed(1)} nad pásmem) ` +
+        `· držet ${drzeniS.toFixed(1)} s`;
+
+    console.log(
+      `  ${m.nazev.padEnd(16)} ${m.rychlost.toFixed(1).padStart(5)} j/s  ` +
+        `×${m.nasobitel.toFixed(2)}  ` +
+        `setrvačnost +${String(m.setrvacnost).padEnd(3)} chladnutí ${String(m.chladnuti).padEnd(4)} →  ${zaver}`,
+    );
+  }
+  console.log('');
+}
+
 const cisloLevelu = cislo('level', 1);
 const seed = cislo('seed', 1);
 
 if (prepinac('hraci')) {
   hraci(cislo('seedu', 60));
+} else if (prepinac('faze')) {
+  faze(cislo('seedu', 20));
 } else if (prepinac('prehled')) {
   prehled(cislo('seedu', 50));
 } else if (prepinac('ideal')) {
@@ -177,7 +270,10 @@ if (prepinac('hraci')) {
   const zadane = argument('drzeni');
   const drzeni = zadane ? zadane.split(',').map(Number) : [];
   if (drzeni.length === 0) {
-    console.log('Chybí --drzeni=1.8,1.7,… nebo --ideal nebo --prehled. Viz komentář v souboru.');
+    console.log(
+      'Chybí --drzeni=1.8,1.7,… nebo --ideal, --prehled, --hraci, --faze. ' +
+        'Viz komentář v souboru.',
+    );
     process.exit(1);
   }
   detail(cisloLevelu, seed, drzeni);

@@ -1,19 +1,23 @@
 /**
  * Složení scény. Jediné, co o vykreslování ví zbytek hry.
  *
- * Pořadí vrstev je záměrné: pozadí, stůl, panáky, proud, láhev, teprve pak
- * rám a lišty. Láhev se při nalévání naklání nad panák a musí být nad ním,
- * jinak proud vytéká „zpod" skla. Lišty jsou nahoře nade všemi, protože
- * dno vyhoupnuté láhve jim jinak leze do textu.
+ * Level má tři fáze a **každá kreslí do téhož rámu**: horní lišta se stavem,
+ * herní plocha, spodní pás s nápovědou. Fáze se liší jen tím, co je uvnitř
+ * plochy — láhev s korkem, řada panáků, nebo teploměr a dlaždice. Kdyby si
+ * každá fáze držela vlastní obrazovku, vypadaly by jako tři různé hry.
  *
- * Rám scény (`plochaY`…`spodniListaY`) je společný všem fázím. Fáze 1
- * a fáze 3 se sem přidají jako další `rezim` — proto tady jde o volbu
- * vrstvy, ne o zvláštní obrazovku vedle hry.
+ * Pořadí vrstev u rozlévání je záměrné: pozadí, stůl, panáky, proud, láhev,
+ * teprve pak rám a lišty. Láhev se při nalévání naklání nad panák a musí být
+ * nad ním, jinak proud vytéká „zpod" skla. Lišty jsou nade vším, protože dno
+ * vyhoupnuté láhve jim jinak leze do textu.
  */
 
 import { KAPACITA_PANAKU_ML } from '../ladeni.ts';
+import type { StavOtevirani } from '../jadro/otevirani.ts';
+import type { StavRitualu } from '../jadro/ritual.ts';
 import type { StavRozlevani } from '../jadro/rozlevani.ts';
-import type { Vysledek } from '../jadro/skore.ts';
+import type { VysledekLevelu } from '../jadro/skore.ts';
+import * as texty from '../texty.ts';
 import type { Karta } from '../texty.ts';
 import { pruhledne } from './barvy.ts';
 import type { Paleta } from './barvy.ts';
@@ -24,29 +28,59 @@ import {
   kresliNapovedu,
   kresliPreskoceni,
   kresliRam,
+  napovedaRozlevani,
 } from './hud.ts';
+import type { StredListy } from './hud.ts';
 import { kresliLahev } from './nadoby.ts';
+import { kresliOtevirani } from './otevirani.ts';
 import type { Platno } from './platno.ts';
 import { text } from './pismo.ts';
 import { kresliPanel } from './prvky.ts';
+import { kresliRitual, popisPokusu } from './ritual.ts';
 import type { PolohaLahve, Rozvrh } from './rozvrh.ts';
 import { kresliDesku, kresliPanaky, kresliProud, kresliRysku } from './stul.ts';
 import { kresliKonec, kresliVysledek } from './vysledek.ts';
 
-export type Rezim = 'karta' | 'ukazka' | 'hra' | 'vysledek' | 'konec';
+/**
+ * Fáze levelu tak, jak je vidí scéna. Ukázka je vlastní režim, ne příznak:
+ * kreslí se v ní komentář a pobídka k přeskočení, a hlavně se v ní nesmí
+ * objevit nápověda určená hráči.
+ */
+export type Rezim =
+  | 'karta'
+  | 'ukazkaOtevirani'
+  | 'otevirani'
+  | 'ukazkaRozlevani'
+  | 'rozlevani'
+  | 'ukazkaRitual'
+  | 'ritual'
+  | 'vysledek'
+  | 'konec';
+
+/** Kreslí se v tomhle režimu řada panáků a láhev nad ní? */
+function jeRozlevani(rezim: Rezim): boolean {
+  return rezim === 'ukazkaRozlevani' || rezim === 'rozlevani' || rezim === 'vysledek';
+}
+
+function jeUkazka(rezim: Rezim): boolean {
+  return (
+    rezim === 'ukazkaOtevirani' || rezim === 'ukazkaRozlevani' || rezim === 'ukazkaRitual'
+  );
+}
 
 export interface Pohled {
   rezim: Rezim;
   stav: StavRozlevani;
-  vysledek: Vysledek | null;
-  /** Dno láhve a její náklon. Hrdlo z toho plyne. */
+  otevirani: StavOtevirani | null;
+  ritual: StavRitualu | null;
+  vysledek: VysledekLevelu | null;
+  /** Dno láhve a její náklon při rozlévání. Hrdlo z toho plyne. */
   poloha: PolohaLahve;
   skore: number;
   karta: Karta | null;
   patkaKarty: string;
   /** Hráč právě přebírá tutéž láhev po ukázce. Řekne se to místo nápovědy. */
   poUkazce: boolean;
-  komentar: string;
   medaile: string[];
   debug: boolean;
   seed: number;
@@ -77,6 +111,70 @@ function kresliPozadi(platno: Platno, r: Rozvrh, paleta: Paleta): void {
   ctx.fillRect(0, 0, r.sirka, r.vyska);
 }
 
+/** Co má stát uprostřed lišty. Každá fáze měří postup něčím jiným. */
+function stredListy(pohled: Pohled): StredListy {
+  const { stav } = pohled;
+
+  if (pohled.rezim === 'otevirani' || pohled.rezim === 'ukazkaOtevirani') {
+    return { popis: texty.hud.otevirani, hodnota: pohled.otevirani?.faze === 'pecet' ? '1 / 2' : '2 / 2' };
+  }
+  if (pohled.rezim === 'ritual' || pohled.rezim === 'ukazkaRitual') {
+    return {
+      popis: texty.hud.pokus,
+      hodnota: pohled.ritual ? popisPokusu(pohled.ritual) : '–',
+    };
+  }
+  // `aktivni` po dolití zůstane na posledním panáku, takže „N / N" sedí
+  // i po rozlití a lišta se v půlce hry nepřepisuje na jiný údaj.
+  return {
+    popis: texty.hud.panak,
+    hodnota: `${stav.aktivni + 1} / ${stav.konfig.panaku}`,
+  };
+}
+
+/** Nápověda pro spodní pás a jestli je to povel, nebo jen popis děje. */
+function napoveda(pohled: Pohled): { obsah: string; povel: boolean } {
+  switch (pohled.rezim) {
+    case 'otevirani': {
+      const faze = pohled.otevirani?.faze ?? 'hotovo';
+      return {
+        obsah: texty.napovedyOtevirani[faze],
+        povel: faze === 'pecet' || faze === 'korek',
+      };
+    }
+    case 'rozlevani':
+      return {
+        obsah: napovedaRozlevani(pohled.stav, pohled.poUkazce),
+        povel: pohled.stav.faze === 'ceka',
+      };
+    case 'ritual': {
+      const faze = pohled.ritual?.faze ?? 'hotovo';
+      return {
+        obsah: texty.napovedyRitualu[faze],
+        povel: faze === 'poloha' || faze === 'zahrivani' || faze === 'ohen' || faze === 'ceka',
+      };
+    }
+    default:
+      return { obsah: '', povel: false };
+  }
+}
+
+/** Komentář běžící ukázky. Váže se na stav fáze, ne na stopky. */
+function komentar(pohled: Pohled): string {
+  switch (pohled.rezim) {
+    case 'ukazkaOtevirani':
+      return texty.komentarOtevirani(pohled.otevirani?.faze ?? 'hotovo');
+    case 'ukazkaRitual':
+      return pohled.ritual ? texty.komentarRitualu(pohled.ritual) : '';
+    default:
+      return texty.komentarUkazky(
+        pohled.stav.faze,
+        pohled.stav.aktivni,
+        pohled.stav.konfig.panaku,
+      );
+  }
+}
+
 function kresliDebug(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohled): void {
   const { stav } = pohled;
   const { konfig } = stav;
@@ -87,13 +185,19 @@ function kresliDebug(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohled):
     `fáze ${stav.faze}   náklon ${stav.naklonPodil.toFixed(2)}   průtok ${stav.prutokMlS.toFixed(1)} ml/s`,
     `panáky ${stav.panaky.map((v) => v.toFixed(1)).join(' · ')}`,
     `rozlito ${stav.rozlitoMl.toFixed(1)} ml   přelití ${stav.prelitiPocet}×   tolerance ${konfig.level.tolerance}`,
+    pohled.otevirani
+      ? `otevírání ${pohled.otevirani.faze}   korek ${pohled.otevirani.korekPodil.toFixed(2)}   body ${pohled.otevirani.body}`
+      : 'otevírání –',
+    pohled.ritual
+      ? `rituál ${pohled.ritual.faze}   teplota ${pohled.ritual.teplota.toFixed(1)}   pásmo ${pohled.ritual.pasmo.stred}±${(pohled.ritual.pasmo.sirka / 2).toFixed(1)}   pokus ${pohled.ritual.pokus}`
+      : 'rituál –',
     `scéna ${r.sirka}×${r.vyska}   ui ${r.ui.toFixed(2)}   panák ${r.panakSirka.toFixed(0)} px`,
     '[ ] level   R seed   N šum   S zpomalení   D panel',
   ];
 
   const vyska = radky.length * 15 + 16;
   const y = r.spodniListaY - vyska - 8;
-  kresliPanel(platno.ctx, paleta, r, 8, y, 470, vyska, { kryti: 0.9 });
+  kresliPanel(platno.ctx, paleta, r, 8, y, 520, vyska, { kryti: 0.9 });
   radky.forEach((radek, i) => {
     text(platno.ctx, radek, 20, y + 8 + i * 15, {
       velikost: 11.5,
@@ -116,30 +220,38 @@ export function vykresli(platno: Platno, r: Rozvrh, paleta: Paleta, pohled: Pohl
   kresliPozadi(platno, r, paleta);
   kresliRam(platno, r, paleta);
   kresliDesku(platno, r, paleta);
-  kresliPanaky(platno, r, paleta, stav);
 
-  // Ryska svítí jen dokud se hraje. Ve výsledku ji nahradí linka rovnosti,
-  // která leží na témže místě — proto by se překrývaly.
-  if (stav.konfig.level.ryska && pohled.rezim !== 'vysledek') {
-    kresliRysku(platno, r, paleta, stav);
-  }
+  if (jeRozlevani(pohled.rezim)) {
+    kresliPanaky(platno, r, paleta, stav);
 
-  kresliProud(platno, r, paleta, stav, pohled.poloha);
-  kresliLahev(platno, r, paleta, stav, pohled.poloha);
+    // Ryska svítí jen dokud se hraje. Ve výsledku ji nahradí linka rovnosti,
+    // která leží na témže místě — proto by se překrývaly.
+    if (stav.konfig.level.ryska && pohled.rezim !== 'vysledek') {
+      kresliRysku(platno, r, paleta, stav);
+    }
 
-  if (pohled.rezim === 'vysledek' && pohled.vysledek) {
-    kresliVysledek(platno, r, paleta, stav, pohled.vysledek);
+    kresliProud(platno, r, paleta, stav, pohled.poloha);
+    kresliLahev(platno, r, paleta, stav, pohled.poloha);
+
+    if (pohled.rezim === 'vysledek' && pohled.vysledek) {
+      kresliVysledek(platno, r, paleta, stav, pohled.vysledek);
+    }
+  } else if (pohled.otevirani && (pohled.rezim === 'otevirani' || pohled.rezim === 'ukazkaOtevirani')) {
+    kresliOtevirani(platno, r, paleta, stav, pohled.otevirani);
+  } else if (pohled.ritual) {
+    kresliRitual(platno, r, paleta, stav, pohled.ritual);
   }
 
   // Lišty až nad scénu: vyhoupnuté dno láhve i překryv výsledku by jim jinak
   // vlezly do textu.
-  kresliListu(platno, r, paleta, stav, pohled.skore);
+  kresliListu(platno, r, paleta, stav.konfig.level.cislo, stredListy(pohled), pohled.skore);
 
-  if (pohled.rezim === 'ukazka') {
+  if (jeUkazka(pohled.rezim)) {
     kresliPreskoceni(platno, r, paleta);
-    kresliKomentarUkazky(platno, r, paleta, pohled.komentar);
-  } else if (pohled.rezim === 'hra') {
-    kresliNapovedu(platno, r, paleta, stav, pohled.poUkazce);
+    kresliKomentarUkazky(platno, r, paleta, komentar(pohled));
+  } else if (pohled.rezim !== 'vysledek' && pohled.rezim !== 'karta') {
+    const { obsah, povel } = napoveda(pohled);
+    kresliNapovedu(platno, r, paleta, obsah, povel);
   }
 
   if (pohled.rezim === 'karta' && pohled.karta) {

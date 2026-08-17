@@ -15,7 +15,7 @@
 
 import * as texty from '../texty.ts';
 import type { StavRozlevani } from '../jadro/rozlevani.ts';
-import type { Vysledek } from '../jadro/skore.ts';
+import type { VysledekLevelu } from '../jadro/skore.ts';
 import { pruhledne } from './barvy.ts';
 import type { Paleta } from './barvy.ts';
 import type { Platno } from './platno.ts';
@@ -34,10 +34,29 @@ interface Polozka {
   soucet?: boolean;
 }
 
-function rozpad(v: Vysledek): Polozka[] {
-  const radky: Polozka[] = [
-    { popis: texty.vysledek.rovnomernost, hodnota: `${v.rovnomernost}`, barva: (p) => p.par },
-  ];
+/**
+ * Rozpad bodů za celý level. Fáze jdou v pořadí, ve kterém se hrály —
+ * otevření, rozlévání, zážeh — aby se dal přečíst jako záznam, ne jako
+ * tabulka. Nulové položky se vynechávají; prázdný řádek „Zážeh 0" by jen
+ * opakoval to, co hráč před chvílí viděl na scéně.
+ */
+function rozpad(vl: VysledekLevelu): Polozka[] {
+  const v = vl.rozlevani;
+  const radky: Polozka[] = [];
+
+  if (vl.otevirani > 0) {
+    radky.push({
+      popis: texty.vysledek.otevirani,
+      hodnota: `${vl.otevirani}`,
+      barva: (p) => p.par,
+    });
+  }
+
+  radky.push({
+    popis: texty.vysledek.rovnomernost,
+    hodnota: `${v.rovnomernost}`,
+    barva: (p) => p.par,
+  });
   if (v.casovyBonus > 0) {
     radky.push({ popis: texty.vysledek.cas, hodnota: `+${v.casovyBonus}`, barva: (p) => p.par });
   }
@@ -69,9 +88,16 @@ function rozpad(v: Vysledek): Polozka[] {
       barva: (p) => p.zazeh,
     });
   }
+  if (vl.zazeh > 0) {
+    radky.push({
+      popis: texty.vysledek.zazehBody,
+      hodnota: `+${vl.zazeh}`,
+      barva: (p) => p.zazeh,
+    });
+  }
   radky.push({
     popis: texty.vysledek.celkem,
-    hodnota: `${v.celkem}`,
+    hodnota: `${vl.celkem}`,
     barva: (p) => p.rumSvetlo,
     soucet: true,
   });
@@ -83,10 +109,11 @@ export function kresliVysledek(
   r: Rozvrh,
   paleta: Paleta,
   stav: StavRozlevani,
-  v: Vysledek,
+  vl: VysledekLevelu,
 ): void {
   const { ctx } = platno;
   const u = r.ui;
+  const v = vl.rozlevani;
 
   ctx.fillStyle = pruhledne(paleta.sklo, 0.78);
   ctx.fillRect(0, 0, r.sirka, r.vyska);
@@ -144,7 +171,7 @@ export function kresliVysledek(
   });
 
   // ----------------------------------------------------------- panel s body
-  const radky = rozpad(v);
+  const radky = rozpad(vl);
   const nazev = v.medaile ? texty.medaile[v.medaile] : texty.bezMedaile;
   const sirka = Math.min(r.sloupec, 420 * u);
   const odsazeni = 24 * u;

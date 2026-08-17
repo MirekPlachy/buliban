@@ -1,6 +1,6 @@
 ---
 /**
- * Minihra „Vypusť Bulibana!" — fáze 2, rozlévání.
+ * Minihra „Vypusť Bulibana!" — celý rituál ve třech fázích.
  *
  * Stránka je schválně holá: žádná navigace ani patička, protože hra běží
  * přes celou výšku okna a jakýkoli okraj by na mobilu ubral z hrací plochy.
@@ -10,7 +10,7 @@ import '../styles/global.css';
 
 const title = 'Vypusť Bulibana! — minihra';
 const description =
-  'Rozlij láhev rumu mezi panáky na stole. Do každého se lije jednou a dolít se nedá.';
+  'Otevři láhev, rozlij ji mezi panáky a z prázdné vypusť Bulibana. Do panáku se lije jednou a dolít se nedá.';
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 const kanonicka = new URL(Astro.url.pathname, Astro.site);
 const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
@@ -41,7 +41,7 @@ const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
       <canvas
         id="hra"
         class="h-full w-full touch-none select-none"
-        aria-label="Rozlévání rumu do panáků. Držením levého tlačítka, prstu nebo mezerníku se nalévá."
+        aria-label="Rituál Buliban ve třech krocích: otevření láhve, rozlévání rumu do panáků a zapálení prázdné láhve. Ovládá se držením nebo ťukáním levého tlačítka, prstu či mezerníku; volby se vybírají kliknutím nebo číslicemi."
       ></canvas>
     </main>
 

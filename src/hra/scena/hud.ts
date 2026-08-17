@@ -49,15 +49,25 @@ function skupina(
   });
 }
 
+/**
+ * Prostřední skupina lišty. Každá fáze tam píše něco jiného — panák k/N,
+ * název otevírání, pokus k/3 — ale **na témže místě a stejným písmem**,
+ * takže se lišta mezi fázemi nepřestavuje.
+ */
+export interface StredListy {
+  popis: string;
+  hodnota: string;
+}
+
 export function kresliListu(
   platno: Platno,
   r: Rozvrh,
   paleta: Paleta,
-  stav: StavRozlevani,
+  cisloLevelu: number,
+  stred: StredListy,
   skore: number,
 ): void {
   const { ctx } = platno;
-  const { konfig } = stav;
   const okraj = 20 * r.ui;
 
   ctx.fillStyle = pruhledne(paleta.skloStin, 0.55);
@@ -67,7 +77,7 @@ export function kresliListu(
   // Postup hrou jako vlásek na spodní hraně lišty. Osm levelů je krátká
   // hra a hráč má vidět, že se blíží konec — ne až na závěrečné obrazovce.
   ctx.fillStyle = pruhledne(paleta.rum, 0.75);
-  ctx.fillRect(0, r.hornilistaY - 2, (r.sirka * konfig.level.cislo) / POSLEDNI_LEVEL, 2);
+  ctx.fillRect(0, r.hornilistaY - 2, (r.sirka * cisloLevelu) / POSLEDNI_LEVEL, 2);
 
   skupina(
     platno,
@@ -75,19 +85,17 @@ export function kresliListu(
     paleta,
     okraj,
     hud.level,
-    `${konfig.level.cislo} / ${POSLEDNI_LEVEL}`,
+    `${cisloLevelu} / ${POSLEDNI_LEVEL}`,
     paleta.par,
     'left',
   );
-  // `aktivni` po dolití zůstane na posledním panáku, takže „N / N" sedí
-  // i po rozlití a lišta se v půlce hry nepřepisuje na jiný údaj.
   skupina(
     platno,
     r,
     paleta,
     r.sirka / 2,
-    hud.panak,
-    `${stav.aktivni + 1} / ${konfig.panaku}`,
+    stred.popis,
+    stred.hodnota,
     pruhledne(paleta.par, 0.85),
     'center',
     true,
@@ -108,32 +116,34 @@ export function kresliListu(
 /**
  * Spodní pás s nápovědou. Jedna věta, vždy na témže místě — hráč se na ni
  * naučí dívat právě proto, že se nestěhuje.
+ *
+ * `povel` odlišuje „teď máš něco udělat" od „tohle se právě děje". Zvýrazněná
+ * nápověda je pobídka, matná je popis; bez toho rozdílu hráč nepozná, kdy je
+ * na řadě.
  */
 export function kresliNapovedu(
   platno: Platno,
   r: Rozvrh,
   paleta: Paleta,
-  stav: StavRozlevani,
-  poUkazce = false,
+  obsah: string,
+  povel = false,
 ): void {
-  if (stav.faze === 'hotovo') return;
-  const posledni = stav.aktivni === stav.konfig.panaku - 1;
-  const obsah = poUkazce
-    ? textyUkazky.patka
-    : posledni && stav.faze === 'ceka'
-      ? napovedaPosledni
-      : napovedy[stav.faze];
   if (!obsah) return;
 
-  // Zvýrazněná, dokud se čeká na stisk: tehdy je nápověda povel, potom už
-  // jen popis toho, co se právě děje.
-  const ceka = stav.faze === 'ceka';
   text(platno.ctx, obsah, r.sirka / 2, r.spodniListaY + (r.vyska - r.spodniListaY) / 2, {
     velikost: 14 * r.ui,
-    barva: pruhledne(ceka ? paleta.rumSvetlo : paleta.par, ceka ? 0.95 : 0.5),
+    barva: pruhledne(povel ? paleta.rumSvetlo : paleta.par, povel ? 0.95 : 0.5),
     zarovnani: 'center',
     svisle: 'middle',
   });
+}
+
+/** Nápověda pro rozlévání — zná pravidlo o posledním panáku a předání po ukázce. */
+export function napovedaRozlevani(stav: StavRozlevani, poUkazce: boolean): string {
+  if (stav.faze === 'hotovo') return '';
+  const posledni = stav.aktivni === stav.konfig.panaku - 1;
+  if (poUkazce) return textyUkazky.patka;
+  return posledni && stav.faze === 'ceka' ? napovedaPosledni : napovedy[stav.faze];
 }
 
 /**

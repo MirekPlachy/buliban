@@ -141,3 +141,45 @@ export function vyhodnot(stav: StavRozlevani): Vysledek {
     medaile: medaileZPodilu(vyrovnanost),
   };
 }
+
+// ------------------------------------------------------- celý level
+
+/**
+ * Body za celý level: otevření + rozlévání + rituál.
+ *
+ * Podíly z kap. 2 (10 / 50 / 40 %) drží samy konstanty základů — fáze 1 má
+ * strop kolem dvou stovek, rozlévání `zakladBodu` levelu a zážeh 700 × Q ×
+ * násobitele. Sčítá se tu proto jen to, co už spočítaly jednotlivé fáze;
+ * žádné vážení navíc, jinak by se stejná věc ladila na dvou místech.
+ *
+ * **Medaile zůstává za rozlévání.** Je to jádro hry a jediná fáze s tolerancí
+ * vyladěnou proti modelu hráče; kdyby ji ředil zážeh, přestala by měřit to,
+ * kvůli čemu existuje.
+ */
+export interface VysledekLevelu {
+  /** Zásahy do korku plus bonus za svižnost. */
+  otevirani: number;
+  rozlevani: Vysledek;
+  /** Body za zážeh. Nula, když se Buliban nevypustil. */
+  zazeh: number;
+  /** Povedlo se? Rozhoduje o postupu do dalšího levelu (kap. 5.3). */
+  vypusteno: boolean;
+  celkem: number;
+  medaile: Medaile;
+}
+
+export function slozLevel(
+  bodyOtevirani: number,
+  rozlevani: Vysledek,
+  bodyZazehu: number,
+  vypusteno: boolean,
+): VysledekLevelu {
+  return {
+    otevirani: bodyOtevirani,
+    rozlevani,
+    zazeh: bodyZazehu,
+    vypusteno,
+    celkem: bodyOtevirani + rozlevani.celkem + bodyZazehu,
+    medaile: rozlevani.medaile,
+  };
+}

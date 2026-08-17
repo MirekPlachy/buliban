@@ -1,26 +1,46 @@
 /**
  * Herní smyčka, vstup a průchod levely.
  *
+ * **Jeden level = tři fáze:** otevření láhve → rozlévání → rituál. Teprve
+ * když je Buliban vypuštěný, jde se dál (kap. 2). Level 1 má před každou
+ * fází ukázku, ve které hra hraje sama sebe; od levelu 2 už žádnou.
+ *
  * Simulace běží na **pevný krok**, vykreslování na snímky. Bez toho by hráč
  * na 144Hz monitoru naléval jinak než na 60Hz a celá hra o přesnosti
  * dávkování by se rozpadla (kap. 9).
  *
- * Ovládání je jedno gesto: drž. Myš, prst i mezerník dělají totéž — proto
- * hra funguje na mobilu i desktopu bez kompromisu (kap. 4.3).
+ * Vstup má tři kanály, protože fáze dělají s lahví tři různé věci:
+ *  - **držení** — nalévání a zahřívání,
+ *  - **hrana stisku** — ťukání do pečeti, timing klik do korku a zápalky,
+ *  - **volba dlaždice** — poloha, metoda, čím zapálit.
+ *
+ * Hrana i volba se **frontují**: přijdou asynchronně z prohlížeče, ale spotřebuje
+ * je právě jeden krok simulace. Bez fronty by se rychlé ťuknutí mezi dvěma
+ * kroky ztratilo, což je u timing kliku ta nejhůř hlášená chyba.
  */
 
 import { KROK_S, MAX_KROKU_ZA_SNIMEK } from './ladeni.ts';
 import { POSLEDNI_LEVEL, level } from './levely.ts';
+import { bodyZaOtevirani, krokOtevirani, zalozOtevirani } from './jadro/otevirani.ts';
+import type { StavOtevirani } from './jadro/otevirani.ts';
+import { krokRitualu, volbyRitualu, vypusteno, zalozRitual } from './jadro/ritual.ts';
+import type { StavRitualu, VolbaRitualu } from './jadro/ritual.ts';
 import { krok, zalozKonfiguraci, zalozStav } from './jadro/rozlevani.ts';
 import type { StavRozlevani } from './jadro/rozlevani.ts';
-import { vyhodnot } from './jadro/skore.ts';
-import type { Medaile, Vysledek } from './jadro/skore.ts';
-import { pripravUkazku } from './jadro/ukazka.ts';
-import type { Ukazka } from './jadro/ukazka.ts';
+import { slozLevel, vyhodnot } from './jadro/skore.ts';
+import type { Medaile, VysledekLevelu } from './jadro/skore.ts';
+import {
+  pripravUkazku,
+  pripravUkazkuOtevirani,
+  pripravUkazkuRitualu,
+} from './jadro/ukazka.ts';
+import type { Ukazka, UkazkaOtevirani, UkazkaRitualu } from './jadro/ukazka.ts';
 import * as texty from './texty.ts';
 import { nactiPaletu } from './scena/barvy.ts';
 import { pripravPlatno } from './scena/platno.ts';
+import { dlazdicePod } from './scena/ritual.ts';
 import { polohaLahve, spocitejRozvrh, stred } from './scena/rozvrh.ts';
+import type { Rozvrh } from './scena/rozvrh.ts';
 import { vykresli } from './scena/index.ts';
 import type { Rezim } from './scena/index.ts';
 
@@ -51,16 +71,24 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
 
   let rezim: Rezim = 'karta';
   let stav: StavRozlevani;
+  let stavOtevirani: StavOtevirani | null = null;
+  let stavRitualu: StavRitualu | null = null;
   let ukazka: Ukazka | null = null;
-  let vysledek: Vysledek | null = null;
+  let ukazkaOtevirani: UkazkaOtevirani | null = null;
+  let ukazkaRitualu: UkazkaRitualu | null = null;
+  let vysledek: VysledekLevelu | null = null;
   let skore = 0;
   let medaile: string[] = [];
 
   let cilXPlynule = -1;
   let drzi = false;
+  let cekaStisk = false;
+  let cekaVolba: VolbaRitualu | null = null;
   let cekaNaPusteni = false;
   let poUkazce = false;
   let bezi = true;
+  /** Poslední spočítaný rozvrh — potřebuje ho trefování dlaždic myší. */
+  let rozvrh: Rozvrh | null = null;
 
   function novyStav(): StavRozlevani {
     const konfig = zalozKonfiguraci(cisloLevelu, seed);
@@ -68,49 +96,85 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
     return zalozStav(konfig);
   }
 
+  function maUkazky(): boolean {
+    return level(cisloLevelu).ukazka;
+  }
+
+  // ------------------------------------------------------- fáze levelu
+
+  function spustOtevirani(sUkazkou: boolean): void {
+    stavOtevirani = zalozOtevirani(cisloLevelu);
+    ukazkaOtevirani = sUkazkou ? pripravUkazkuOtevirani() : null;
+    rezim = sUkazkou ? 'ukazkaOtevirani' : 'otevirani';
+    drzi = false;
+    cekaStisk = false;
+  }
+
+  function spustRozlevani(sUkazkou: boolean): void {
+    // Ukázka i hráč dostanou TUTÉŽ láhev — stav se proto zakládá znovu.
+    stav = novyStav();
+    ukazka = sUkazkou ? pripravUkazku(cisloLevelu, seed) : null;
+    cilXPlynule = -1;
+    rezim = sUkazkou ? 'ukazkaRozlevani' : 'rozlevani';
+    // Kdo držel, když ukázka dojela, by jinak začal lít prvnímu panáku,
+    // aniž by o tom rozhodl. Nalití musí být vždy nový stisk.
+    drzi = false;
+    cekaNaPusteni = !sUkazkou;
+    poUkazce = !sUkazkou && maUkazky();
+  }
+
+  function spustRitual(sUkazkou: boolean): void {
+    stavRitualu = zalozRitual(cisloLevelu, seed);
+    ukazkaRitualu = sUkazkou ? pripravUkazkuRitualu(cisloLevelu, seed) : null;
+    rezim = sUkazkou ? 'ukazkaRitual' : 'ritual';
+    drzi = false;
+    cekaStisk = false;
+    cekaVolba = null;
+  }
+
   /**
-   * Připraví level. Karta se ukáže vždy, když pro level nějaká je.
-   *
-   * Sled obrazovek levelu je **karta → (ukázka) → hra → výsledek**, tedy
-   * jedno odehrání levelu, a před ním nejvýš jedna ukázka. Ukázku má podle
-   * `levely.ts` jen level 1 — hlídá to invariant „ryska svítí jen v prvním
-   * levelu a ukázka taky jen v něm" v `rozlevani.test.ts`.
+   * Připraví level. Sled je **karta → (ukázka) fáze 1 → (ukázka) fáze 2 →
+   * (ukázka) fáze 3 → výsledek**. Ukázku má podle `levely.ts` jen level 1.
    */
   function zalozLevel(): void {
     stav = novyStav();
+    stavOtevirani = null;
+    stavRitualu = null;
     ukazka = null;
+    ukazkaOtevirani = null;
+    ukazkaRitualu = null;
     vysledek = null;
     drzi = false;
+    cekaStisk = false;
+    cekaVolba = null;
     cekaNaPusteni = false;
     poUkazce = false;
     cilXPlynule = -1;
-    rezim = texty.karty[cisloLevelu] ? 'karta' : 'hra';
+    rezim = texty.karty[cisloLevelu] ? 'karta' : 'otevirani';
+    if (rezim === 'otevirani') spustOtevirani(maUkazky());
   }
 
   stav = novyStav();
   zalozLevel();
 
-  /** Ukázka hraje na TÉŽE láhvi, kterou pak dostane hráč. */
-  function spustUkazku(): void {
-    stav = novyStav();
-    ukazka = pripravUkazku(cisloLevelu, seed);
-    cilXPlynule = -1;
-    rezim = 'ukazka';
-  }
-
-  function spustHrani(): void {
-    stav = novyStav();
-    ukazka = null;
-    cilXPlynule = -1;
-    rezim = 'hra';
-    // Kdo držel, když ukázka dojela, by jinak začal lít prvnímu panáku,
-    // aniž by o tom rozhodl. Nalití musí být vždy nový stisk.
-    drzi = false;
-    cekaNaPusteni = true;
+  function dokoncLevel(): void {
+    const rozlevani = vyhodnot(stav);
+    vysledek = slozLevel(
+      stavOtevirani ? bodyZaOtevirani(stavOtevirani) : 0,
+      rozlevani,
+      stavRitualu?.body ?? 0,
+      stavRitualu ? vypusteno(stavRitualu) : false,
+    );
+    skore += vysledek.celkem;
+    medaile.push(vysledek.medaile ? ZNACKY_MEDAILI[vysledek.medaile] : '·');
+    rezim = 'vysledek';
+    cekaNaPusteni = drzi;
   }
 
   function dalsiLevel(): void {
-    if (cisloLevelu >= POSLEDNI_LEVEL) {
+    // Bez vypuštění Bulibana se dál nepostupuje (kap. 5.3): tři neúspěšné
+    // pokusy o zážeh hru ukončí. Je to jediný fail state v celé hře.
+    if (!vysledek?.vypusteno || cisloLevelu >= POSLEDNI_LEVEL) {
       rezim = 'konec';
       return;
     }
@@ -128,16 +192,31 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
 
   // ------------------------------------------------------------- vstup
 
-  function stisk(): void {
+  /** Dlaždice pod bodem, nebo `null`. Jen v rituálu a jen když se vybírá. */
+  function volbaPod(x: number, y: number): VolbaRitualu | null {
+    if (rezim !== 'ritual' || !stavRitualu || !rozvrh) return null;
+    const volby = volbyRitualu(stavRitualu);
+    if (volby.length === 0) return null;
+    const index = dlazdicePod(rozvrh, volby.length, x, y);
+    return index >= 0 ? volby[index] : null;
+  }
+
+  function stisk(x?: number, y?: number): void {
     if (cekaNaPusteni) return;
 
     switch (rezim) {
       case 'karta':
-        if (level(cisloLevelu).ukazka) spustUkazku();
-        else spustHrani();
+        spustOtevirani(maUkazky());
         break;
-      case 'ukazka':
-        spustHrani();
+      // Stisk během ukázky ji přeskočí — hráč přebírá tutéž fázi.
+      case 'ukazkaOtevirani':
+        spustOtevirani(false);
+        break;
+      case 'ukazkaRozlevani':
+        spustRozlevani(false);
+        break;
+      case 'ukazkaRitual':
+        spustRitual(false);
         break;
       case 'vysledek':
         dalsiLevel();
@@ -145,12 +224,27 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
       case 'konec':
         znovu();
         break;
-      case 'hra':
+      case 'otevirani':
+        cekaStisk = true;
+        break;
+      case 'rozlevani':
         drzi = true;
         break;
+      case 'ritual': {
+        // Klik do dlaždice vybírá, klik jinam hřeje nebo škrtá. Bez tohohle
+        // rozlišení by výběr metody zároveň začal hřát tou předchozí.
+        const volba = x !== undefined && y !== undefined ? volbaPod(x, y) : null;
+        if (volba) cekaVolba = volba;
+        else {
+          cekaStisk = true;
+          drzi = true;
+        }
+        break;
+      }
     }
+
     // Přechod nesmí spadnout rovnou do dalšího: jeden stisk, jeden krok.
-    if (rezim !== 'hra') cekaNaPusteni = true;
+    if (rezim === 'karta' || rezim === 'vysledek' || rezim === 'konec') cekaNaPusteni = true;
   }
 
   function pusteni(): void {
@@ -161,7 +255,8 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
   const naPointerDown = (e: PointerEvent): void => {
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
-    stisk();
+    const rect = canvas.getBoundingClientRect();
+    stisk(e.clientX - rect.left, e.clientY - rect.top);
   };
   const naPointerUp = (): void => pusteni();
 
@@ -173,6 +268,18 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
       if (!e.repeat) stisk();
       return;
     }
+
+    // Číslice vybírají dlaždici — plné ovládání klávesnicí (kap. 10).
+    if (rezim === 'ritual' && stavRitualu && e.key >= '1' && e.key <= '9') {
+      const volby = volbyRitualu(stavRitualu);
+      const index = Number(e.key) - 1;
+      if (index < volby.length) {
+        e.preventDefault();
+        cekaVolba = volby[index];
+      }
+      return;
+    }
+
     if (!debug) return;
 
     if (e.key === '[') {
@@ -225,34 +332,55 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
   };
   document.addEventListener('visibilitychange', naViditelnost);
 
+  /** Jeden krok simulace té fáze, která zrovna běží. */
+  function krokFaze(): void {
+    if (rezim === 'otevirani' || rezim === 'ukazkaOtevirani') {
+      if (!stavOtevirani) return;
+      const vstup = ukazkaOtevirani ? ukazkaOtevirani.stisk(stavOtevirani) : cekaStisk;
+      cekaStisk = false;
+      if (krokOtevirani(stavOtevirani, vstup) !== 'hotovo') return;
+
+      if (rezim === 'ukazkaOtevirani') spustOtevirani(false);
+      else spustRozlevani(maUkazky());
+      return;
+    }
+
+    if (rezim === 'rozlevani' || rezim === 'ukazkaRozlevani') {
+      if (krok(stav, ukazka ? ukazka.drzi(stav) : drzi) !== 'hotovo') return;
+
+      if (rezim === 'ukazkaRozlevani') spustRozlevani(false);
+      else spustRitual(maUkazky());
+      return;
+    }
+
+    if (rezim === 'ritual' || rezim === 'ukazkaRitual') {
+      if (!stavRitualu) return;
+      const vstup = ukazkaRitualu
+        ? ukazkaRitualu.vstup(stavRitualu)
+        : { drzi, stisk: cekaStisk, volba: cekaVolba };
+      cekaStisk = false;
+      cekaVolba = null;
+      if (krokRitualu(stavRitualu, vstup) !== 'hotovo') return;
+
+      if (rezim === 'ukazkaRitual') spustRitual(false);
+      else dokoncLevel();
+    }
+  }
+
+  function bezici(): boolean {
+    return rezim !== 'karta' && rezim !== 'vysledek' && rezim !== 'konec';
+  }
+
   function odkrokuj(): void {
-    const bezici = rezim === 'hra' || rezim === 'ukazka';
-    if (!bezici || document.hidden) return;
+    if (!bezici() || document.hidden) return;
 
     let kroku = 0;
-    while (dluh >= KROK_S && kroku < MAX_KROKU_ZA_SNIMEK) {
-      krok(stav, ukazka ? ukazka.drzi(stav) : drzi);
+    while (dluh >= KROK_S && kroku < MAX_KROKU_ZA_SNIMEK && bezici()) {
+      krokFaze();
       dluh -= KROK_S;
       kroku += 1;
     }
     if (dluh > KROK_S * MAX_KROKU_ZA_SNIMEK) dluh = 0;
-
-    if (stav.faze !== 'hotovo') return;
-
-    if (rezim === 'ukazka') {
-      // Ukázka doběhla — hráč dostane tutéž láhev. Předání je potřeba říct
-      // nahlas: scéna se nezmění, jen se ovládání předá hráči, a bez toho
-      // to prvních pár sekund vypadá jako pokračování ukázky.
-      spustHrani();
-      poUkazce = true;
-      return;
-    }
-    vysledek = vyhodnot(stav);
-    skore += vysledek.celkem;
-    medaile.push(vysledek.medaile ? ZNACKY_MEDAILI[vysledek.medaile] : '·');
-    rezim = 'vysledek';
-    // Pokud hráč v tu chvíli ještě drží, výsledek nesmí hned odskočit.
-    cekaNaPusteni = drzi;
   }
 
   function snimek(t: number): void {
@@ -272,6 +400,7 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
       stav.konfig.lahev,
       stav.konfig.panak,
     );
+    rozvrh = r;
 
     const cil = stred(r, Math.max(0, stav.aktivni));
     cilXPlynule =
@@ -280,6 +409,8 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
     vykresli(platno, r, paleta, {
       rezim,
       stav,
+      otevirani: stavOtevirani,
+      ritual: stavRitualu,
       vysledek,
       poloha: polohaLahve(r, stav.konfig.lahev, cilXPlynule, stav.naklonPodil),
       skore,
@@ -288,7 +419,6 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
       // Předání po ukázce zmizí, jakmile hráč poprvé nalije — dál už je
       // nápověda potřebnější než upozornění, že je na řadě.
       poUkazce: poUkazce && stav.aktivni === 0 && stav.faze === 'ceka',
-      komentar: texty.komentarUkazky(stav.faze, stav.aktivni, stav.konfig.panaku),
       medaile,
       debug,
       seed,
