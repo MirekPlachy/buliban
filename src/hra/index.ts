@@ -29,9 +29,12 @@ export function pripoj(canvas: HTMLCanvasElement): () => void {
       ? Math.min(POSLEDNI_LEVEL, Math.floor(zadanyLevel))
       : 1;
 
+  const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+
   return spustHru(canvas, {
     seed: seedZAdresy(parametry),
     level,
     debug: parametry.get('debug') === '1',
+    zpet: `${zaklad}/#uvod`,
   });
 }

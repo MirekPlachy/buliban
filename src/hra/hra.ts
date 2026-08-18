@@ -30,6 +30,7 @@ import { pripravUkazku, pripravUkazkuRitualu } from './jadro/ukazka.ts';
 import type { Ukazka, UkazkaRitualu } from './jadro/ukazka.ts';
 import * as texty from './texty.ts';
 import { nactiPaletu } from './scena/barvy.ts';
+import { tlacitkoZpet } from './scena/hud.ts';
 import { pripravPlatno } from './scena/platno.ts';
 import { geometrieRitualu, naLahvi, naZapalce, uHrdla } from './scena/ritual.ts';
 import { polohaLahve, spocitejRozvrh, stred } from './scena/rozvrh.ts';
@@ -41,6 +42,8 @@ export interface Nastaveni {
   seed: number;
   level: number;
   debug: boolean;
+  /** Adresa, kam vede tlačítko „zpět na web" v horní liště. */
+  zpet: string;
 }
 
 /** Jak rychle láhev dojíždí nad další panák. Jen vzhled, na simulaci nesahá. */
@@ -179,6 +182,16 @@ export function spustHru(canvas: HTMLCanvasElement, nastaveni: Nastaveni): () =>
   // ------------------------------------------------------------- vstup
 
   function stisk(x?: number, y?: number): void {
+    // Tlačítko zpět žije v liště, která se nekreslí jen na závěrečné
+    // obrazovce — jinde funguje kdykoli, i uprostřed čekání na puštění.
+    if (x !== undefined && y !== undefined && rozvrh && rezim !== 'konec') {
+      const t = tlacitkoZpet(platno.ctx, rozvrh);
+      if (x >= t.x && x <= t.x + t.sirka && y >= t.y && y <= t.y + t.vyska) {
+        window.location.href = nastaveni.zpet;
+        return;
+      }
+    }
+
     if (cekaNaPusteni) return;
 
     switch (rezim) {

@@ -15,6 +15,7 @@ import type { Medaile } from './jadro/skore.ts';
 
 /** Štítky horní lišty. Stejné v obou fázích, proto vedle nápověd. */
 export const hud = {
+  zpet: 'Web',
   level: 'Level',
   panak: 'Panák',
   skore: 'Skóre',

@@ -19,7 +19,8 @@ import type { StavRozlevani } from '../jadro/rozlevani.ts';
 import { pruhledne } from './barvy.ts';
 import type { Paleta } from './barvy.ts';
 import type { Platno } from './platno.ts';
-import { odstavec, text, vyskaOdstavce } from './pismo.ts';
+import { odstavec, sirkaTextu, text, vyskaOdstavce } from './pismo.ts';
+import type { Napis } from './pismo.ts';
 import { kresliLinku, kresliPanel, stitek, zaobleny } from './prvky.ts';
 import { sloupecX } from './rozvrh.ts';
 import type { Rozvrh } from './rozvrh.ts';
@@ -59,6 +60,46 @@ export interface StredListy {
   hodnota: string;
 }
 
+/** Rozměry a poloha tlačítka „zpět na web" v lište — sdílené kreslením i hitboxem. */
+export interface Tlacitko {
+  x: number;
+  y: number;
+  sirka: number;
+  vyska: number;
+}
+
+const TLACITKO_VYSKA = 30;
+const TLACITKO_ODSAZENI = 16;
+
+function napisZpet(r: Rozvrh, barva = '#000000'): Napis {
+  return { velikost: 12.5 * r.ui, barva, zarovnani: 'center', svisle: 'middle' };
+}
+
+/**
+ * Geometrie tlačítka, bez kreslení. `hra.ts` s ní trefuje prst stejně jako
+ * u zápalky a hrdla (`scena/ritual.ts`) — jeden výpočet pro vzhled i hitbox,
+ * ať se nerozejdou.
+ */
+export function tlacitkoZpet(ctx: CanvasRenderingContext2D, r: Rozvrh): Tlacitko {
+  const vyska = TLACITKO_VYSKA * r.ui;
+  const sirka = sirkaTextu(ctx, `‹ ${hud.zpet}`, napisZpet(r)) + 2 * TLACITKO_ODSAZENI * r.ui;
+  return { x: 20 * r.ui, y: (r.hornilistaY - vyska) / 2, sirka, vyska };
+}
+
+/** Orámovaná pilulka — stejný tvar jako „odchod jinam" v navigaci webu. */
+function kresliTlacitkoZpet(platno: Platno, r: Rozvrh, paleta: Paleta): Tlacitko {
+  const { ctx } = platno;
+  const t = tlacitkoZpet(ctx, r);
+  zaobleny(ctx, t.x, t.y, t.sirka, t.vyska, t.vyska / 2);
+  ctx.fillStyle = pruhledne(paleta.skloStin, 0.5);
+  ctx.fill();
+  ctx.strokeStyle = pruhledne(paleta.par, 0.2);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  text(ctx, `‹ ${hud.zpet}`, t.x + t.sirka / 2, t.y + t.vyska / 2, napisZpet(r, pruhledne(paleta.par, 0.8)));
+  return t;
+}
+
 export function kresliListu(
   platno: Platno,
   r: Rozvrh,
@@ -79,11 +120,13 @@ export function kresliListu(
   ctx.fillStyle = pruhledne(paleta.rum, 0.75);
   ctx.fillRect(0, r.hornilistaY - 2, (r.sirka * cisloLevelu) / POSLEDNI_LEVEL, 2);
 
+  const tlacitko = kresliTlacitkoZpet(platno, r, paleta);
+
   skupina(
     platno,
     r,
     paleta,
-    okraj,
+    tlacitko.x + tlacitko.sirka + TLACITKO_ODSAZENI * r.ui,
     hud.level,
     `${cisloLevelu} / ${POSLEDNI_LEVEL}`,
     paleta.par,
