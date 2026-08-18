@@ -18,7 +18,7 @@ const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // Náhled se nesmí dostat do vyhledávačů — jinak by soupeřil se starým webem
 // o stejná klíčová slova. Přepne se samo, jakmile `site` ukazuje na ostrou doménu.
-const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
+const jeOstra = new URL(Astro.site!).hostname === 'buliban.eu';
 
 // Náhled sdílení. Musí být absolutní adresa — scrapery relativní cestu neumí.
 const ogObrazek = new URL(`${zaklad}/og.jpg`, Astro.site);

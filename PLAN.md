@@ -18,6 +18,8 @@ _Zpracováno 14. 8. 2026. Doména `buliban.cz` je vedená na účtu u CZECHIA.CO
 
 **Měsíční náklady na provoz webu: 0 Kč.** Platí se jen doména.
 
+> **Změna z 18. 8. 2026:** web se spouští na **`buliban.eu`**, ne na `buliban.cz`. Doména `.eu` byla zaparkovaná, nemá žádné MX záznamy a neběží na ní nic, o co by šlo přijít — přepnutí je proto bez rizika. Na `buliban.cz` zatím dál běží starý web; co s ní bude dál, se rozhodne potom. Kroky ve fázi 4 už míří na `.eu`.
+
 Webhosting u CZECHIA.COM (inPage) půjde zrušit — ale až úplně na konci a až po ověření pošty (kapitola 6).
 
 **Bonus:** nová analytika nepoužívá cookies, takže nový web **nepotřebuje cookie lištu**, kterou má ten starý.
@@ -151,7 +153,7 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 
 ### Fáze 4 — přepnutí domény (jediný riskantní krok)
 
-14. **V DNS manažeru u CZECHIA.COM** přidat pro `buliban.cz`:
+14. **V DNS manažeru (Regzone / CZECHIA.COM, nameservery `ns1.regzone.*`)** nastavit pro `buliban.eu` — nejdřív smazat stávající A i AAAA záznamy parkovací stránky, pak přidat:
 
     | Typ | Název | Hodnota |
     |---|---|---|
@@ -163,10 +165,10 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 
     Volitelně i AAAA pro IPv6: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
 
-    **MX a TXT záznamy nechat být.** Nameservery se nemění, pošty se nedotýkáme.
+    Doména `buliban.eu` **nemá žádné MX záznamy** — pošta na ní neběží, takže tu není o co přijít. Nameservery se nemění.
 
-15. **Vypnout náhledový režim a vrátit doménu:** smazat blok `env: NAHLED` z [`deploy.yml`](.github/workflows/deploy.yml) (tím se `base` vrátí na `/` a `site` na `https://buliban.cz`, což zároveň shodí `noindex`) a založit `public/CNAME` s jediným řádkem `buliban.cz`. Pushnout.
-16. **Settings → Pages → Custom domain →** `buliban.cz` → Save. GitHub si ověří DNS; může to trvat i pár hodin.
+15. **Vypnout náhledový režim a vrátit doménu:** smazat blok `env: NAHLED` z [`deploy.yml`](.github/workflows/deploy.yml) (tím se `base` vrátí na `/` a `site` na `https://buliban.eu`, což zároveň shodí `noindex`) a založit `public/CNAME` s jediným řádkem `buliban.eu`. Pushnout.
+16. **Settings → Pages → Custom domain →** `buliban.eu` → Save. GitHub si ověří DNS; může to trvat i pár hodin.
 17. Až kontrola projde, zaškrtnout **Enforce HTTPS**. Certifikát se vystaví sám.
 18. **Otestovat:** apex i `www`, HTTPS, mobil i desktop a odeslání formuláře.
 
@@ -174,7 +176,7 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 
 19. **Ověřit, že pošta na doméně chodí** — poslat si testovací zprávu. Teprve pak dál.
 20. Zrušit starou inPage prezentaci u CZECHIA.COM. Pokud na stejném tarifu visí i schránka, nejdřív vyřešit její přesun (kapitola 6).
-21. Google Search Console: ověřit doménu a odeslat `https://buliban.cz/sitemap-index.xml`.
+21. Google Search Console: ověřit doménu a odeslat `https://buliban.eu/sitemap-index.xml`.
 
 ---
 
@@ -293,6 +295,7 @@ Log rozhodnutí, ať je za půl roku jasné proč:
 | Formulář | **Web3Forms** + Turnstile | Zdarma, bez účtu, vlastní HTML; GH Pages nemá backend |
 | Analytika | **Cloudflare Web Analytics** | Zdarma, bez cookies → není potřeba cookie lišta |
 | Texty | **psát nově** | Staré jen jako inspirace |
+| Doména pro spuštění | **buliban.eu** (18. 8. 2026) | Byla zaparkovaná a bez pošty → nasazení bez rizika; `.cz` zatím drží starý web |
 | Staré adresy `/inpage/…` | **nepřesměrovávat** (18. 8. 2026) | Web se pouští nanovo; adresní struktura cizího systému se nedědí. Cenou je ztráta pozic navázaných na staré adresy — vědomě přijato. |
 
 **Zbývá doladit při stavbě:** vizuální poloha webu — jak vážně má působit. Základ v `global.css` je zatím laděný pseudo-sakrálně a majestátně (tmavá noc + zlatý plamen), s prostorem pro vtip v detailech.

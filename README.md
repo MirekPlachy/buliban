@@ -238,14 +238,14 @@ Lokálně si stejný režim vyzkoušíte přes `NAHLED=1 npm run build`.
 
 **Při přepnutí na vlastní doménu** (podle [PLAN.md](PLAN.md), fáze 4) se
 blok `env: NAHLED` z workflow smaže a založí se `public/CNAME` s řádkem
-`buliban.cz`. Ten soubor v repozitáři schválně **není** — jakmile je
+`buliban.eu`. Ten soubor v repozitáři schválně **není** — jakmile je
 v nasazeném výstupu, GitHub si podle něj nastaví vlastní doménu, a dokud
 na něj nemíří A záznamy, byl by web nedostupný na obou adresách.
 
 ### Přepnutí na vlastní doménu
 
 Celý postup včetně pořadí kroků je v [PLAN.md](PLAN.md), fáze 4 a 5.
-Ve zkratce — v DNS manažeru u CZECHIA.COM nastavit:
+Ve zkratce — v DNS manažeru u Regzone/CZECHIA.COM nastavit pro `buliban.eu` (stávající A a AAAA parkovací stránky smazat):
 
 | Typ | Název | Hodnota |
 |---|---|---|
@@ -262,7 +262,7 @@ Volitelně i AAAA záznamy pro IPv6:
 Stávající MX a TXT záznamy nechte být.
 
 Pak vrátit `public/CNAME`, v **Settings → Pages → Custom domain** zadat
-`buliban.cz` a po úspěšné kontrole DNS zaškrtnout **Enforce HTTPS**.
+`buliban.eu` a po úspěšné kontrole DNS zaškrtnout **Enforce HTTPS**.
 
 ---
 

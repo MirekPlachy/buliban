@@ -13,7 +13,7 @@ const description =
   'Otevři láhev, rozlij ji mezi panáky a z prázdné vypusť Bulibana. Do panáku se lije jednou a dolít se nedá.';
 const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
 const kanonicka = new URL(Astro.url.pathname, Astro.site);
-const jeOstra = new URL(Astro.site!).hostname === 'buliban.cz';
+const jeOstra = new URL(Astro.site!).hostname === 'buliban.eu';
 ---
 
 <!doctype html>
