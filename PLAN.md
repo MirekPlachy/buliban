@@ -143,12 +143,12 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 
 ### Fáze 3 — doplňky, které musí být hotové před přepnutím (~1 večer)
 
-9. **Kontaktní formulář — Web3Forms.** `<form action="https://api.web3forms.com/submit" method="POST">` + skryté pole `access_key`, honeypot proti botům, widget Cloudflare Turnstile a stránka `/odeslano/` jako potvrzení. Přístupový klíč je veřejný identifikátor, ne tajemství — může být klidně v repozitáři.
-10. **Přesměrování starých URL** — klíčem `redirects` v [`astro.config.mjs`](astro.config.mjs), osm položek podle tabulky v kapitole 4. Astro ve statickém buildu vygeneruje pro každou starou cestu HTML stránku s `meta refresh` a `<link rel="canonical">`.
+9. **Kontaktní formulář — Web3Forms.** ✅ Formulář, honeypot i stránka `/odeslano/` stojí. **Chybí přístupový klíč** — dokud je `PRISTUPOVY_KLIC` v [index.astro](src/pages/index.astro) prázdný, tlačítko Odeslat je vypnuté. Klíč je veřejný identifikátor, ne tajemství, patří rovnou do repozitáře. Turnstile zatím není — je to jen pojistka proti spamu, dá se doplnit i po spuštění.
+10. **Přesměrování starých URL** ✅ — klíč `redirects` v [astro.config.mjs](astro.config.mjs), osm položek podle tabulky v kapitole 4. Astro pro každou starou cestu vygeneruje HTML s `meta refresh` a kanonickým odkazem.
     > Není to plnohodnotné HTTP 301 — to GitHub Pages neumí. Vyhledávače ale meta refresh na kanonickou adresu jako přesměrování berou.
-11. **Stránka 404** — `src/pages/404.astro`. GitHub Pages ji servíruje automaticky.
-12. **SEO a sdílení** — doplnit `og:image` (1200 × 630 px) do [`Base.astro`](src/layouts/Base.astro), kde zatím chybí; projít `title` a `description`.
-13. **Analytika** — v Cloudflare dashboardu přidat web do Web Analytics (jde to i pro web mimo Cloudflare) a vložit beacon skript do `Base.astro`.
+11. **Stránka 404** ✅ — [src/pages/404.astro](src/pages/404.astro). GitHub Pages ji servíruje automaticky.
+12. **SEO a sdílení** ✅ — `og:image` (public/og.jpg), kanonické odkazy, `noindex` pro náhled i pro přesměrovací stránky.
+13. **Analytika** — v Cloudflare dashboardu přidat web do Web Analytics (jde to i pro web mimo Cloudflare) a vložit beacon skript do [Base.astro](src/layouts/Base.astro). Není podmínkou spuštění; token se dá vložit kdykoli potom.
 
 ### Fáze 4 — přepnutí domény (jediný riskantní krok)
 
