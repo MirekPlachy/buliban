@@ -226,43 +226,34 @@ bezplatném plánu neběží.
 
 Web pak naběhne na `https://mirekplachy.github.io/buliban/`.
 
-### Náhledový režim
+### Ostrá doména
 
-Dokud web běží na github.io, běží v **podadresáři** `/buliban/`. Proto
-workflow staví s proměnnou `NAHLED=1`, která v `astro.config.mjs` přepne
-`base` na `/buliban` a `site` na `https://mirekplachy.github.io`. Bez toho
-by odkazy na CSS a fonty mířily do kořene domény a stránka by se načetla
-bez stylů. Náhled zároveň dostane `noindex`.
+Web běží na **https://buliban.eu** (přepnuto 18. 8. 2026). Doména je vedená
+na nameserverech Regzone/CZECHIA.COM, kde má čtyři A záznamy na `@`
+(`185.199.108–111.153`), čtyři AAAA (`2606:50c0:800{0,1,2,3}::153`) a CNAME
+`www` na `mirekplachy.github.io.`. Adresu `www.buliban.eu` GitHub sám
+přesměruje na apex. Doména nemá MX záznamy — pošta na ní neběží.
 
-Lokálně si stejný režim vyzkoušíte přes `NAHLED=1 npm run build`.
+Na `buliban.cz` zatím pořád běží starý web; s tou doménou se nic neděje.
 
-**Při přepnutí na vlastní doménu** (podle [PLAN.md](PLAN.md), fáze 4) se
-blok `env: NAHLED` z workflow smaže a založí se `public/CNAME` s řádkem
-`buliban.eu`. Ten soubor v repozitáři schválně **není** — jakmile je
-v nasazeném výstupu, GitHub si podle něj nastaví vlastní doménu, a dokud
-na něj nemíří A záznamy, byl by web nedostupný na obou adresách.
+**Dvě věci, které při přepínání zdržely — ať se to příště neopakuje:**
 
-### Přepnutí na vlastní doménu
+1. Při nasazení přes GitHub Actions **soubor `public/CNAME` vlastní doménu
+   nenastaví.** To platí jen pro nasazení z větve. Doménu je potřeba zadat
+   v **Settings → Pages → Custom domain**, případně příkazem
+   `gh api -X PUT repos/MirekPlachy/buliban/pages -f cname=buliban.eu`.
+   Soubor v repozitáři přesto nechte — drží nastavení, kdyby se způsob
+   nasazení někdy měnil.
+2. Po nastavení domény je potřeba **workflow spustit znovu**. Do té doby
+   GitHub na doméně vrací „Site not found", i když je build zelený.
 
-Celý postup včetně pořadí kroků je v [PLAN.md](PLAN.md), fáze 4 a 5.
-Ve zkratce — v DNS manažeru u Regzone/CZECHIA.COM nastavit pro `buliban.eu` (stávající A a AAAA parkovací stránky smazat):
+### Náhledový režim (historie)
 
-| Typ | Název | Hodnota |
-|---|---|---|
-| A | `@` | `185.199.108.153` |
-| A | `@` | `185.199.109.153` |
-| A | `@` | `185.199.110.153` |
-| A | `@` | `185.199.111.153` |
-| CNAME | `www` | `mirekplachy.github.io.` |
-
-Volitelně i AAAA záznamy pro IPv6:
-`2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
-
-**Nameservery se nemění** — doména i pošta zůstávají tam, kde jsou.
-Stávající MX a TXT záznamy nechte být.
-
-Pak vrátit `public/CNAME`, v **Settings → Pages → Custom domain** zadat
-`buliban.eu` a po úspěšné kontrole DNS zaškrtnout **Enforce HTTPS**.
+Než web dostal vlastní doménu, běžel na `mirekplachy.github.io/buliban/`,
+tedy v podadresáři. Řešila to proměnná `NAHLED=1`, která v
+[astro.config.mjs](astro.config.mjs) přepnula `base` i `site` a přidala
+`noindex`. Z workflow už je pryč, ale v konfiguraci zůstala — kdyby bylo
+potřeba náhled znovu postavit, stačí `NAHLED=1 npm run build`.
 
 ---
 

@@ -151,7 +151,9 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 12. **SEO a sdílení** ✅ — `og:image` (public/og.jpg), kanonické odkazy, `noindex` pro náhledovou adresu.
 13. **Analytika** — v Cloudflare dashboardu přidat web do Web Analytics (jde to i pro web mimo Cloudflare) a vložit beacon skript do [Base.astro](src/layouts/Base.astro). Není podmínkou spuštění; token se dá vložit kdykoli potom.
 
-### Fáze 4 — přepnutí domény (jediný riskantní krok)
+### Fáze 4 — přepnutí domény ✅ hotovo 18. 8. 2026
+
+Web běží na **[buliban.eu](https://buliban.eu)** s platným certifikátem, `www` se přesměrovává na apex. Kroky 14–17 jsou hotové, zbývá jen krok 18 (formulář, až bude klíč).
 
 14. **V DNS manažeru (Regzone / CZECHIA.COM, nameservery `ns1.regzone.*`)** nastavit pro `buliban.eu` — nejdřív smazat stávající A i AAAA záznamy parkovací stránky, pak přidat:
 
@@ -168,8 +170,8 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
     Doména `buliban.eu` **nemá žádné MX záznamy** — pošta na ní neběží, takže tu není o co přijít. Nameservery se nemění.
 
 15. **Vypnout náhledový režim a vrátit doménu:** smazat blok `env: NAHLED` z [`deploy.yml`](.github/workflows/deploy.yml) (tím se `base` vrátí na `/` a `site` na `https://buliban.eu`, což zároveň shodí `noindex`) a založit `public/CNAME` s jediným řádkem `buliban.eu`. Pushnout.
-16. **Settings → Pages → Custom domain →** `buliban.eu` → Save. GitHub si ověří DNS; může to trvat i pár hodin.
-17. Až kontrola projde, zaškrtnout **Enforce HTTPS**. Certifikát se vystaví sám.
+16. **Settings → Pages → Custom domain →** `buliban.eu` → Save. **Pozor:** při nasazení přes GitHub Actions soubor `public/CNAME` doménu sám nenastaví (to platí jen pro nasazení z větve) a po jejím zadání je potřeba workflow spustit znovu — do té doby GitHub na doméně vrací „Site not found".
+17. Až kontrola projde, zaškrtnout **Enforce HTTPS**. Certifikát se vystavil během pár minut.
 18. **Otestovat:** apex i `www`, HTTPS, mobil i desktop a odeslání formuláře.
 
 ### Fáze 5 — úklid
