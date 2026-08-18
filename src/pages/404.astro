@@ -1,0 +1,72 @@
+---
+/**
+ * Stránka pro neexistující adresu. GitHub Pages ji servíruje sám, stačí,
+ * že se jmenuje 404 (PLAN.md, fáze 3, krok 11).
+ */
+import Base from '../layouts/Base.astro';
+import Plamen from '../components/Plamen.astro';
+import { kapitoly } from '../data/kapitoly';
+
+const title = 'Plamen zhasl — 404';
+const description =
+  'Taková stránka na Bulibanu není. Zkuste některou z kapitol nebo kroniku zážehů.';
+
+const zaklad = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title={title} description={description}>
+  <section class="relative overflow-hidden px-6 pt-36 pb-28">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div
+        class="dychani absolute -top-24 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-plamen-500/15 blur-[130px]"
+      >
+      </div>
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-2xl text-center">
+      <Plamen trida="mx-auto mb-6 opacity-70" />
+
+      <p class="mb-5 text-xs tracking-[0.4em] text-kour-400 uppercase">404</p>
+
+      <h1 class="font-display text-4xl text-uhel-100 sm:text-5xl">
+        Tady plamen zhasl
+      </h1>
+
+      <p class="mt-6 text-lg leading-relaxed text-uhel-300/75">
+        Taková stránka na Bulibanu není — možná ji odnesl průvan, možná
+        adresa jen ztratila písmenko. Zpátky k ohni vede kterýkoli z odkazů
+        níže.
+      </p>
+
+      <div class="mt-10 flex flex-wrap justify-center gap-4">
+        <a
+          href={`${zaklad}/`}
+          class="rounded-full border border-plamen-400/40 bg-plamen-400/10 px-8 py-3.5 text-sm font-medium tracking-wide text-plamen-400 transition hover:border-plamen-400 hover:bg-plamen-400/20 focus-visible:ring-2 focus-visible:ring-plamen-400 focus-visible:outline-none"
+          >Na úvodní stránku</a
+        >
+        <a
+          href={`${zaklad}/zazehy/`}
+          class="rounded-full border border-white/10 px-8 py-3.5 text-sm font-medium tracking-wide text-uhel-300 transition hover:border-kour-400/50 hover:text-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
+          >Kronika zážehů</a
+        >
+      </div>
+
+      <ul
+        class="mt-14 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-uhel-300/55"
+      >
+        {
+          kapitoly.map((kapitola) => (
+            <li>
+              <a
+                href={`${zaklad}/#${kapitola.id}`}
+                class="underline decoration-white/15 underline-offset-4 transition hover:text-kour-400 hover:decoration-kour-400 focus-visible:ring-2 focus-visible:ring-kour-400 focus-visible:outline-none"
+              >
+                {kapitola.nazev}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>

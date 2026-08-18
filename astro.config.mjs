@@ -16,7 +16,30 @@ export default defineConfig({
   site: nahled ? 'https://mirekplachy.github.io' : 'https://buliban.cz',
   base: nahled ? '/buliban' : '/',
 
-  integrations: [sitemap()],
+  // Potvrzení po odeslání formuláře do sitemapy nepatří — samo o sobě
+  // nic neříká a ve výsledcích hledání by jen mátlo.
+  integrations: [sitemap({ filter: (url) => !url.includes('/odeslano') })],
+
+  // Staré adresy inPage prezentace. Astro pro každou vygeneruje HTML stránku
+  // s `meta refresh` a kanonickým odkazem — plnohodnotnou 301 GitHub Pages
+  // neumí. Cíle jsou kotvy z `src/data/kapitoly.ts` a nesmí se rozejít
+  // (viz PLAN.md, kapitola 4 a fáze 3, krok 10).
+  //
+  // Na cíl přesměrování Astro základní cestu nelepí, takže se v náhledovém
+  // režimu musí předsadit ručně — jinak by odkaz vedl mimo podadresář.
+  redirects: Object.fromEntries(
+    Object.entries({
+      '/inpage/co-je-to-buliban': '#nauka',
+      '/inpage/historie-bulibana': '#historie',
+      '/inpage/zpusoby-zahrivani': '#zahrivani',
+      '/inpage/vertikalni-versus-horizontalni': '#vertikalni-horizontalni',
+      '/inpage/jak-vypustit-bulibana': '#jak-vypustit',
+      '/inpage/opakovane-zapaleni': '#opakovane-zapaleni',
+      '/inpage/buliban-dnes': '#dnes',
+      '/inpage/kontaktni-formular': '#kontakt',
+    }).map(([stara, kotva]) => [stara, (nahled ? '/buliban' : '') + '/' + kotva]),
+  ),
+
 
   // Náhledy YouTube videí v kronice: Astro je při buildu stáhne z i.ytimg.com,
   // zoptimalizuje a servíruje z vlastní domény. Návštěvník na Google nesáhne.
