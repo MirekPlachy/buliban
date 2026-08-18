@@ -13,7 +13,7 @@ const nahled = process.env.NAHLED === '1';
 // https://astro.build/config
 export default defineConfig({
   // Adresa webu. Používá se pro sitemap.xml a kanonické odkazy.
-  site: nahled ? 'https://mirekplachy.github.io' : 'https://buliban.eu',
+  site: nahled ? 'https://mirekplachy.github.io' : 'https://buliban.cz',
   base: nahled ? '/buliban' : '/',
 
   // Potvrzení po odeslání formuláře do sitemapy nepatří — samo o sobě
