@@ -42,7 +42,7 @@ Zdrojový kód je stejně na GitHubu, takže hosting přímo tam je nejkratší 
 | Velikost webu | max. 1 GB | Ne — jednostránka s optimalizovanými obrázky má jednotky MB |
 | Přenos dat | měkký limit ~100 GB/měsíc | Ne |
 | **Žádný serverový kód** | — | Ano → formulář řeší externí služba (kapitola 6) |
-| **Žádné vlastní HTTP hlavičky ani skutečná 301** | — | Ano → přesměrování starých URL se řeší v Astru (fáze 3, krok 9) |
+| **Žádné vlastní HTTP hlavičky ani skutečná 301** | — | Ne — web se pouští nanovo, žádné staré adresy se nepřesměrovávají |
 
 **Kdyby to jednou přestalo stačit:** celý web je jen statická složka `dist/`. Přesun na Cloudflare Pages znamená propojit tentýž repozitář (build `npm run build`, výstup `dist`), přidat doménu jako zónu do Cloudflare a přepnout nameservery. **V kódu se nemění nic.**
 
@@ -65,7 +65,7 @@ Kdyby později přišla chuť na složitější choreografii, dá se doplnit GSA
 
 ## 4. Mapa obsahu — ze starých stránek do nových sekcí
 
-Starý web má 9 položek menu. Z téhle tabulky vychází jednak stavba stránky, jednak konfigurace přesměrování (fáze 3, krok 9) — kotvy proto musí sedět přesně.
+Starý web měl 9 položek menu. Tabulka je podkladem stavby stránky — kam se která látka přesunula. Staré adresy se nikam nepřesměrovávají: web se pouští nanovo (rozhodnuto 18. 8. 2026, viz kapitolu 8).
 
 | Stará URL | Nová sekce | Kotva |
 |---|---|---|
@@ -81,7 +81,7 @@ Starý web má 9 položek menu. Z téhle tabulky vychází jednak stavba stránk
 
 **Podklady:** kompletní extrakt starého webu je ve složce [`obsah/`](obsah/) — jeden soubor na sekci, v každém hlavní myšlenky, návrh zkráceného textu a zadání obrázku. Rozcestník a tón webu v [`obsah/README.md`](obsah/README.md).
 
-**Texty:** psát nově — staré slouží jen jako inspirace a jako zdroj klíčových slov. Aby se tím neshodily pozice ve vyhledávačích, drží se dvě pojistky: přesměrování všech starých URL a zachování stejných témat i názvosloví v nadpisech.
+**Texty:** psát nově — staré slouží jen jako inspirace a jako zdroj klíčových slov.
 
 **Obrázky:** stáhnout ze starého webu jako zálohu, ale nová grafika se generuje (viz kapitolu 5a). Ty stávající jsou z Pixlru.
 
@@ -132,7 +132,7 @@ Cílem je ověřit potrubí dřív, než se do něj nalije obsah.
 Kostra stojí: navigace, patička, stránka Zážehy, zástupná Minihra, komponenty `Video` a `Plamen`. Zbývá naplnit obsahem.
 
 
-5. Naskládat sekce podle tabulky v kapitole 4. **Každá sekce dostane `id` přesně podle sloupce „Kotva"** — na tom pak stojí přesměrování.
+5. Naskládat sekce podle tabulky v kapitole 4. **Každá sekce dostane `id` podle sloupce „Kotva"** — na tom stojí navigace i sdílené odkazy na sekce.
 6. Napsat texty, doplnit obrázky přes `astro:assets` (Astro je sám převede do WebP/AVIF).
 7. Sticky hlavička s odkazy na kotvy, responzivita, kontrast, viditelný focus stav pro klávesnici.
 8. Průběžná kontrola: `npm run dev` lokálně, po každém pushi náhled na github.io adrese.
@@ -144,10 +144,9 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 ### Fáze 3 — doplňky, které musí být hotové před přepnutím (~1 večer)
 
 9. **Kontaktní formulář — Web3Forms.** ✅ Formulář, honeypot i stránka `/odeslano/` stojí. **Chybí přístupový klíč** — dokud je `PRISTUPOVY_KLIC` v [index.astro](src/pages/index.astro) prázdný, tlačítko Odeslat je vypnuté. Klíč je veřejný identifikátor, ne tajemství, patří rovnou do repozitáře. Turnstile zatím není — je to jen pojistka proti spamu, dá se doplnit i po spuštění.
-10. **Přesměrování starých URL** ✅ — klíč `redirects` v [astro.config.mjs](astro.config.mjs), osm položek podle tabulky v kapitole 4. Astro pro každou starou cestu vygeneruje HTML s `meta refresh` a kanonickým odkazem.
-    > Není to plnohodnotné HTTP 301 — to GitHub Pages neumí. Vyhledávače ale meta refresh na kanonickou adresu jako přesměrování berou.
+10. **Přesměrování starých URL — zrušeno.** Původně tu bylo osm položek `redirects` mířících z `/inpage/…` na kotvy. Zadavatel 18. 8. 2026 rozhodl adresní strukturu starého systému nedědit: web se pouští nanovo a cizí odkazy na staré adresy nejsou důvod nosit s sebou balast. Konfigurace i vygenerované stránky jsou pryč, `/inpage/…` teď spadne na 404.
 11. **Stránka 404** ✅ — [src/pages/404.astro](src/pages/404.astro). GitHub Pages ji servíruje automaticky.
-12. **SEO a sdílení** ✅ — `og:image` (public/og.jpg), kanonické odkazy, `noindex` pro náhled i pro přesměrovací stránky.
+12. **SEO a sdílení** ✅ — `og:image` (public/og.jpg), kanonické odkazy, `noindex` pro náhledovou adresu.
 13. **Analytika** — v Cloudflare dashboardu přidat web do Web Analytics (jde to i pro web mimo Cloudflare) a vložit beacon skript do [Base.astro](src/layouts/Base.astro). Není podmínkou spuštění; token se dá vložit kdykoli potom.
 
 ### Fáze 4 — přepnutí domény (jediný riskantní krok)
@@ -169,7 +168,7 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 15. **Vypnout náhledový režim a vrátit doménu:** smazat blok `env: NAHLED` z [`deploy.yml`](.github/workflows/deploy.yml) (tím se `base` vrátí na `/` a `site` na `https://buliban.cz`, což zároveň shodí `noindex`) a založit `public/CNAME` s jediným řádkem `buliban.cz`. Pushnout.
 16. **Settings → Pages → Custom domain →** `buliban.cz` → Save. GitHub si ověří DNS; může to trvat i pár hodin.
 17. Až kontrola projde, zaškrtnout **Enforce HTTPS**. Certifikát se vystaví sám.
-18. **Otestovat:** apex i `www`, HTTPS, mobil i desktop, všech osm starých URL a odeslání formuláře.
+18. **Otestovat:** apex i `www`, HTTPS, mobil i desktop a odeslání formuláře.
 
 ### Fáze 5 — úklid
 
@@ -274,8 +273,7 @@ Alternativa, kdyby limit přestal stačit: Formspree. Netlify Forms ani Cloudfla
 | Náhled na github.io se dostane do vyhledávačů | `noindex` se přidá automaticky, dokud `site` neukazuje na `buliban.cz` |
 | Výpadek webu při přepnutí DNS | Nový web je hotový a otestovaný na github.io ještě **před** krokem 14; propagace bývá do hodin |
 | Ztráta e-mailu na doméně | Nameservery se nemění → MX nedotčené. Pozor jen na pořadí: krok 19 před krokem 20. |
-| Ztráta pozic ve vyhledávačích | Přesměrování všech osmi starých URL (krok 10) + zachovaná témata a názvosloví v nadpisech |
-| Meta refresh není plnohodnotné 301 | Doplněn `rel="canonical"`; sitemapa odeslaná do Search Console (krok 21) |
+| Ztráta pozic ve vyhledávačích | **Vědomě přijato** — web se pouští nanovo, staré adresy se nepřesměrovávají. Nové adresy nabere Google ze sitemapy (krok 21). |
 | Spam z formuláře | Turnstile + honeypot (krok 9) |
 | Ztráta obsahu starého webu | Před vypnutím inPage stáhnout kompletní zálohu textů i obrázků |
 | Závislost na GitHubu | Web je v Gitu jako statické soubory — přesun jinam je otázka minut (kapitola 2) |
@@ -294,6 +292,7 @@ Log rozhodnutí, ať je za půl roku jasné proč:
 | DNS | **zůstává u CZECHIA.COM** | Mění se jen A záznamy; pošta zůstává nedotčená |
 | Formulář | **Web3Forms** + Turnstile | Zdarma, bez účtu, vlastní HTML; GH Pages nemá backend |
 | Analytika | **Cloudflare Web Analytics** | Zdarma, bez cookies → není potřeba cookie lišta |
-| Texty | **psát nově** | Staré jen jako inspirace; SEO jistí přesměrování a zachované nadpisy |
+| Texty | **psát nově** | Staré jen jako inspirace |
+| Staré adresy `/inpage/…` | **nepřesměrovávat** (18. 8. 2026) | Web se pouští nanovo; adresní struktura cizího systému se nedědí. Cenou je ztráta pozic navázaných na staré adresy — vědomě přijato. |
 
 **Zbývá doladit při stavbě:** vizuální poloha webu — jak vážně má působit. Základ v `global.css` je zatím laděný pseudo-sakrálně a majestátně (tmavá noc + zlatý plamen), s prostorem pro vtip v detailech.

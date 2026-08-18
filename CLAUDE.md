@@ -36,8 +36,8 @@ session a v drtivé většině úkolů z nich není potřeba ani odstavec.
 
 ## Co je zamčené
 
-- **`id` v `kapitoly.ts`** jsou kotvy, na které míří přesměrování ze starých
-  adres `/inpage/…`. Přejmenování shodí pozice ve vyhledávačích.
+- **`id` v `kapitoly.ts`** jsou kotvy do URL. Míří na ně navigace i sdílené
+  odkazy na jednotlivé sekce, takže přejmenování je rozbije.
 - **Obrázky s `_zamceno` v `grafika/zadani.json`** jsou schválené zadavatelem.
   Hromadné `--znovu` je přeskočí; přepsat jde jen adresně
   (`npm run obrazky -- --jen=nauka --znovu`) a jen na výslovné přání.

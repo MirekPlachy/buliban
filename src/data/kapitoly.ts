@@ -4,12 +4,12 @@
  * Bere si odtud text hlavička, patička, karty „další kapitola" i samotné
  * sekce v index.astro — aby přejmenování nadpisu nešlo udělat na půl.
  *
- * `id` jsou kotvy, na které míří přesměrování ze starých adres `/inpage/…`
- * (viz PLAN.md, kapitola 4). Přejmenovat je znamená shodit pozice ve
- * vyhledávačích, takže se nemění.
+ * `id` jsou kotvy do URL. Míří na ně navigace, patička i karty „další
+ * kapitola" a objevují se ve sdílených odkazech na jednotlivé sekce —
+ * přejmenování je tedy rozbije.
  */
 export interface Kapitola {
-  /** Kotva bez #. Nesahat — váže se na staré URL. */
+  /** Kotva bez #. Míří na ni odkazy v navigaci i sdílené adresy sekcí. */
   id: string;
   /** Římské číslo do výpisů. */
   cislo: string;
