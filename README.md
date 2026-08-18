@@ -228,20 +228,33 @@ Web pak naběhne na `https://mirekplachy.github.io/buliban/`.
 
 ### Ostrá doména
 
-Web běží na **https://buliban.eu** (přepnuto 18. 8. 2026). Doména je vedená
-na nameserverech Regzone/CZECHIA.COM, kde má čtyři A záznamy na `@`
-(`185.199.108–111.153`), čtyři AAAA (`2606:50c0:800{0,1,2,3}::153`) a CNAME
-`www` na `mirekplachy.github.io.`. Adresu `www.buliban.eu` GitHub sám
-přesměruje na apex. Doména nemá MX záznamy — pošta na ní neběží.
+Web běží na **https://buliban.cz** (18. 8. 2026). Doména má u
+Regzone/CZECHIA.COM čtyři A záznamy na `@` (`185.199.108–111.153`), čtyři
+AAAA (`2606:50c0:800{0,1,2,3}::153`) a CNAME `www` na
+`mirekplachy.github.io.`. Adresu `www.buliban.cz` GitHub sám přesměruje na
+apex.
 
-Na `buliban.cz` zatím pořád běží starý web; s tou doménou se nic neděje.
+**Na `buliban.cz` běží pošta** (MX na Zoner, SPF, DKIM klíče `zdkim-s1m` a
+`zdkim-s2m`, CNAME `autoconfig`). Web ji nijak neovlivňuje — mění se jen A a
+AAAA záznamy — ale do sekcí MX a TXT se nesahá a **nameservery se nestěhují**.
 
-**Dvě věci, které při přepínání zdržely — ať se to příště neopakuje:**
+### Druhá doména: buliban.eu
+
+`buliban.eu` přesměrovává na `buliban.cz`. GitHub Pages umí jednomu
+repozitáři přiřadit jen jednu doménu, takže přesměrování obsluhuje vlastní
+repozitář [MirekPlachy/buliban-eu](https://github.com/MirekPlachy/buliban-eu):
+jedna HTML stránka, která zachová cestu i kotvu, plus její kopie v `404.html`,
+aby fungovala každá adresa. Nasazuje se z větve, ne přes Actions.
+
+Obsah se tedy udržuje **jen tady**. Do druhého repozitáře se sahá jen tehdy,
+kdyby se měnily samotné domény.
+
+**Dvě věci, které při přepínání domény zdržely — ať se to příště neopakuje:**
 
 1. Při nasazení přes GitHub Actions **soubor `public/CNAME` vlastní doménu
    nenastaví.** To platí jen pro nasazení z větve. Doménu je potřeba zadat
    v **Settings → Pages → Custom domain**, případně příkazem
-   `gh api -X PUT repos/MirekPlachy/buliban/pages -f cname=buliban.eu`.
+   `gh api -X PUT repos/MirekPlachy/buliban/pages -f cname=buliban.cz`.
    Soubor v repozitáři přesto nechte — drží nastavení, kdyby se způsob
    nasazení někdy měnil.
 2. Po nastavení domény je potřeba **workflow spustit znovu**. Do té doby

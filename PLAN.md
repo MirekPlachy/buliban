@@ -18,7 +18,7 @@ _Zpracováno 14. 8. 2026. Doména `buliban.cz` je vedená na účtu u CZECHIA.CO
 
 **Měsíční náklady na provoz webu: 0 Kč.** Platí se jen doména.
 
-> **Změna z 18. 8. 2026:** web se spouští na **`buliban.eu`**, ne na `buliban.cz`. Doména `.eu` byla zaparkovaná, nemá žádné MX záznamy a neběží na ní nic, o co by šlo přijít — přepnutí je proto bez rizika. Na `buliban.cz` zatím dál běží starý web; co s ní bude dál, se rozhodne potom. Kroky ve fázi 4 už míří na `.eu`.
+> **Stav k 18. 8. 2026:** web běží na **`buliban.cz`**, `buliban.eu` na něj přesměrovává (samostatný repozitář `MirekPlachy/buliban-eu`, protože GitHub Pages umí na repozitář jen jednu doménu). Spouštělo se to nadvakrát: nejdřív nanečisto na zaparkované `.eu` bez pošty, a po ověření se hlavní doménou stala `.cz`. Starý inPage web tím skončil, pošta na `.cz` běží dál nedotčená.
 
 Webhosting u CZECHIA.COM (inPage) půjde zrušit — ale až úplně na konci a až po ověření pošty (kapitola 6).
 
@@ -153,7 +153,9 @@ Podrobný postup je v kapitole 5a. Ve zkratce: reference → styl → obrázky �
 
 ### Fáze 4 — přepnutí domény ✅ hotovo 18. 8. 2026
 
-Web běží na **[buliban.eu](https://buliban.eu)** s platným certifikátem, `www` se přesměrovává na apex. Kroky 14–17 jsou hotové, zbývá jen krok 18 (formulář, až bude klíč).
+Web běží na **[buliban.cz](https://buliban.cz)** s platným certifikátem, `www` se přesměrovává na apex. Kroky 14–17 jsou hotové, zbývá jen krok 18 (formulář, až bude klíč).
+
+Cesta k tomu byla dvoukroková: nejdřív se web spustil na zaparkované `buliban.eu` (nízké riziko, žádná pošta), a když se ověřilo, že všechno šlape, přenesl se na `buliban.cz`. Ta teď obsluhuje obsah, `.eu` na ni přesměrovává z repozitáře `MirekPlachy/buliban-eu`. Starý inPage web tím skončil; jeho záloha (9 stránek, 23 obrázků) je mimo repozitář v `C:devulibanzaloha-stary-web`.
 
 14. **V DNS manažeru (Regzone / CZECHIA.COM, nameservery `ns1.regzone.*`)** nastavit pro `buliban.eu` — nejdřív smazat stávající A i AAAA záznamy parkovací stránky, pak přidat:
 
@@ -297,7 +299,8 @@ Log rozhodnutí, ať je za půl roku jasné proč:
 | Formulář | **Web3Forms** + Turnstile | Zdarma, bez účtu, vlastní HTML; GH Pages nemá backend |
 | Analytika | **Cloudflare Web Analytics** | Zdarma, bez cookies → není potřeba cookie lišta |
 | Texty | **psát nově** | Staré jen jako inspirace |
-| Doména pro spuštění | **buliban.eu** (18. 8. 2026) | Byla zaparkovaná a bez pošty → nasazení bez rizika; `.cz` zatím drží starý web |
+| Doména pro spuštění | **buliban.eu** (18. 8. 2026) | Byla zaparkovaná a bez pošty → nácvik nasazení bez rizika |
+| Hlavní doména | **buliban.cz** (18. 8. 2026) | Česká adresa je pro publikum přirozenější; `.eu` na ni přesměrovává |
 | Staré adresy `/inpage/…` | **nepřesměrovávat** (18. 8. 2026) | Web se pouští nanovo; adresní struktura cizího systému se nedědí. Cenou je ztráta pozic navázaných na staré adresy — vědomě přijato. |
 
 **Zbývá doladit při stavbě:** vizuální poloha webu — jak vážně má působit. Základ v `global.css` je zatím laděný pseudo-sakrálně a majestátně (tmavá noc + zlatý plamen), s prostorem pro vtip v detailech.
